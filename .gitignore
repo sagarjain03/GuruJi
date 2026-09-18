@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# env — never commit real secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# prisma
+packages/database/prisma/migrations/dev.db*
+packages/database/generated/
+
+# test / coverage
+coverage/
+test-results/
+playwright-report/
+.playwright/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editors / os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# code runner scratch
+apps/code-runner/tmp/
+
+# playwright mcp scratch
+.playwright-mcp/

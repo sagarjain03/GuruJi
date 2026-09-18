@@ -1,0 +1,9 @@
+{
+  "extends": "@guruji/config/tsconfig/node.json",
+  "compilerOptions": {
+    // The generated client lives beside `src`, so the root must cover both.
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts", "generated/**/*.ts"]
+}

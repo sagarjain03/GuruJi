@@ -1,0 +1,42 @@
+# Local development infrastructure for GuruJi.
+# Production uses managed Postgres/Redis — this file is for `pnpm infra:up`.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: guruji-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-guruji}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_locally}
+      POSTGRES_DB: ${POSTGRES_DB:-guruji}
+      # Every timestamp in this system is UTC. See docs/architecture.md.
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guruji} -d ${POSTGRES_DB:-guruji}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: guruji-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:

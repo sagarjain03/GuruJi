@@ -1,0 +1,26 @@
+{
+  "name": "@guruji/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared tsconfig, eslint and prettier presets for the GuruJi workspace.",
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/node.json": "./tsconfig/node.json",
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./eslint/base": "./eslint/base.js",
+    "./eslint/node": "./eslint/node.js",
+    "./eslint/next": "./eslint/next.js",
+    "./prettier": "./prettier/index.js"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.5",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript-eslint": "^8.70.0"
+  }
+}

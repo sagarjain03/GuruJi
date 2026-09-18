@@ -1,0 +1,120 @@
+// GuruJi — identity schema (Phase 1).
+// Conventions are fixed in docs/database.md: uuid keys, snake_case SQL,
+// camelCase Prisma fields, TIMESTAMPTZ everywhere, explicit onDelete.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+// Prisma 7 keeps the connection URL out of the schema: Migrate reads it from
+// prisma.config.ts, the client gets it through a driver adapter.
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+
+  @@map("role")
+}
+
+enum Language {
+  CPP
+  C
+  PYTHON
+  JAVASCRIPT
+
+  @@map("language")
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+
+  @@map("experience_level")
+}
+
+model User {
+  id String @id @default(uuid(7)) @db.Uuid
+
+  // Stored lowercase; normalisation happens in the auth service so the unique
+  // index is enough and no Postgres extension is required.
+  email String @unique @db.VarChar(320)
+
+  // Argon2id. Never selected into a DTO — repositories return explicit fields.
+  passwordHash String @map("password_hash")
+
+  role            Role      @default(USER)
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(3)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  profile       Profile?
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Profile {
+  userId String @id @map("user_id") @db.Uuid
+
+  displayName       String          @map("display_name") @db.VarChar(80)
+  preferredLanguage Language        @default(CPP) @map("preferred_language")
+  experienceLevel   ExperienceLevel @default(BEGINNER) @map("experience_level")
+  dailyGoalMinutes  Int             @default(30) @map("daily_goal_minutes")
+
+  // Denormalised on purpose: read on every dashboard load, recomputed on submission.
+  difficultyTolerance Float @default(0.5) @map("difficulty_tolerance")
+  hintDependency      Float @default(0) @map("hint_dependency")
+  retentionScore      Float @default(0) @map("retention_score")
+
+  currentStreak Int       @default(0) @map("current_streak")
+  longestStreak Int       @default(0) @map("longest_streak")
+  // A local-day concept, not an instant — hence `date`, resolved against `timezone`.
+  lastActiveDate DateTime? @map("last_active_date") @db.Date
+
+  // IANA name, e.g. "Asia/Kolkata". A preference, never stored beside a timestamp.
+  timezone String @default("UTC") @db.VarChar(64)
+
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model RefreshToken {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  // Hashed, never plaintext. Unique so a replay is a lookup, not a scan.
+  tokenHash String @unique @map("token_hash")
+
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+
+  // Set on rotation. Presenting a token that has one means the old token was
+  // replayed — the whole chain is revoked.
+  replacedById String? @unique @map("replaced_by_id") @db.Uuid
+
+  userAgent String? @map("user_agent") @db.VarChar(512)
+  ipHash    String? @map("ip_hash")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy RefreshToken? @relation("TokenRotation", fields: [replacedById], references: [id], onDelete: SetNull)
+  replaces   RefreshToken? @relation("TokenRotation")
+
+  // Query: revoke or list every token for one user (chain revocation, logout-all).
+  @@index([userId])
+  @@map("refresh_tokens")
+}

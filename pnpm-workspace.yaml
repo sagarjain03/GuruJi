@@ -1,0 +1,14 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm v10 blocks post-install scripts by default. These packages genuinely
+# need them (native binaries / engine downloads), so we allow them explicitly.
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "prisma"
+  - "esbuild"
+  - "@nestjs/core"
+  - "unrs-resolver"
+  - "sharp"

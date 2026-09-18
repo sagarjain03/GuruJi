@@ -1,0 +1,104 @@
+/* Reference: logo hard left, links in a centred outlined capsule where each item
+   carries its own soft chip, one white pill CTA hard right. Bar is transparent. */
+.nav {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(14px, 1.7vw, 22px) var(--gutter);
+}
+
+.nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.nav__logo { width: 1.3em; height: 1.3em; }
+
+.nav__pill {
+  display: none;
+  padding: 5px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: rgba(14, 14, 18, 0.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.nav__pill ul {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav__pill a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 450;
+  color: rgba(245, 245, 245, 0.82);
+  background: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out);
+}
+.nav__pill a:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+
+.nav__chev { width: 10px; height: 10px; opacity: 0.7; }
+
+.nav__actions { display: flex; align-items: center; gap: 10px; }
+
+.nav__cta { font-size: 13.5px; font-weight: 550; }
+
+.nav__burger {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  background: rgba(14, 14, 18, 0.5);
+  backdrop-filter: blur(10px);
+}
+.nav__burger svg { width: 20px; height: 20px; }
+
+.nav__sheet {
+  position: fixed;
+  inset: 68px 12px auto;
+  padding: 18px;
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  background: rgba(5, 5, 6, 0.94);
+  backdrop-filter: blur(20px);
+}
+.nav__sheet ul { margin: 0 0 14px; padding: 0; list-style: none; display: grid; gap: 2px; }
+.nav__sheet a {
+  display: block;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-size: 16px;
+  color: rgba(245, 245, 245, 0.86);
+}
+.nav__sheet a:hover { background: rgba(255, 255, 255, 0.07); }
+.nav__sheet-cta { width: 100%; justify-content: center; padding: 0.85em 1.4em; }
+
+@media (min-width: 940px) {
+  .nav__pill { display: block; }
+  .nav__burger { display: none; }
+}
+
+@media (max-width: 480px) {
+  .nav__cta { display: none; }
+}

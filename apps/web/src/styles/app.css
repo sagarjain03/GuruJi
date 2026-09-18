@@ -1,0 +1,192 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* =============================================================================
+   GuruJi — product design tokens.
+
+   Dark is the DEFAULT, not the override: `:root` carries the dark palette and
+   `.light` overrides it. The usual shadcn arrangement is the other way around.
+
+   Two reasons. First, a dark-first product whose `:root` is light flashes white
+   before next-themes resolves, and on a near-black UI that flash is violent.
+   Second, it means components never need `dark:` variants — every colour goes
+   through a semantic token, so a component written once is correct in both
+   themes. If a component needs a `light:` variant, that is a signal the token is
+   missing, not that the variant is needed.
+
+   The palette is the landing page's, carried across so the two halves of the app
+   read as one product. See docs/architecture.md §13.
+============================================================================= */
+
+@custom-variant light (&:is(.light *));
+
+:root {
+  --radius: 0.625rem;
+
+  /* ground */
+  --background: #08080a;
+  --foreground: #f2f2f4;
+
+  --card: #101013;
+  --card-foreground: #f2f2f4;
+  --popover: #141418;
+  --popover-foreground: #f2f2f4;
+
+  /* violet — the single accent, same hue as the landing CTA */
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1a1a1f;
+  --secondary-foreground: #e6e6ea;
+
+  --muted: #151519;
+  --muted-foreground: #9a9aa4;
+
+  --accent: #1e1e25;
+  --accent-foreground: #f2f2f4;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(255, 255, 255, 0.11);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #8b5cf6;
+
+  /* Difficulty. Always paired with a text label in the UI — colour alone is not
+     an accessible signal, and roughly one in twelve men cannot separate the
+     easy/hard pair by hue. */
+  --difficulty-easy: #34d399;
+  --difficulty-medium: #fbbf24;
+  --difficulty-hard: #f87171;
+
+  /* Mastery bands, matching docs/mastery-model.md */
+  --mastery-none: #3f3f46;
+  --mastery-learning: #f87171;
+  --mastery-developing: #fbbf24;
+  --mastery-proficient: #60a5fa;
+  --mastery-strong: #34d399;
+  --mastery-mastered: #a78bfa;
+
+  --sidebar: #0b0b0e;
+  --sidebar-foreground: #e6e6ea;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+.light {
+  --background: #fbfbfc;
+  --foreground: #121215;
+
+  --card: #ffffff;
+  --card-foreground: #121215;
+  --popover: #ffffff;
+  --popover-foreground: #121215;
+
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f2f2f5;
+  --secondary-foreground: #26262c;
+
+  --muted: #f4f4f6;
+  --muted-foreground: #64646e;
+
+  --accent: #f0edfd;
+  --accent-foreground: #3b1f8f;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(10, 10, 14, 0.1);
+  --input: rgba(10, 10, 14, 0.16);
+  --ring: #7c3aed;
+
+  --difficulty-easy: #059669;
+  --difficulty-medium: #b45309;
+  --difficulty-hard: #dc2626;
+
+  --mastery-none: #d4d4d8;
+  --mastery-learning: #dc2626;
+  --mastery-developing: #b45309;
+  --mastery-proficient: #2563eb;
+  --mastery-strong: #059669;
+  --mastery-mastered: #7c3aed;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #26262c;
+  --sidebar-border: rgba(10, 10, 14, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-easy: var(--difficulty-easy);
+  --color-medium: var(--difficulty-medium);
+  --color-hard: var(--difficulty-hard);
+
+  --color-mastery-none: var(--mastery-none);
+  --color-mastery-learning: var(--mastery-learning);
+  --color-mastery-developing: var(--mastery-developing);
+  --color-mastery-proficient: var(--mastery-proficient);
+  --color-mastery-strong: var(--mastery-strong);
+  --color-mastery-mastered: var(--mastery-mastered);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Inter Tight', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Keyboard focus is visible; mouse clicks are not ringed. */
+  :focus-visible {
+    @apply outline-ring outline-2 outline-offset-2;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
