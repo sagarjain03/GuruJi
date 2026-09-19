@@ -29,7 +29,8 @@ export default function Hero() {
         {/* Two rules, not the original three — the middle one ran straight down
             the figure's centre line. These flank it instead. */}
         <div className="hero__rules" aria-hidden="true">
-          <span /><span />
+          <span />
+          <span />
         </div>
       </div>
 
@@ -37,24 +38,31 @@ export default function Hero() {
         <div className="hero__lead">
           <p className="hero__note">
             <Globe className="hero__note-icon" />
-            <span>Guided training for<br />developers everywhere</span>
+            <span>
+              Guided training for
+              <br />
+              developers everywhere
+            </span>
           </p>
 
           <h1 className="hero__title">
-            Train Your<br />
-            DSA Skills<br />
+            Train Your
+            <br />
+            DSA Skills
+            <br />
             Like a <em>Pro</em>
           </h1>
 
           <p className="hero__sub">
-            We measure what you actually understand and decide
-            what you should practise next.
+            We measure what you actually understand and decide what you should practise next.
           </p>
 
           <div className="hero__cta">
             <a className="btn btn--accent hero__go" href="#main">
               Start training
-              <span className="hero__go-dot" aria-hidden="true"><ArrowRight /></span>
+              <span className="hero__go-dot" aria-hidden="true">
+                <ArrowRight />
+              </span>
             </a>
 
             <div className="hero__proof">
@@ -74,7 +82,9 @@ export default function Hero() {
           <ul className="hero__stats">
             {stats.map((stat) => (
               <li key={stat.label} className="stat">
-                <span className="stat__mark" aria-hidden="true">*</span>
+                <span className="stat__mark" aria-hidden="true">
+                  *
+                </span>
                 <span className="stat__value">{stat.value}</span>
                 <span className="stat__label">{stat.label}</span>
                 <span className="stat__rule" aria-hidden="true" />
@@ -90,18 +100,24 @@ export default function Hero() {
                 <span key={i} style={{ height: `${h}%` }} />
               ))}
             </div>
-            <p className="ghost__kpi"><strong>+42%</strong>Problem Solving<br />Performance</p>
+            <p className="ghost__kpi">
+              <strong>+42%</strong>Problem Solving
+              <br />
+              Performance
+            </p>
           </div>
           <h2 className="ghost__title">Track Your Progress</h2>
           <p className="ghost__copy">
-            We track every attempt through meaningful metrics and
-            adapt the training path until the pattern feels effortless.
+            We track every attempt through meaningful metrics and adapt the training path until the
+            pattern feels effortless.
           </p>
         </aside>
       </div>
 
       <div className="hero__foot">
-        <span className="hero__watermark" aria-hidden="true">GURU</span>
+        <span className="hero__watermark" aria-hidden="true">
+          GURU
+        </span>
         <div className="hero__partners">
           <span className="hero__partners-label">Core Patterns</span>
           <ul>

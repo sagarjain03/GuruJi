@@ -17,7 +17,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { UserMenu } from '@/components/user-menu'
 import { cn } from '@/lib/utils'
+import { useSessionStore } from '@/stores/session-store'
 
 // Routes arrive phase by phase. Anything not built yet stays visible but inert:
 // `typedRoutes` refuses a Link to a page that does not exist, and a link that
@@ -34,11 +36,72 @@ const NAV = [
   { href: '/contest', label: 'Contest', Icon: Swords, ready: false },
 ] as const
 
-const NAV_ITEM = 'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors'
+/** The floating icon rail. Desktop only — a 64px column is unusable on a phone. */
+function IconRail() {
+  const pathname = usePathname()
+  const profile = useSessionStore((state) => state.profile)
 
-// `exactOptionalPropertyTypes` is on, so an optional handler cannot be passed
-// straight through to a DOM prop. A no-op default keeps the type honest.
-function NavList({ onNavigate = () => {} }: { onNavigate?: () => void }) {
+  return (
+    <aside className="hidden shrink-0 overflow-y-auto py-4 pl-4 lg:block">
+      <nav
+        aria-label="Main"
+        className="border-border/60 bg-card/70 sticky top-4 flex flex-col items-center gap-1 rounded-none border p-2 backdrop-blur-xl"
+      >
+        {NAV.map((item) => {
+          const { href, label, Icon } = item
+          const active = pathname === href || pathname.startsWith(`${href}/`)
+
+          if (!item.ready) {
+            return (
+              <span
+                key={href}
+                aria-disabled="true"
+                title={`${label} — not built yet`}
+                className="text-muted-foreground/25 grid size-10 cursor-not-allowed place-items-center rounded-none"
+              >
+                <Icon className="size-[18px]" />
+                <span className="sr-only">{label} (not built yet)</span>
+              </span>
+            )
+          }
+
+          return (
+            <Link
+              key={href}
+              href={item.href}
+              title={label}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'grid size-10 place-items-center rounded-none transition-all',
+                active
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+              )}
+            >
+              <Icon className="size-[18px]" />
+              <span className="sr-only">{label}</span>
+            </Link>
+          )
+        })}
+
+        {profile && (
+          <>
+            <span className="bg-border my-1 h-px w-6" aria-hidden="true" />
+            <span
+              title={profile.displayName}
+              className="bg-primary text-primary-foreground grid size-10 place-items-center font-mono text-xs font-semibold"
+            >
+              {initials(profile.displayName)}
+            </span>
+          </>
+        )}
+      </nav>
+    </aside>
+  )
+}
+
+/** The mobile drawer keeps the labelled list — icons alone are a guessing game. */
+function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
   const pathname = usePathname()
 
   return (
@@ -52,16 +115,19 @@ function NavList({ onNavigate = () => {} }: { onNavigate?: () => void }) {
             {label}
           </>
         )
+        const base = 'flex items-center gap-3 rounded-none px-3 py-2.5 text-sm transition-colors'
 
         if (!item.ready) {
           return (
             <span
               key={href}
               aria-disabled="true"
-              title="Not built yet"
-              className={cn(NAV_ITEM, 'text-muted-foreground/40 cursor-not-allowed')}
+              className={cn(base, 'text-muted-foreground/35 cursor-not-allowed')}
             >
               {body}
+              <span className="border-border/70 text-muted-foreground/60 ml-auto rounded-none border px-2 py-0.5 text-[10px]">
+                soon
+              </span>
             </span>
           )
         }
@@ -73,10 +139,10 @@ function NavList({ onNavigate = () => {} }: { onNavigate?: () => void }) {
             onClick={onNavigate}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              NAV_ITEM,
+              base,
               active
-                ? 'bg-accent text-accent-foreground font-medium'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/60',
+                ? 'bg-primary text-primary-foreground font-medium'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground',
             )}
           >
             {body}
@@ -127,35 +193,42 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div className="flex min-h-svh">
+    <div className="relative flex h-svh overflow-hidden">
+      {/* A engineering-drawing grid rather than a coloured wash. Hairlines at
+          64px, faded out towards the bottom so the page has a top edge without
+          a gradient doing the work. Colour is reserved for things you can act
+          on — nothing decorative is tinted. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.55]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage: 'linear-gradient(to bottom, black, transparent 65%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black, transparent 65%)',
+        }}
+      />
+
       <a
         href="#content"
-        className="bg-primary text-primary-foreground sr-only rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+        className="bg-primary text-primary-foreground sr-only rounded-none px-4 py-2 text-sm font-medium focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
       >
         Skip to content
       </a>
 
-      {/* Desktop sidebar */}
-      <aside className="bg-sidebar border-sidebar-border hidden w-60 shrink-0 flex-col border-r lg:flex">
-        <div className="flex h-14 items-center px-5">
-          <Brand />
-        </div>
-        <div className="flex-1 overflow-y-auto px-3 py-2">
-          <NavList />
-        </div>
-      </aside>
+      <IconRail />
 
-      {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
-          <div className="bg-sidebar border-sidebar-border absolute inset-y-0 left-0 flex w-64 flex-col border-r">
-            <div className="flex h-14 items-center justify-between px-5">
+          <div className="bg-sidebar border-sidebar-border absolute inset-y-0 left-0 flex w-72 flex-col border-r p-4">
+            <div className="mb-4 flex h-10 items-center justify-between">
               <Brand />
               <button
                 type="button"
@@ -166,15 +239,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <X className="size-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 py-2">
-              <NavList onNavigate={() => setOpen(false)} />
+            <div className="flex-1 overflow-y-auto">
+              <DrawerNav onNavigate={() => setOpen(false)} />
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-border bg-background/80 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-md lg:px-6">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-14 shrink-0 items-center gap-3 px-4 lg:px-6">
           <button
             type="button"
             aria-label="Open menu"
@@ -184,18 +257,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="size-5" />
           </button>
-          <div className="lg:hidden">
-            <Brand />
-          </div>
+          <Brand />
           <div className="ml-auto flex items-center gap-3">
+            <UserMenu />
             <ThemeToggle />
           </div>
         </header>
 
-        <main id="content" className="min-w-0 flex-1 px-4 py-6 lg:px-8 lg:py-8">
+        <main id="content" className="min-w-0 flex-1 overflow-y-auto px-4 pb-6 lg:px-6">
           {children}
         </main>
       </div>
     </div>
   )
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] ?? '')
+    .join('')
+    .toUpperCase()
 }

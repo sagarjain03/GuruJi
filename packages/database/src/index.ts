@@ -8,8 +8,6 @@ declare global {
   var __guruji_prisma__: PrismaClient | undefined
 }
 
-// DATABASE_URL is read when this module loads, so whatever imports it must have
-// the environment in place first — `node --env-file=.env` or an equivalent.
 function createClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
@@ -25,8 +23,27 @@ function createClient(): PrismaClient {
  * client and opens a new connection pool, and Postgres runs out of connections
  * long before anyone notices why.
  */
-export const prisma: PrismaClient = globalThis.__guruji_prisma__ ?? createClient()
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__guruji_prisma__ = prisma
+export function getPrisma(): PrismaClient {
+  const client = globalThis.__guruji_prisma__ ?? createClient()
+  if (process.env.NODE_ENV !== 'production') {
+    globalThis.__guruji_prisma__ = client
+  }
+  return client
 }
+
+/**
+ * The client, built on first use rather than on import.
+ *
+ * Eager construction would read DATABASE_URL while the importing module graph is
+ * still being resolved — before Nest's ConfigModule has loaded `.env` — so the
+ * API would crash on startup depending on nothing but import order.
+ */
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, property, receiver) {
+    const client = getPrisma()
+    const value = Reflect.get(client, property, receiver)
+    return typeof value === 'function'
+      ? (value as (...args: never[]) => unknown).bind(client)
+      : value
+  },
+})

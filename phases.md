@@ -114,7 +114,9 @@ protected-route middleware, dashboard behind auth. Reuse the existing app shell
 and theme provider — do not rebuild them.
 **Verify:** register in the browser, land on the dashboard, reload, still signed in.
 
-### Gate 1 🚪
+### Gate 1 🚪 — passed
+
+What was built and why: [`docs/phases/phase1.md`](./docs/phases/phase1.md).
 
 `pnpm dev` starts both apps · register → login → dashboard works · `pnpm build`,
 `pnpm typecheck`, `pnpm lint` all clean.

@@ -10,8 +10,8 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 
 | Phase | Name | Size | Status |
 |---|---|---|---|
-| 0 | Analysis & design | M | 🟡 In progress |
-| 1 | Foundation | L | ⬜ Not started |
+| 0 | Analysis & design | M | ✅ Done |
+| 1 | Foundation | L | ✅ Done |
 | 2 | Question platform | L | ⬜ |
 | 3 | Code editor | M | ⬜ |
 | 4 | Code runner 🔴 | XL | ⬜ |
@@ -29,7 +29,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 
 ---
 
-## Phase 0 — Analysis & design 🟡
+## Phase 0 — Analysis & design ✅
 
 **Goal:** know what we are building before anything is typed.
 
@@ -38,7 +38,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 - [x] Pin dependency versions against current registry state
 - [x] `docs/` — 13 documents covering architecture, engines, security, AI, sandbox
 - [x] `TODO.md` — this file
-- [ ] Confirm the phase plan with the project owner
+- [x] Confirm the phase plan with the project owner
 
 **Exit:** architecture, schema shape, module boundaries and MVP order are written
 down and agreed.
@@ -48,14 +48,14 @@ Phase 1.
 
 ---
 
-## Phase 1 — Foundation
+## Phase 1 — Foundation ✅
 
 **Goal:** a registered user can log in and reach an empty dashboard.
 
 ### Setup
 - [x] pnpm workspace wired up; `packages/config` presets (tsconfig, eslint, prettier)
 - [x] `docker-compose` verified up — Postgres 17 + Redis 7, healthchecks green, UTC
-- [ ] `.env` loading + startup validation. **The app refuses to boot on a missing
+- [x] `.env` loading + startup validation. **The app refuses to boot on a missing
       required variable** — a half-configured service that starts is worse than one
       that does not
 
@@ -66,34 +66,34 @@ Phase 1.
 - [x] First migration + `pnpm db:migrate` / `db:seed` / `db:studio` scripts
 
 ### API
-- [ ] NestJS bootstrap, global prefix, CORS allow-list, Helmet
-- [ ] Global exception filter → the error envelope from `docs/api.md`
-- [ ] Global `ValidationPipe` with `whitelist` + `forbidNonWhitelisted`
-- [ ] Structured logger with a per-request correlation id
-- [ ] `GET /health` and `/health/ready`
-- [ ] Auth: register, login, refresh, logout, me
-- [ ] Argon2id hashing; access JWT + rotating refresh token in an httpOnly cookie
-- [ ] Refresh-token **reuse detection** → revoke the whole chain
-- [ ] Rate limits on login/register (per IP *and* per email)
+- [x] NestJS bootstrap, global prefix, CORS allow-list, Helmet
+- [x] Global exception filter → the error envelope from `docs/api.md`
+- [x] Global `ValidationPipe` with `whitelist` + `forbidNonWhitelisted`
+- [x] Structured logger with a per-request correlation id
+- [x] `GET /health` and `/health/ready`
+- [x] Auth: register, login, refresh, logout, me
+- [x] Argon2id hashing; access JWT + rotating refresh token in an httpOnly cookie
+- [x] Refresh-token **reuse detection** → revoke the whole chain
+- [x] Rate limits on login/register (per IP *and* per email)
 
 ### Frontend
-- [ ] Next.js 16 App Router + TypeScript strict
-- [ ] Tailwind 4 + shadcn/ui + dark-first theme tokens (budget real time here —
+- [x] Next.js 16 App Router + TypeScript strict
+- [x] Tailwind 4 + shadcn/ui + dark-first theme tokens (budget real time here —
       setup differs from pre-v4 guides)
-- [ ] Theme switching: dark / light / system, persisted
-- [ ] App shell — sidebar nav, header, responsive layout
-- [ ] Auth pages (register, login) with React Hook Form + Zod
-- [ ] Token handling + protected-route middleware
-- [ ] TanStack Query provider + Zustand store skeleton
-- [ ] Empty dashboard
+- [x] Theme switching: dark / light / system, persisted
+- [x] App shell — sidebar nav, header, responsive layout
+- [x] Auth pages (register, login) with React Hook Form + Zod
+- [x] Token handling + protected-route middleware
+- [x] TanStack Query provider + Zustand store skeleton
+- [x] Empty dashboard
 
 ### Shared
-- [ ] `packages/types` — first shared contracts (auth DTOs, error envelope)
+- [x] `packages/types` — first shared contracts (auth DTOs, error envelope)
 
 ### Tests
-- [ ] Auth unit tests — hashing, token issue/rotate/revoke
-- [ ] Auth e2e — register → login → refresh → protected route → logout
-- [ ] Reuse-detection test: a rotated token revokes the chain
+- [x] Auth unit tests — hashing, token issue/rotate/revoke
+- [x] Auth e2e — register → login → refresh → protected route → logout
+- [x] Reuse-detection test: a rotated token revokes the chain
 
 ### 🔴 De-risking spike (do it in this phase, not Phase 4)
 - [x] **Sandbox spike — done 2026-09-18.** Full results in

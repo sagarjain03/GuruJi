@@ -17,7 +17,9 @@ export default function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [open])
 
   return (
@@ -41,7 +43,9 @@ export default function Navbar() {
       </nav>
 
       <div className="nav__actions">
-        <a className="btn btn--light nav__cta" href="#main">Start Training</a>
+        <a className="btn btn--light nav__cta" href="#main">
+          Start Training
+        </a>
         <button
           className="nav__burger"
           type="button"
@@ -58,7 +62,9 @@ export default function Navbar() {
           <ul>
             {links.map((link) => (
               <li key={link.label}>
-                <a href="#main" onClick={() => setOpen(false)}>{link.label}</a>
+                <a href="#main" onClick={() => setOpen(false)}>
+                  {link.label}
+                </a>
               </li>
             ))}
           </ul>

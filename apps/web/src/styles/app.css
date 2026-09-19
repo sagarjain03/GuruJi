@@ -21,7 +21,7 @@
 @custom-variant light (&:is(.light *));
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0;
 
   /* ground */
   --background: #08080a;
@@ -67,6 +67,10 @@
   --mastery-strong: #34d399;
   --mastery-mastered: #a78bfa;
 
+  /* The backdrop grid. Barely there on purpose — you should notice the page
+     has structure without being able to say why. */
+  --grid-line: rgba(255, 255, 255, 0.045);
+
   --sidebar: #0b0b0e;
   --sidebar-foreground: #e6e6ea;
   --sidebar-border: rgba(255, 255, 255, 0.08);
@@ -111,6 +115,8 @@
   --mastery-strong: #059669;
   --mastery-mastered: #7c3aed;
 
+  --grid-line: rgba(10, 10, 14, 0.055);
+
   --sidebar: #ffffff;
   --sidebar-foreground: #26262c;
   --sidebar-border: rgba(10, 10, 14, 0.08);
@@ -152,14 +158,18 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-border: var(--sidebar-border);
 
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Inter Tight', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', monospace;
+  /* Loaded and self-hosted by next/font in the root layout. */
+  --font-sans: var(--font-sans-src), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display-src), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-src), ui-monospace, monospace;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Square by decision, not by omission. Rounded corners soften an interface;
+     this one is about precision, so every edge is a right angle and the
+     hierarchy is carried by borders, weight and space instead. */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
 }
 
 @layer base {

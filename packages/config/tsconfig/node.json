@@ -8,8 +8,8 @@
     "verbatimModuleSyntax": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["node"],
-    "outDir": "dist",
-    "rootDir": "src"
+    "types": ["node"]
+    // No rootDir/outDir here: a relative path in a shared preset resolves
+    // against the preset's own folder, not the package that extends it.
   }
 }
