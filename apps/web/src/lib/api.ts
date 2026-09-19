@@ -1,4 +1,17 @@
-import type { AuthSession, ErrorEnvelope, Me } from '@guruji/types'
+import type {
+  AuthSession,
+  ErrorEnvelope,
+  Hint,
+  Me,
+  Paginated,
+  PatternSummary,
+  ProblemDetail,
+  ProblemListItem,
+  ProblemQuery,
+  Roadmap,
+  TopicDetail,
+  TopicSummary,
+} from '@guruji/types'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api'
 
@@ -90,6 +103,46 @@ export const authApi = {
   logout: () => send<void>('/auth/logout', { method: 'POST', skipRefresh: true }),
 
   me: () => send<Me>('/auth/me'),
+}
+
+/**
+ * Content reads.
+ *
+ * These work signed out — the roadmap and the problem bank are public, so the
+ * calls go through the same `send` helper but never depend on a token.
+ */
+export const contentApi = {
+  topics: () => send<TopicSummary[]>('/topics'),
+
+  topic: (slug: string) => send<TopicDetail>(`/topics/${encodeURIComponent(slug)}`),
+
+  patterns: () => send<PatternSummary[]>('/patterns'),
+
+  roadmap: () => send<Roadmap>('/roadmap'),
+
+  problems: (query: Partial<ProblemQuery> = {}) =>
+    send<Paginated<ProblemListItem>>(`/problems${toQueryString(query)}`),
+
+  problem: (slug: string) => send<ProblemDetail>(`/problems/${encodeURIComponent(slug)}`),
+
+  hint: (slug: string, level: number) =>
+    send<Hint>(`/problems/${encodeURIComponent(slug)}/hints/${String(level)}`),
+}
+
+/**
+ * Undefined and empty values are dropped rather than sent as empty strings: the
+ * API validates with `forbidNonWhitelisted`, and `?q=` is not the same request
+ * as one with no `q` at all.
+ */
+function toQueryString(query: Partial<ProblemQuery>): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== null && String(value).length > 0) {
+      params.set(key, String(value))
+    }
+  }
+  const text = params.toString()
+  return text.length > 0 ? `?${text}` : ''
 }
 
 /**

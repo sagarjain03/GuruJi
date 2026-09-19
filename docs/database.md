@@ -53,7 +53,7 @@ Hint                     AIConversation            UserAchievement
 IDENTITY                 Contest
 User                     ContestProblem
 Profile                  ContestSubmission
-RefreshToken
+RefreshToken             Draft
 ```
 
 ---
@@ -210,6 +210,21 @@ Per test case: `submissionId`, `testCaseId`, `passed`, `runtimeMs`, `memoryKb`,
 
 Output is capped at write time. An unbounded `actualOutput` is a storage-denial
 vector — a program that prints a gigabyte would otherwise land in the database.
+
+### `Draft`
+
+`id`, `userId`, `problemId`, `language`, `code`, `createdAt`, `updatedAt`.
+
+Unsubmitted code. Unique on `(userId, problemId, language)`, which is also the
+autosave upsert target — one draft *per language*, because switching from C++ to
+Python to try an idea must not destroy the C++ attempt.
+
+A draft is not a submission and never becomes one: submitting stores its own
+copy of the code, so editing the draft afterwards cannot rewrite the history of
+what was actually judged.
+
+Index on `(userId, updatedAt)` — "what was I last working on", read by the
+dashboard from Phase 5.
 
 ### `Mistake`
 

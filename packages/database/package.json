@@ -17,18 +17,21 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@prisma/client": "7.10.0",
-    "@prisma/adapter-pg": "7.10.0"
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0"
   },
   "devDependencies": {
     "@guruji/config": "workspace:*",
     "@types/node": "^22.15.0",
     "eslint": "^9.39.5",
     "prisma": "7.10.0",
+    "prisma-erd-generator": "^3.2.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.4"
   }
 }

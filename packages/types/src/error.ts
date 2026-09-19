@@ -14,6 +14,9 @@ export const ERROR_CODES = [
   'EMAIL_ALREADY_REGISTERED',
   'INVALID_CREDENTIALS',
   'REFRESH_TOKEN_INVALID',
+  'PROBLEM_NOT_FOUND',
+  'TOPIC_NOT_FOUND',
+  'INVALID_CURSOR',
 ] as const
 
 export const errorCodeSchema = z.enum(ERROR_CODES)

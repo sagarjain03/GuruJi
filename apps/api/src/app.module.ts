@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino'
 import { randomUUID } from 'node:crypto'
 import { loadEnv } from './config/env'
 import { AuthModule } from './auth/auth.module'
+import { ContentModule } from './content/content.module'
 import { HealthModule } from './health/health.module'
 import { RedisModule } from './redis/redis.module'
 
@@ -36,6 +37,7 @@ import { RedisModule } from './redis/redis.module'
     }),
     RedisModule,
     AuthModule,
+    ContentModule,
     HealthModule,
   ],
 })

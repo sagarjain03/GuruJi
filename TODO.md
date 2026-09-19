@@ -2,7 +2,7 @@
 
 > Task-level tracking. Phase *ordering and reasoning* lives in
 > [`docs/roadmap.md`](./docs/roadmap.md) — this file is what actually gets ticked off.
-> Last updated: 2026-09-18
+> Last updated: 2026-09-19
 
 **MVP = Phases 0–8.** Phases 9–12 are explicitly not in the first release.
 
@@ -12,7 +12,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 |---|---|---|---|
 | 0 | Analysis & design | M | ✅ Done |
 | 1 | Foundation | L | ✅ Done |
-| 2 | Question platform | L | ⬜ |
+| 2 | Question platform | L | ✅ Done |
 | 3 | Code editor | M | ⬜ |
 | 4 | Code runner 🔴 | XL | ⬜ |
 | 5 | Progress engine | M | ⬜ |
@@ -111,39 +111,50 @@ Phase 1.
 
 ---
 
-## Phase 2 — Question platform
+## Phase 2 — Question platform ✅
 
 **Goal:** browse and read problems.
 
 ### Database
-- [ ] `Topic`, `Pattern`, `RoadmapNode`
-- [ ] `Problem`, `ProblemTopic`, `ProblemPattern`, `TestCase`, `Hint`
-- [ ] Indexes from `docs/database.md`
-- [ ] Seed: 14 topics, 12 patterns, full roadmap tree with prerequisites
-- [ ] Seed: original problems covering every difficulty and several patterns,
-      each with real test cases and curated hints
-- [ ] Seed is **idempotent** — `upsert` by slug, re-running never duplicates
+- [x] `Topic`, `Pattern`, `RoadmapNode`, `TopicPrerequisite`
+- [x] `Problem`, `ProblemTopic`, `ProblemPattern`, `TestCase`, `Hint`
+- [x] Indexes from `docs/database.md`
+- [x] Seed: 14 topics, 12 patterns, full roadmap tree with prerequisites
+- [x] Seed: 12 original problems — 5 easy, 5 medium, 2 hard — across 9 patterns,
+      each with 8 test cases and a 3-level hint ladder
+- [x] Seed is **idempotent** — `upsert` by natural key. Stronger than "no
+      duplicates": a re-run reissues no test case or hint **id**, because from
+      Phase 4 submissions reference them
 
 ### API
-- [ ] `GET /topics`, `/topics/:slug`, `/patterns`
-- [ ] `GET /roadmap` — full tree, cached, overlaid with user progress
-- [ ] `GET /problems` — filter by topic/pattern/difficulty/status/`q`, cursor pagination
-- [ ] `GET /problems/:slug` — **sample test cases only**
-- [ ] Hidden test cases excluded in the *repository*, not the controller
-- [ ] Redis caching + documented invalidation
+- [x] `GET /topics`, `/topics/:slug`, `/patterns`
+- [x] `GET /roadmap` — full tree, cached. The user-progress overlay lands in
+      Phase 5, with the user id in the cache key
+- [x] `GET /problems` — filter by topic/pattern/difficulty/`q`, cursor pagination
+- [ ] `status` filter (solved / attempted / unsolved) — **deferred to Phase 5.**
+      It is derived from submissions, which do not exist yet. The API rejects the
+      parameter rather than accepting and ignoring it
+- [x] `GET /problems/:slug` — **sample test cases only**
+- [x] `GET /problems/:slug/hints/:level` — one curated hint at a time
+- [x] Hidden test cases excluded in the *repository*, not the controller
+- [x] Redis caching, TTLs per `docs/api.md`. Invalidation is TTL-only for now:
+      nothing in Phase 2 writes content, so the admin publish/update hooks have
+      nothing to hang off yet
 
 ### Frontend
-- [ ] Roadmap page — rendered from the database, never hard-coded
-- [ ] Problem list — filters in URL search params, infinite scroll
-- [ ] Problem detail — Markdown statement, constraints, examples, metadata
-- [ ] Markdown sanitisation with an allow-list
-- [ ] Loading / empty / error states for each
+- [x] Roadmap page — rendered from `RoadmapNode`, never hard-coded
+- [x] Problem list — filters in URL search params, infinite scroll
+- [x] Problem detail — Markdown statement, constraints, examples, metadata
+- [x] Markdown sanitisation with an allow-list (`rehype-sanitize`, narrowed)
+- [x] Loading / empty / error states for each
 
 ### Tests
-- [ ] Cursor pagination is stable when rows are inserted mid-scroll
-- [ ] Hidden test cases never appear in any response
-- [ ] Filter combinations return correct sets
-- [ ] Seed idempotency
+- [x] Cursor pagination is stable when rows are inserted mid-scroll
+- [x] Hidden test cases never appear in any response
+- [x] Filter combinations return correct sets
+- [x] Seed idempotency — counts *and* ids
+- [x] Every seeded expected output checked against an independent reference
+      implementation. It caught five wrong answers in the hand-written data
 
 **Exit:** the roadmap renders from the database; the problem list filters and
 paginates without fetching everything.

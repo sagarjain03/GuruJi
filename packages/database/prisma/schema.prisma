@@ -7,6 +7,14 @@ generator client {
   output   = "../generated/client"
 }
 
+// Entity-relationship diagram, regenerated on every `prisma generate`.
+// Mermaid output renders in GitHub and in VS Code's markdown preview.
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../../../docs/erd.md"
+  theme    = "neutral"
+}
+
 // Prisma 7 keeps the connection URL out of the schema: Migrate reads it from
 // prisma.config.ts, the client gets it through a driver adapter.
 datasource db {
@@ -56,6 +64,7 @@ model User {
 
   profile       Profile?
   refreshTokens RefreshToken[]
+  drafts        Draft[]
 
   @@map("users")
 }
@@ -117,4 +126,271 @@ model RefreshToken {
   // Query: revoke or list every token for one user (chain revocation, logout-all).
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Content (Phase 2). Conventions unchanged: uuid keys, snake_case SQL,
+// camelCase Prisma fields, TIMESTAMPTZ, explicit onDelete on every relation.
+// ---------------------------------------------------------------------------
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+
+  @@map("difficulty")
+}
+
+enum ProblemSource {
+  ORIGINAL
+  LICENSED
+  EXTERNAL_REFERENCE
+  AI_GENERATED
+
+  @@map("problem_source")
+}
+
+enum ReviewStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  REJECTED
+
+  @@map("review_status")
+}
+
+enum RoadmapSection {
+  FOUNDATION
+  DATA_STRUCTURES
+  TREES
+  GRAPHS
+  ADVANCED
+
+  @@map("roadmap_section")
+}
+
+// Whether a tag is what the problem is *about* or merely something it touches.
+// The recommendation engine weights PRIMARY far more heavily.
+enum TagRelevance {
+  PRIMARY
+  SECONDARY
+
+  @@map("tag_relevance")
+}
+
+/// A subject area — Arrays, Graphs, Dynamic Programming.
+model Topic {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  slug        String  @unique @db.VarChar(80)
+  name        String  @db.VarChar(120)
+  description String
+  // Curriculum order within the roadmap section. Data, not a deploy.
+  displayOrder Int    @map("display_order")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  roadmapNodes RoadmapNode[]
+  problems     ProblemTopic[]
+
+  // Prerequisites are a join table rather than a uuid[] column: an array cannot
+  // carry a foreign key, so a deleted topic would leave dangling ids behind and
+  // the roadmap would render edges to nothing.
+  prerequisites  TopicPrerequisite[] @relation("TopicDependent")
+  requiredBy     TopicPrerequisite[] @relation("TopicPrerequisite")
+
+  @@map("topics")
+}
+
+/// "Topic `topicId` cannot be started before `prerequisiteId`."
+model TopicPrerequisite {
+  topicId        String @map("topic_id") @db.Uuid
+  prerequisiteId String @map("prerequisite_id") @db.Uuid
+
+  topic        Topic @relation("TopicDependent", fields: [topicId], references: [id], onDelete: Cascade)
+  prerequisite Topic @relation("TopicPrerequisite", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, prerequisiteId])
+  @@index([prerequisiteId])
+  @@map("topic_prerequisites")
+}
+
+/// A reusable solving technique — Sliding Window, Two Pointer, Binary Search on
+/// Answer. Deliberately separate from Topic: "bad at Graphs" and "bad at BFS"
+/// are different diagnoses.
+model Pattern {
+  id           String @id @default(uuid(7)) @db.Uuid
+  slug         String @unique @db.VarChar(80)
+  name         String @db.VarChar(120)
+  description  String
+  displayOrder Int    @map("display_order")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  problems ProblemPattern[]
+
+  @@map("patterns")
+}
+
+/// The roadmap tree. It lives here so changing the curriculum is a data change.
+model RoadmapNode {
+  id       String  @id @default(uuid(7)) @db.Uuid
+  topicId  String  @map("topic_id") @db.Uuid
+  parentId String? @map("parent_id") @db.Uuid
+
+  section        RoadmapSection
+  displayOrder   Int            @map("display_order")
+  estimatedHours Int            @map("estimated_hours")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  // Restrict, not Cascade: deleting a parent node must not silently delete the
+  // subtree under it. Re-parent first, then delete.
+  parent   RoadmapNode?  @relation("RoadmapTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children RoadmapNode[] @relation("RoadmapTree")
+
+  // One node per topic — the tree is a curriculum, not a tag cloud.
+  @@unique([topicId])
+  @@index([parentId])
+  @@map("roadmap_nodes")
+}
+
+model Problem {
+  id    String @id @default(uuid(7)) @db.Uuid
+  slug  String @unique @db.VarChar(120)
+  title String @db.VarChar(200)
+
+  difficulty  Difficulty
+  statement   String
+  constraints String
+
+  // [{ input, output, explanation }] — display-only, not graded.
+  examples Json
+  // { cpp, c, python, javascript }
+  starterCode Json @map("starter_code")
+
+  timeLimitMs      Int @map("time_limit_ms")
+  memoryLimitMb    Int @map("memory_limit_mb")
+  estimatedMinutes Int @map("estimated_minutes")
+
+  source       ProblemSource @default(ORIGINAL)
+  sourceUrl    String?       @map("source_url") @db.VarChar(500)
+  aiGenerated  Boolean       @default(false) @map("ai_generated")
+  reviewStatus ReviewStatus  @default(DRAFT) @map("review_status")
+
+  // Denormalised, recomputed periodically. Null until anyone has submitted.
+  acceptanceRate Float? @map("acceptance_rate")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  topics    ProblemTopic[]
+  patterns  ProblemPattern[]
+  testCases TestCase[]
+  hints     Hint[]
+  drafts    Draft[]
+
+  // The filtered problem list.
+  @@index([difficulty, reviewStatus])
+  // Cursor pagination orders by (createdAt desc, id desc).
+  @@index([createdAt, id])
+  @@map("problems")
+}
+
+model ProblemTopic {
+  problemId String       @map("problem_id") @db.Uuid
+  topicId   String       @map("topic_id") @db.Uuid
+  relevance TagRelevance @default(SECONDARY)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, topicId])
+  // Candidate generation by topic.
+  @@index([topicId, problemId])
+  @@map("problem_topics")
+}
+
+model ProblemPattern {
+  problemId String       @map("problem_id") @db.Uuid
+  patternId String       @map("pattern_id") @db.Uuid
+  relevance TagRelevance @default(SECONDARY)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  pattern Pattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, patternId])
+  @@index([patternId, problemId])
+  @@map("problem_patterns")
+}
+
+model TestCase {
+  id        String @id @default(uuid(7)) @db.Uuid
+  problemId String @map("problem_id") @db.Uuid
+
+  input          String
+  expectedOutput String @map("expected_output")
+
+  // isSample is what the client may see; isHidden is what grading uses. They are
+  // not inverses — a case can be neither (visible in the editor, ungraded).
+  isSample     Boolean @default(false) @map("is_sample")
+  isHidden     Boolean @default(true) @map("is_hidden")
+  displayOrder Int     @map("display_order")
+  weight       Int     @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, displayOrder])
+  @@index([problemId, isSample])
+  @@map("test_cases")
+}
+
+model Hint {
+  id        String @id @default(uuid(7)) @db.Uuid
+  problemId String @map("problem_id") @db.Uuid
+
+  // 1..n, served one level at a time. Curated hints are asked before the model.
+  level   Int
+  content String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, level])
+  @@map("hints")
+}
+
+// ---------------------------------------------------------------------------
+// Editor (Phase 3).
+// ---------------------------------------------------------------------------
+
+/// Unsubmitted code, kept so a reload never costs anyone their work.
+model Draft {
+  id        String @id @default(uuid(7)) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  problemId String @map("problem_id") @db.Uuid
+
+  // One draft per language, not one per problem. Switching from C++ to Python
+  // to check an idea must not overwrite the C++ attempt.
+  language Language
+  code     String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  // The upsert target for every autosave.
+  @@unique([userId, problemId, language])
+  // "What was I last working on" — read by the dashboard from Phase 5.
+  @@index([userId, updatedAt])
+  @@map("drafts")
 }

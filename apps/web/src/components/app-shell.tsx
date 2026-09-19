@@ -26,8 +26,8 @@ import { useSessionStore } from '@/stores/session-store'
 // 404s is worse than one that is plainly not ready.
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard, ready: true },
-  { href: '/roadmap', label: 'Roadmap', Icon: Map, ready: false },
-  { href: '/problems', label: 'Problems', Icon: BookOpen, ready: false },
+  { href: '/roadmap', label: 'Roadmap', Icon: Map, ready: true },
+  { href: '/problems', label: 'Problems', Icon: BookOpen, ready: true },
   { href: '/revision', label: 'Revision', Icon: RotateCcw, ready: false },
   { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: false },
   { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: false },
