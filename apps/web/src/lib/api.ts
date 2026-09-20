@@ -255,13 +255,40 @@ function toQueryString(query: Record<string, unknown>): string {
  * Returns false rather than throwing: "no session" is a normal state on a cold
  * page load, not an error the UI should report.
  */
+/**
+ * In flight, if one is. Every caller waits on the same exchange.
+ *
+ * The refresh token **rotates on use**, and presenting a spent one is treated
+ * as theft — which revokes the whole chain and signs the user out. So two
+ * refreshes running at once do not merely waste a request, they destroy the
+ * session.
+ *
+ * That is not hypothetical. `SessionGate` refreshes on mount, and the
+ * dashboard's own queries fire at the same moment; the first of those to get a
+ * 401 calls `refreshSession` again while the gate's exchange is still open. The
+ * second presents the token the server has just spent, and the user lands on
+ * the login page with nothing in the console to explain it. Caught by the
+ * Phase 6 browser suite, which was the first test to load a page that queries
+ * during its own sign-in.
+ */
+let pendingRefresh: Promise<AuthSession | null> | null = null
+
 export async function refreshSession(): Promise<AuthSession | null> {
-  try {
-    const session = await authApi.refresh()
-    setAccessToken(session.accessToken)
-    return session
-  } catch {
-    setAccessToken(null)
-    return null
-  }
+  // Already exchanging. Wait for that one rather than spending the token twice.
+  pendingRefresh ??= (async () => {
+    try {
+      const session = await authApi.refresh()
+      setAccessToken(session.accessToken)
+      return session
+    } catch {
+      setAccessToken(null)
+      return null
+    } finally {
+      // Cleared inside the same promise so the next caller after it settles
+      // starts a fresh exchange rather than reusing a resolved one.
+      pendingRefresh = null
+    }
+  })()
+
+  return pendingRefresh
 }

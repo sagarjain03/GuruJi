@@ -145,6 +145,33 @@ which brings foundational practice back round.
 
 ---
 
+## The bug the browser found
+
+**Opening the dashboard signed the user out.**
+
+The refresh token rotates on use, and presenting a spent one is treated as
+theft — which revokes the whole chain. `SessionGate` refreshes on mount. The
+dashboard's own queries fire at the same moment, and the first of them to get a
+401 called `refreshSession` again while the gate's exchange was still open. The
+second request presented the token the server had just spent, the chain was
+revoked, and the user landed on the login page with nothing in the console to
+explain it.
+
+Nothing else could have caught it. The API tests exercise refresh correctly, one
+call at a time. The unit tests do not have a browser. Every earlier browser spec
+opened a problem page, which does not query during sign-in — the dashboard is
+the first page that does.
+
+`refreshSession` is now single-flight: concurrent callers await the same
+exchange, and the token is spent once.
+
+This is the second time a rotation race has cost an afternoon — the first was
+`auth.setup.ts` reloading mid-exchange in Phase 4. Rotation is correct and worth
+keeping, but anything that can call `refreshSession` needs to assume something
+else already has.
+
+---
+
 ## One type-level trap, worth naming
 
 `DockItem` in the nav typed its `href` as `ComponentProps<typeof Link>['href']`.
@@ -164,8 +191,15 @@ so a link to a page that does not exist stays a compile error.
 | Scheduler unit tests (pure) | 12 / 12 |
 | Local-day + DST unit tests | 11 / 11 |
 | Revision e2e (real database) | 13 / 13 |
+| Browser suite (`e2e/revision.spec.ts`) | 5 passed, 1 skipped, nothing logged to the console |
 | `typecheck` · `lint` (api, web) | clean |
-| `pnpm --filter @guruji/web build` | see below |
+| `pnpm --filter @guruji/web build` | clean, 10 routes |
+
+The skipped case is the mastery breakdown: the browser suite registers a fresh
+account, which has nothing solved and therefore no bars to open. It is skipped
+explicitly rather than asserted against seeded data, because a test that only
+passes when someone else's fixture is present is a test that fails for the wrong
+reason later.
 
 ---
 

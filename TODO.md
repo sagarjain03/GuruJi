@@ -16,7 +16,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 | 3 | Code editor | M | ✅ Done |
 | 4 | Code runner 🔴 | XL | ✅ Done |
 | 5 | Progress engine | M | ✅ Done |
-| 6 | Revision engine | M | ⬜ |
+| 6 | Revision engine | M | ✅ Done |
 | 7 | Recommendation engine | L | ⬜ |
 | 8 | AI mentor | L | ⬜ |
 | — | **MVP complete** | | |
@@ -312,7 +312,7 @@ exit criteria waived.**
 
 ---
 
-## Phase 6 — Revision engine
+## Phase 6 — Revision engine ✅
 
 **Goal:** solved problems come back at the right time.
 
