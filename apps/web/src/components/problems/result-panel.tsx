@@ -1,6 +1,7 @@
 'use client'
 
 import type { SubmissionDetail, SubmissionResult, SubmissionStatus, Verdict } from '@guruji/types'
+import { MistakeForm } from '@/components/problems/mistake-form'
 import { cn } from '@/lib/utils'
 
 /**
@@ -91,6 +92,18 @@ export function ResultPanel({
             {submission.compileOutput}
           </pre>
         </div>
+      )}
+
+      {/*
+        Offered here, not on a page the user has to remember to visit.
+        The moment a submission fails is the only moment the reason is still in
+        their head — and a journal nobody writes in aggregates into nothing.
+
+        Not shown for an accepted answer, and not for `INTERNAL_ERROR`: there is
+        nothing for the user to learn from our runner breaking.
+      */}
+      {!submission.isRun && verdict !== 'ACCEPTED' && verdict !== 'INTERNAL_ERROR' && (
+        <MistakeForm problemId={submission.problemId} submissionId={submission.id} />
       )}
 
       <ol className="flex flex-col gap-2">

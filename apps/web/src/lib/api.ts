@@ -1,9 +1,14 @@
 import type {
+  AnalyticsOverview,
   AuthSession,
+  CreateMistakeRequest,
   ErrorEnvelope,
   Draft,
   DraftsResponse,
   Hint,
+  Mistake,
+  MistakeCategory,
+  MistakePatternsResponse,
   Language,
   Me,
   Paginated,
@@ -177,6 +182,29 @@ export const submissionApi = {
 
   list: (query: { problemId?: string; cursor?: string; limit?: number } = {}) =>
     send<Paginated<Submission>>(`/submissions${toQueryString(query)}`),
+}
+
+/**
+ * How well you are doing.
+ *
+ * One call for the whole dashboard rather than five. It is the first screen
+ * after signing in, and a waterfall of requests there is the difference between
+ * an app that feels ready and one that assembles itself while you watch.
+ */
+export const analyticsApi = {
+  overview: () => send<AnalyticsOverview>('/analytics/overview'),
+}
+
+/** The mistake journal. Every call needs a session; nothing here is public. */
+export const mistakeApi = {
+  create: (body: CreateMistakeRequest) =>
+    send<Mistake>('/mistakes', { method: 'POST', body }),
+
+  list: (query: { category?: MistakeCategory; problemId?: string; limit?: number } = {}) =>
+    send<Paginated<Mistake>>(`/mistakes${toQueryString(query)}`),
+
+  /** The aggregation — what keeps happening, and in which topics. */
+  patterns: () => send<MistakePatternsResponse>('/mistakes/patterns'),
 }
 
 /**

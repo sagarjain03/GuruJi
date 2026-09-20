@@ -15,7 +15,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 | 2 | Question platform | L | ✅ Done |
 | 3 | Code editor | M | ✅ Done |
 | 4 | Code runner 🔴 | XL | ✅ Done |
-| 5 | Progress engine | M | ⬜ |
+| 5 | Progress engine | M | ✅ Done |
 | 6 | Revision engine | M | ⬜ |
 | 7 | Recommendation engine | L | ⬜ |
 | 8 | AI mentor | L | ⬜ |
@@ -276,35 +276,37 @@ exit criteria waived.**
 **Goal:** the system knows how well you are doing.
 
 ### Database
-- [ ] `UserTopicProgress`, `UserPatternProgress` (unique on user+topic / user+pattern)
-- [ ] `Mistake` + categories
-- [ ] `StudySession`
+- [x] `UserTopicProgress`, `UserPatternProgress` (unique on user+topic / user+pattern)
+- [x] `Mistake` + categories
+- [x] `StudySession`
 
 ### API
-- [ ] Mastery module — the formula from `docs/mastery-model.md`, weights in **one**
+- [x] Mastery module — the formula from `docs/mastery-model.md`, weights in **one**
       config object
-- [ ] Progress updated **inside** the submission transaction, incrementally
-- [ ] Nightly reconciliation job — recompute from source, **log** drift rather than
+- [x] Progress updated **inside** the submission transaction, incrementally
+- [x] Nightly reconciliation job — recompute from source, **log** drift rather than
       silently correcting it (drift means a write path is broken; hiding it hides the bug)
-- [ ] `POST /mistakes`, `GET /mistakes`, `GET /mistakes/patterns`
-- [ ] `GET /analytics/overview`
+- [x] `POST /mistakes`, `GET /mistakes`, `GET /mistakes/patterns`
+- [x] `GET /analytics/overview`
 
 ### Frontend
-- [ ] Dashboard mastery bars, backed by real numbers
-- [ ] Mastery breakdown — "why is my Graphs score 40?" has an answer
-- [ ] Mistake journal — log after a wrong submission, categorise, add notes
-- [ ] Streak display
+- [x] Dashboard mastery bars, backed by real numbers
+- [x] Mastery breakdown — "why is my Graphs score 40?" has an answer
+- [x] Mistake journal — log after a wrong submission, categorise, add notes
+- [x] Streak display
 
 ### Tests
-- [ ] Zero attempts → 0 with the no-data flag
-- [ ] One perfect solve → low score, not 100 (confidence damping)
-- [ ] All failures → 0, no division by zero
-- [ ] Hint-heavy solves score materially lower than unaided ones
-- [ ] Hard solves outscore an equal count of easy solves
-- [ ] One pattern repeated → capped by `patternCoverage`
-- [ ] Every component maxed → exactly 100
-- [ ] Weight config sums to the documented total
-- [ ] `isRun` submissions and `INTERNAL_ERROR` are excluded
+- [x] Zero attempts → 0 with the no-data flag
+- [x] One perfect solve → low score, not 100 (confidence damping)
+- [x] All failures → 0, no division by zero
+- [x] Hint-heavy solves score materially lower than unaided ones
+- [x] Hard solves outscore an equal count of easy solves. **The obvious
+      implementation does not do this** — weighting both sides of a rate cancels
+      the weight, so difficulty is a ceiling on the component, not a scale factor
+- [x] One pattern repeated → capped by `patternCoverage`
+- [x] Every component maxed → exactly 100
+- [x] Weight config sums to the documented total
+- [x] `isRun` submissions and `INTERNAL_ERROR` are excluded
 
 **Exit:** the mastery formula is unit-tested including every degenerate case.
 

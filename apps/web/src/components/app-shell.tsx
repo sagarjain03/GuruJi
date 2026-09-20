@@ -29,7 +29,7 @@ const NAV = [
   { href: '/roadmap', label: 'Roadmap', Icon: Map, ready: true },
   { href: '/problems', label: 'Problems', Icon: BookOpen, ready: true },
   { href: '/revision', label: 'Revision', Icon: RotateCcw, ready: false },
-  { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: false },
+  { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: true },
   { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: false },
   { href: '/mentor', label: 'AI Mentor', Icon: Bot, ready: false },
   { href: '/analytics', label: 'Analytics', Icon: BarChart3, ready: false },

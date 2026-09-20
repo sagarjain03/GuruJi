@@ -1,6 +1,10 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Clock3, Flame, Globe2, Layers, Sparkles, Target } from 'lucide-react'
+import type { AnalyticsOverview } from '@guruji/types'
+import { MasteryBar } from '@/components/dashboard/mastery-bar'
+import { analyticsApi } from '@/lib/api'
 import { useSessionStore } from '@/stores/session-store'
 import { cn } from '@/lib/utils'
 
@@ -20,9 +24,24 @@ const LEVEL_LABEL: Record<string, string> = {
 export function DashboardView() {
   const profile = useSessionStore((state) => state.profile)
 
+  /*
+   * One request for the whole dashboard.
+   *
+   * `staleTime` is short rather than zero: coming back from solving something
+   * should show the new number, and switching tabs twice in a minute should
+   * not re-fetch a year of activity.
+   */
+  const overview = useQuery({
+    queryKey: ['analytics', 'overview'],
+    queryFn: () => analyticsApi.overview(),
+    staleTime: 30_000,
+  })
+
   if (!profile) {
     return null
   }
+
+  const data = overview.data ?? null
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3">
@@ -37,10 +56,18 @@ export function DashboardView() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <MasteryPanel />
+        <MasteryPanel overview={data} isLoading={overview.isPending} />
         <RevisionPanel />
-        <StreakPanel current={profile.currentStreak} longest={profile.longestStreak} />
+        <StreakPanel
+          // The server's numbers, not the profile's. The profile copy is written
+          // by a different path and is exactly the kind of second source that
+          // drifts without anyone noticing.
+          current={data?.streak.current ?? 0}
+          longest={data?.streak.longest ?? 0}
+        />
       </div>
+
+      <TopicsPanel overview={data} isLoading={overview.isPending} />
     </div>
   )
 }
@@ -216,19 +243,129 @@ function Gauge({ value, label }: { value: number | null; label: string }) {
   )
 }
 
-function MasteryPanel() {
+function MasteryPanel({
+  overview,
+  isLoading,
+}: {
+  overview: AnalyticsOverview | null
+  isLoading: boolean
+}) {
+  const topics = overview?.topics ?? []
+
+  /*
+   * The mean across topics that have been touched, not across the whole
+   * curriculum.
+   *
+   * Averaging in every unattempted topic would report a number that falls every
+   * time the syllabus grows, which tells the user something about our content
+   * plan rather than about themselves.
+   */
+  const practised = topics.filter((topic) => topic.attempts > 0)
+  const overall =
+    practised.length === 0
+      ? null
+      : Math.round(
+          practised.reduce((total, topic) => total + topic.mastery.score, 0) / practised.length,
+        )
+
   return (
     <Panel className="flex flex-col items-center text-center">
       <header className="mb-4 w-full text-left">
         <h2 className="font-display text-base font-semibold">Mastery</h2>
         <p className="text-muted-foreground text-xs">Across every topic, 0&ndash;100.</p>
       </header>
-      <Gauge value={null} label="overall" />
+
+      <Gauge value={isLoading ? null : overall} label="overall" />
+
       <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
-        Computed from real submissions — accuracy, time, hints and how much you remember later.
-        Nothing to measure yet.
+        {overall === null
+          ? 'Computed from real submissions — accuracy, time, hints and how much you remember later. Nothing to measure yet.'
+          : `Averaged over ${String(practised.length)} topic${practised.length === 1 ? '' : 's'} you have practised. Open one below to see why.`}
       </p>
     </Panel>
+  )
+}
+
+/**
+ * The weak topics, weakest first, each one openable.
+ *
+ * Ordering *is* the answer to "what should I work on" — sorting alphabetically
+ * would hand the comparison back to the user every time they looked.
+ */
+function TopicsPanel({
+  overview,
+  isLoading,
+}: {
+  overview: AnalyticsOverview | null
+  isLoading: boolean
+}) {
+  if (isLoading) {
+    return (
+      <Panel>
+        <p className="text-muted-foreground text-xs">Loading your progress…</p>
+      </Panel>
+    )
+  }
+
+  const topics = overview?.topics ?? []
+  const patterns = overview?.patterns ?? []
+
+  if (topics.length === 0) {
+    return (
+      <Panel>
+        <h2 className="font-display text-base font-semibold">Where you stand</h2>
+        <p className="text-muted-foreground mt-1 text-xs">
+          Nothing submitted yet. Solve a problem and this fills in — one bar per topic, and the
+          reason behind each one.
+        </p>
+      </Panel>
+    )
+  }
+
+  return (
+    <div className="grid gap-3 lg:grid-cols-2">
+      <Panel>
+        <header className="mb-3">
+          <h2 className="font-display text-base font-semibold">Topics</h2>
+          <p className="text-muted-foreground text-xs">Weakest first. Tap one for the reason.</p>
+        </header>
+        <div className="flex flex-col gap-1.5">
+          {topics.map((topic) => (
+            <MasteryBar
+              key={topic.topicId}
+              name={topic.name}
+              mastery={topic.mastery}
+              meta={`${String(topic.solved)} solved of ${String(topic.attempts)} attempted`}
+            />
+          ))}
+        </div>
+      </Panel>
+
+      <Panel>
+        <header className="mb-3">
+          <h2 className="font-display text-base font-semibold">Techniques</h2>
+          {/* Kept separate on purpose: "bad at Graphs" and "bad at BFS" are
+              different diagnoses, and only one of them is actionable today. */}
+          <p className="text-muted-foreground text-xs">
+            Tracked apart from topics — the data structure and the technique fail differently.
+          </p>
+        </header>
+        {patterns.length === 0 ? (
+          <p className="text-muted-foreground text-xs">Nothing tagged yet.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {patterns.map((pattern) => (
+              <MasteryBar
+                key={pattern.patternId}
+                name={pattern.name}
+                mastery={pattern.mastery}
+                meta={`${String(pattern.solved)} solved of ${String(pattern.attempts)} attempted`}
+              />
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
   )
 }
 
@@ -272,7 +409,10 @@ function StreakPanel({ current, longest }: { current: number; longest: number })
       </div>
 
       <p className="text-muted-foreground mt-4 text-xs">
-        Counted in your own timezone, not UTC midnight.
+        {/* The server buckets days in UTC, and says so rather than claiming
+            otherwise. Two devices in two time zones have to agree on whether
+            yesterday counted, and only one clock can decide that. */}
+        A day counts once you solve something. Days are counted in UTC.
       </p>
     </Panel>
   )

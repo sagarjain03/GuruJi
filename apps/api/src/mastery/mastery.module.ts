@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common'
+import { AuthModule } from '../auth/auth.module'
+import { AnalyticsController } from './analytics.controller'
+import { AnalyticsService } from './analytics.service'
+import { MistakesController } from './mistakes.controller'
+import { MistakesService } from './mistakes.service'
 import { ProgressService } from './progress.service'
 import { ReconciliationService } from './reconciliation.service'
 
@@ -10,7 +15,10 @@ import { ReconciliationService } from './reconciliation.service'
  * instance doing the writing. This module owns the one that checks it.
  */
 @Module({
-  providers: [ProgressService, ReconciliationService],
+  // For `AccessTokenGuard`, which AuthModule exports.
+  imports: [AuthModule],
+  controllers: [MistakesController, AnalyticsController],
+  providers: [ProgressService, ReconciliationService, MistakesService, AnalyticsService],
   exports: [ProgressService, ReconciliationService],
 })
 export class MasteryModule {}
