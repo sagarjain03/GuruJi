@@ -67,6 +67,11 @@ model User {
   drafts        Draft[]
   submissions   Submission[]
 
+  topicProgress   UserTopicProgress[]
+  patternProgress UserPatternProgress[]
+  mistakes        Mistake[]
+  studySessions   StudySession[]
+
   @@map("users")
 }
 
@@ -200,6 +205,8 @@ model Topic {
   prerequisites  TopicPrerequisite[] @relation("TopicDependent")
   requiredBy     TopicPrerequisite[] @relation("TopicPrerequisite")
 
+  userProgress UserTopicProgress[]
+
   @@map("topics")
 }
 
@@ -229,7 +236,8 @@ model Pattern {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  problems ProblemPattern[]
+  problems     ProblemPattern[]
+  userProgress UserPatternProgress[]
 
   @@map("patterns")
 }
@@ -294,6 +302,7 @@ model Problem {
   hints       Hint[]
   drafts      Draft[]
   submissions Submission[]
+  mistakes    Mistake[]
 
   // The filtered problem list.
   @@index([difficulty, reviewStatus])
@@ -458,9 +467,10 @@ model Submission {
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
 
-  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problem Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  results SubmissionResult[]
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem  Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results  SubmissionResult[]
+  mistakes Mistake[]
 
   // Submission history and the activity chart.
   @@index([userId, createdAt])
@@ -491,4 +501,189 @@ model SubmissionResult {
   @@unique([submissionId, testCaseId])
   @@index([testCaseId])
   @@map("submission_results")
+}
+
+// ---------------------------------------------------------------------------
+// Progress (Phase 5). See docs/mastery-model.md.
+// ---------------------------------------------------------------------------
+
+/// The counters a mastery score is computed from.
+///
+/// Materialised, not computed on read. The dashboard draws a bar per topic on
+/// every load, and recomputing that from full submission history is fine at ten
+/// submissions and unusable at ten thousand.
+///
+/// Updated inside the submission-completion transaction, so they cannot drift
+/// from a write that succeeded. They can still drift from a write path that
+/// bypasses the transaction, which is what the nightly reconciliation job
+/// exists to *report* — it logs the discrepancy rather than correcting it,
+/// because a drift is a bug somewhere and silently fixing it hides the bug.
+model UserTopicProgress {
+  id      String @id @default(uuid(7)) @db.Uuid
+  userId  String @map("user_id") @db.Uuid
+  topicId String @map("topic_id") @db.Uuid
+
+  /// Distinct problems attempted, not submissions. Retrying is not evidence.
+  attempts           Int @default(0)
+  solved             Int @default(0)
+  /// Solved on the first graded submission — the honest accuracy signal.
+  firstAttemptSolved Int @default(0) @map("first_attempt_solved")
+
+  /// Phase 6 fills these. Until then retention is *unmeasured*, not zero.
+  revisionAttempts  Int @default(0) @map("revision_attempts")
+  revisionSuccesses Int @default(0) @map("revision_successes")
+
+  easyAttempts   Int @default(0) @map("easy_attempts")
+  easySolved     Int @default(0) @map("easy_solved")
+  mediumAttempts Int @default(0) @map("medium_attempts")
+  mediumSolved   Int @default(0) @map("medium_solved")
+  hardAttempts   Int @default(0) @map("hard_attempts")
+  hardSolved     Int @default(0) @map("hard_solved")
+
+  /// Distinct patterns this user has solved within the topic.
+  patternsSolved Int @default(0) @map("patterns_solved")
+
+  /// Sum of per-problem clamped speed ratios, and the sample count behind it.
+  /// A sum of ratios rather than of times: one session left open overnight
+  /// would otherwise sink the component permanently.
+  speedRatioSum Float @default(0) @map("speed_ratio_sum")
+  speedSamples  Int   @default(0) @map("speed_samples")
+
+  /// Weighted by the hint level reached, not a plain count.
+  hintWeightedSolves Float @default(0) @map("hint_weighted_solves")
+
+  /// Derived from the counters above and stored so the dashboard can read it.
+  masteryScore   Float     @default(0) @map("mastery_score")
+  lastPracticedAt DateTime? @map("last_practiced_at") @db.Timestamptz(3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  /// The upsert target for every submission.
+  @@unique([userId, topicId])
+  /// Weak-topic ranking, read by the recommendation engine in Phase 7.
+  @@index([userId, masteryScore])
+  @@map("user_topic_progress")
+}
+
+/// The same counters per pattern.
+///
+/// Kept separate from the topic table rather than collapsed into one score,
+/// because the two answer different questions. Low topic mastery with healthy
+/// pattern mastery means the data structure is the gap; the reverse means the
+/// technique is. Collapsing them loses exactly the distinction that makes a
+/// recommendation useful.
+model UserPatternProgress {
+  id        String @id @default(uuid(7)) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  patternId String @map("pattern_id") @db.Uuid
+
+  attempts           Int @default(0)
+  solved             Int @default(0)
+  firstAttemptSolved Int @default(0) @map("first_attempt_solved")
+
+  revisionAttempts  Int @default(0) @map("revision_attempts")
+  revisionSuccesses Int @default(0) @map("revision_successes")
+
+  easyAttempts   Int @default(0) @map("easy_attempts")
+  easySolved     Int @default(0) @map("easy_solved")
+  mediumAttempts Int @default(0) @map("medium_attempts")
+  mediumSolved   Int @default(0) @map("medium_solved")
+  hardAttempts   Int @default(0) @map("hard_attempts")
+  hardSolved     Int @default(0) @map("hard_solved")
+
+  speedRatioSum Float @default(0) @map("speed_ratio_sum")
+  speedSamples  Int   @default(0) @map("speed_samples")
+
+  hintWeightedSolves Float @default(0) @map("hint_weighted_solves")
+
+  masteryScore    Float     @default(0) @map("mastery_score")
+  lastPracticedAt DateTime? @map("last_practiced_at") @db.Timestamptz(3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pattern Pattern @relation(fields: [patternId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, patternId])
+  @@index([userId, masteryScore])
+  @@map("user_pattern_progress")
+}
+
+/// A closed set on purpose.
+///
+/// The value of the mistake journal is aggregation — "you have made this
+/// mistake in three sliding-window problems" only works if the categories
+/// cannot be free text.
+enum MistakeCategory {
+  LOGIC
+  SYNTAX
+  EDGE_CASE
+  COMPLEXITY
+  IMPLEMENTATION
+  MISREAD_PROBLEM
+  WRONG_PATTERN
+  OFF_BY_ONE
+  OVERFLOW
+
+  @@map("mistake_category")
+}
+
+model Mistake {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  userId       String  @map("user_id") @db.Uuid
+  problemId    String  @map("problem_id") @db.Uuid
+  /// Nullable: a mistake can be logged from reflection, not only from a verdict.
+  submissionId String? @map("submission_id") @db.Uuid
+
+  category      MistakeCategory
+  whatWentWrong String          @map("what_went_wrong")
+  correctIdea   String?         @map("correct_idea")
+  /// Filled by the mentor in Phase 8. Never overwrites what the user wrote.
+  aiAnalysis    String?         @map("ai_analysis")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem    Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  submission Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+
+  /// Mistake aggregation — the journal's whole reason to exist.
+  @@index([userId, category, createdAt])
+  @@index([userId, createdAt])
+  @@map("mistakes")
+}
+
+enum StudySessionSource {
+  PRACTICE
+  REVISION
+  CONTEST
+  ASSESSMENT
+
+  @@map("study_session_source")
+}
+
+/// Feeds daily goals and the activity heatmap.
+model StudySession {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  startedAt DateTime  @map("started_at") @db.Timestamptz(3)
+  /// Null while a session is open. Closed by the next one, or by a sweep.
+  endedAt   DateTime? @map("ended_at") @db.Timestamptz(3)
+
+  problemsAttempted Int @default(0) @map("problems_attempted")
+  problemsSolved    Int @default(0) @map("problems_solved")
+
+  source StudySessionSource @default(PRACTICE)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The activity heatmap, and "is a session already open".
+  @@index([userId, startedAt])
+  @@map("study_sessions")
 }

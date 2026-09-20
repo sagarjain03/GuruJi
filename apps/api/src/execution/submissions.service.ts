@@ -13,6 +13,7 @@ import {
 import { AppError, NotFoundError } from '../common/app-error'
 import { RateLimitService } from '../auth/rate-limit.service'
 import { decodeCursor, encodeCursor } from '../content/cursor'
+import { ProgressService } from '../mastery/progress.service'
 import { SubmissionQueueService } from './submission-queue.service'
 
 /** docs/api.md — ten a minute per user, counted in Redis so it holds across instances. */
@@ -46,6 +47,7 @@ export class SubmissionsService {
   constructor(
     private readonly queue: SubmissionQueueService,
     private readonly rateLimit: RateLimitService,
+    private readonly progress: ProgressService,
   ) {}
 
   /**
@@ -219,9 +221,19 @@ export class SubmissionsService {
     const passedCount = payload.results.filter((result) => result.passed).length
     const internal = payload.verdict === 'INTERNAL_ERROR'
 
-    await prisma.$transaction([
-      prisma.submissionResult.deleteMany({ where: { submissionId: payload.submissionId } }),
-      prisma.submissionResult.createMany({
+    /*
+     * Interactive rather than an array of writes, because the progress update
+     * has to *read* — whether this problem has been attempted before, and
+     * whether it was already solved — and those reads must see the same world
+     * the writes do.
+     *
+     * Everything below lands together or not at all. Mastery written outside
+     * this boundary is mastery that can fail on its own, invisibly: the user
+     * sees their verdict and the dashboard quietly disagrees with it forever.
+     */
+    await prisma.$transaction(async (tx) => {
+      await tx.submissionResult.deleteMany({ where: { submissionId: payload.submissionId } })
+      await tx.submissionResult.createMany({
         data: payload.results.map((result) => ({
           submissionId: payload.submissionId,
           testCaseId: result.testCaseId,
@@ -233,8 +245,9 @@ export class SubmissionsService {
           actualOutput: truncate(result.actualOutput),
           errorMessage: truncate(result.errorMessage),
         })),
-      }),
-      prisma.submission.update({
+      })
+
+      const updated = await tx.submission.update({
         where: { id: payload.submissionId },
         data: {
           // FAILED alongside an INTERNAL_ERROR verdict is what "our runner
@@ -248,8 +261,27 @@ export class SubmissionsService {
           passedCount,
           completedAt: new Date(),
         },
-      }),
-    ])
+        select: {
+          id: true,
+          userId: true,
+          problemId: true,
+          verdict: true,
+          isRun: true,
+          hintsUsedAtSubmit: true,
+          timeSpentMs: true,
+        },
+      })
+
+      await this.progress.apply(tx, {
+        submissionId: updated.id,
+        userId: updated.userId,
+        problemId: updated.problemId,
+        verdict: updated.verdict ?? 'INTERNAL_ERROR',
+        isRun: updated.isRun,
+        hintsUsedAtSubmit: updated.hintsUsedAtSubmit,
+        timeSpentMs: updated.timeSpentMs,
+      })
+    })
 
     return {
       userId: submission.userId,

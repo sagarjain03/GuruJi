@@ -87,6 +87,29 @@ COMPILE_ERROR COMPILE_ERROR
 INTERNAL_ERROR INTERNAL_ERROR
         }
     
+
+
+        mistake_category {
+            LOGIC LOGIC
+SYNTAX SYNTAX
+EDGE_CASE EDGE_CASE
+COMPLEXITY COMPLEXITY
+IMPLEMENTATION IMPLEMENTATION
+MISREAD_PROBLEM MISREAD_PROBLEM
+WRONG_PATTERN WRONG_PATTERN
+OFF_BY_ONE OFF_BY_ONE
+OVERFLOW OVERFLOW
+        }
+    
+
+
+        study_session_source {
+            PRACTICE PRACTICE
+REVISION REVISION
+CONTEST CONTEST
+ASSESSMENT ASSESSMENT
+        }
+    
   "users" {
     String id "🗝️"
     String email 
@@ -273,6 +296,81 @@ INTERNAL_ERROR INTERNAL_ERROR
     String error_message "❓"
     }
   
+
+  "user_topic_progress" {
+    String id "🗝️"
+    String user_id 
+    String topic_id 
+    Int attempts 
+    Int solved 
+    Int first_attempt_solved 
+    Int revision_attempts 
+    Int revision_successes 
+    Int easy_attempts 
+    Int easy_solved 
+    Int medium_attempts 
+    Int medium_solved 
+    Int hard_attempts 
+    Int hard_solved 
+    Int patterns_solved 
+    Float speed_ratio_sum 
+    Int speed_samples 
+    Float hint_weighted_solves 
+    Float mastery_score 
+    DateTime last_practiced_at "❓"
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "user_pattern_progress" {
+    String id "🗝️"
+    String user_id 
+    String pattern_id 
+    Int attempts 
+    Int solved 
+    Int first_attempt_solved 
+    Int revision_attempts 
+    Int revision_successes 
+    Int easy_attempts 
+    Int easy_solved 
+    Int medium_attempts 
+    Int medium_solved 
+    Int hard_attempts 
+    Int hard_solved 
+    Float speed_ratio_sum 
+    Int speed_samples 
+    Float hint_weighted_solves 
+    Float mastery_score 
+    DateTime last_practiced_at "❓"
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "mistakes" {
+    String id "🗝️"
+    String user_id 
+    String problem_id 
+    String submission_id "❓"
+    MistakeCategory category 
+    String what_went_wrong 
+    String correct_idea "❓"
+    String ai_analysis "❓"
+    DateTime created_at 
+    }
+  
+
+  "study_sessions" {
+    String id "🗝️"
+    String user_id 
+    DateTime started_at 
+    DateTime ended_at "❓"
+    Int problems_attempted 
+    Int problems_solved 
+    StudySessionSource source 
+    }
+  
     "users" |o--|| "role" : "enum:role"
     "profiles" |o--|| "language" : "enum:preferred_language"
     "profiles" |o--|| "experience_level" : "enum:experience_level"
@@ -305,4 +403,14 @@ INTERNAL_ERROR INTERNAL_ERROR
     "submissions" }o--|| "problems" : "problem"
     "submission_results" }o--|| "submissions" : "submission"
     "submission_results" }o--|| "test_cases" : "testCase"
+    "user_topic_progress" }o--|| "users" : "user"
+    "user_topic_progress" }o--|| "topics" : "topic"
+    "user_pattern_progress" }o--|| "users" : "user"
+    "user_pattern_progress" }o--|| "patterns" : "pattern"
+    "mistakes" |o--|| "mistake_category" : "enum:category"
+    "mistakes" }o--|| "users" : "user"
+    "mistakes" }o--|| "problems" : "problem"
+    "mistakes" }o--|o "submissions" : "submission"
+    "study_sessions" |o--|| "study_session_source" : "enum:source"
+    "study_sessions" }o--|| "users" : "user"
 ```
