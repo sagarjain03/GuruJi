@@ -65,6 +65,7 @@ model User {
   profile       Profile?
   refreshTokens RefreshToken[]
   drafts        Draft[]
+  submissions   Submission[]
 
   @@map("users")
 }
@@ -289,9 +290,10 @@ model Problem {
 
   topics    ProblemTopic[]
   patterns  ProblemPattern[]
-  testCases TestCase[]
-  hints     Hint[]
-  drafts    Draft[]
+  testCases   TestCase[]
+  hints       Hint[]
+  drafts      Draft[]
+  submissions Submission[]
 
   // The filtered problem list.
   @@index([difficulty, reviewStatus])
@@ -343,7 +345,8 @@ model TestCase {
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  problem Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results SubmissionResult[]
 
   @@unique([problemId, displayOrder])
   @@index([problemId, isSample])
@@ -393,4 +396,99 @@ model Draft {
   // "What was I last working on" — read by the dashboard from Phase 5.
   @@index([userId, updatedAt])
   @@map("drafts")
+}
+
+// ---------------------------------------------------------------------------
+// Execution (Phase 4). See docs/code-execution.md.
+// ---------------------------------------------------------------------------
+
+/// The lifecycle of *our* job, not the judgement of the code.
+enum SubmissionStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+
+  @@map("submission_status")
+}
+
+/// The judgement of the code. Separate from status on purpose: a FAILED status
+/// with no verdict means our infrastructure broke, and that must never be
+/// recorded as the user getting the problem wrong.
+enum Verdict {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILE_ERROR
+  INTERNAL_ERROR
+
+  @@map("verdict")
+}
+
+model Submission {
+  id        String @id @default(uuid(7)) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  problemId String @map("problem_id") @db.Uuid
+
+  language Language
+  // Its own copy, never a pointer at the draft: editing the draft afterwards
+  // must not rewrite the history of what was actually judged.
+  code     String
+
+  status  SubmissionStatus @default(QUEUED)
+  verdict Verdict?
+
+  runtimeMs Int? @map("runtime_ms")
+  memoryKb  Int? @map("memory_kb")
+
+  passedCount Int @default(0) @map("passed_count")
+  totalCount  Int @default(0) @map("total_count")
+
+  compileOutput String? @map("compile_output")
+
+  /// true = "Run" against samples. Kept out of the mastery signal in Phase 5:
+  /// counting exploratory runs would punish people for testing their thinking.
+  isRun Boolean @default(false) @map("is_run")
+
+  hintsUsedAtSubmit Int @default(0) @map("hints_used_at_submit")
+  timeSpentMs       Int @default(0) @map("time_spent_ms")
+
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results SubmissionResult[]
+
+  // Submission history and the activity chart.
+  @@index([userId, createdAt])
+  // Per-problem attempt history.
+  @@index([userId, problemId, createdAt])
+  // Acceptance-rate recomputation.
+  @@index([problemId, verdict])
+  @@map("submissions")
+}
+
+model SubmissionResult {
+  id           String @id @default(uuid(7)) @db.Uuid
+  submissionId String @map("submission_id") @db.Uuid
+  testCaseId   String @map("test_case_id") @db.Uuid
+
+  passed    Boolean
+  runtimeMs Int? @map("runtime_ms")
+  memoryKb  Int? @map("memory_kb")
+
+  /// Capped at write time. An unbounded column here is a storage-denial vector:
+  /// a program that prints a gigabyte would otherwise land in the database.
+  actualOutput String? @map("actual_output")
+  errorMessage String? @map("error_message")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testCase   TestCase   @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, testCaseId])
+  @@index([testCaseId])
+  @@map("submission_results")
 }

@@ -83,6 +83,14 @@ kills the container). A process that ignores signals, or a container whose entry
 process wedges, is still bounded. Relying on the inner timeout alone assumes the
 sandboxed program cooperates — which is exactly the assumption we cannot make.
 
+The inner half is `--ulimit cpu`, set to the problem's limit rounded up plus a
+second. `RLIMIT_CPU` is the kernel sending `SIGXCPU` and then `SIGKILL` once the
+process has burned that many **CPU** seconds; nothing in the image has to
+cooperate, and there is no shell to wrap the program in a `timeout` call even if
+we wanted one. It is CPU time, not wall clock — a program that sleeps for an
+hour uses no CPU and this never fires — which is precisely why the outer kill is
+not optional. The two limits catch different programs.
+
 > **Killing the `docker run` client does not kill the container.** Verified on
 > this host, twice, during the Phase 1 spike: a `SIGKILL` to the CLI left an
 > infinite-loop container running and burning a full core for minutes

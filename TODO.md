@@ -13,7 +13,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 | 0 | Analysis & design | M | ✅ Done |
 | 1 | Foundation | L | ✅ Done |
 | 2 | Question platform | L | ✅ Done |
-| 3 | Code editor | M | ⬜ |
+| 3 | Code editor | M | ✅ Done |
 | 4 | Code runner 🔴 | XL | ⬜ |
 | 5 | Progress engine | M | ⬜ |
 | 6 | Revision engine | M | ⬜ |
@@ -161,28 +161,47 @@ paginates without fetching everything.
 
 ---
 
-## Phase 3 — Code editor
+## Phase 3 — Code editor ✅
 
 **Goal:** write code against a problem and never lose it.
 
+### Database
+- [x] `Draft` — unique on (user, problem, language). **Not in the original
+      `docs/database.md` design;** added to the doc in the same change
+
 ### Frontend
-- [ ] Monaco integration — **configured without `unsafe-eval`** so the CSP in
-      `docs/security.md` stays real
-- [ ] Language switcher: C++, C, Python, JavaScript
-- [ ] Per-language starter code loaded from the problem
-- [ ] Draft persistence per (user, problem, language), debounced
-- [ ] Split layout — statement / editor / results, resizable
-- [ ] Test-case panel + custom input
-- [ ] Submission history panel
-- [ ] Editor preferences in Zustand (font size, theme, tab width)
+- [x] Monaco integration — from our own bundle, not a CDN, with only the Monarch
+      grammars and **none of the language services**, so nothing needs
+      `unsafe-eval`
+- [x] The CSP itself, which `docs/security.md` promised and the web app did not
+      have. `script-src 'self'` in production
+- [x] Language switcher: C++, C, Python, JavaScript
+- [x] Per-language starter code loaded from the problem
+- [x] Draft persistence per (user, problem, language), debounced at 1.2s, with a
+      `pagehide` flush so closing the tab does not lose the last edit
+- [x] Split layout — statement / editor / test panel, drag- **and keyboard**-resizable
+- [x] Test-case panel + custom input
+- [ ] Submission history panel — **deferred to Phase 4.** `Submission` does not
+      exist yet; there is no history to show
+- [x] Editor preferences in Zustand (font size, tab width, wrap, minimap),
+      persisted per device
 
 ### API
-- [ ] Draft save/load endpoints
-- [ ] `GET /problems/:slug/submissions`
+- [x] `GET /problems/:slug/drafts`, `PUT /problems/:slug/drafts/:language`
+- [ ] `GET /problems/:slug/submissions` — **deferred to Phase 4**, same reason
 
 ### Tests
-- [ ] Draft survives a page reload
-- [ ] Switching language does not destroy the other language's draft
+- [x] A saved draft comes back exactly — the server half of "survives a reload"
+- [x] Switching language does not destroy the other language's draft
+- [x] Autosave updates in place instead of accumulating rows
+- [x] A draft is never visible to another user; unauthenticated calls are refused
+- [x] **Browser tests** — Playwright pulled forward from Phase 12. Seven tests in
+      Chromium: Monaco renders with no CSP violation, nothing is fetched from a
+      CDN, the split resizes from the keyboard, the exit criterion holds across a
+      reload, the test panel works, preferences persist
+- [x] They found two real bugs the build could not: a controlled `value` prop
+      dropping typed characters, and a language switch discarding the pending
+      autosave. Both fixed
 
 **Exit:** write code, switch language, reload, and the code is still there.
 
@@ -194,10 +213,10 @@ paginates without fetching everything.
 exit criteria waived.**
 
 ### Infrastructure
-- [ ] `apps/code-runner` service skeleton
-- [ ] BullMQ queue + worker, bounded concurrency, retry with a dead-letter path
-- [ ] Sandbox images per language, pinned base tags, no shell / no package manager
-- [ ] Image build script
+- [x] `apps/code-runner` service skeleton
+- [x] BullMQ queue + worker, bounded concurrency, retry with a dead-letter path
+- [x] Sandbox images per language, pinned base tags, no shell / no package manager
+- [x] Image build script
 
 ### Sandbox controls — every one of these, per `docs/code-execution.md`
 - [ ] `--network none`
@@ -217,15 +236,15 @@ exit criteria waived.**
 - [ ] Compilation runs under the same limits, with its own longer timeout
 
 ### API
-- [ ] `POST /submissions` → `202` + id, validated and enqueued
-- [ ] Runner → API callback, shared-secret authenticated
-- [ ] Submission-completion transaction (results + verdict; mastery hooks land in Phase 5)
-- [ ] WebSocket namespace + `submission:status` / `submission:result`
+- [x] `POST /submissions` → `202` + id, validated and enqueued
+- [x] Runner → API callback, shared-secret authenticated
+- [x] Submission-completion transaction (results + verdict; mastery hooks land in Phase 5)
+- [x] WebSocket namespace + `submission:status` / `submission:result`
 
 ### Frontend
-- [ ] Run against samples · Submit against all
-- [ ] Live status over WebSocket
-- [ ] Result panel — per-test results, runtime, memory, compile errors
+- [x] Run against samples · Submit against all
+- [x] Live status over WebSocket
+- [x] Result panel — per-test results, runtime, memory, compile errors
 
 ### 🔴 Adversarial suite — every row must pass to exit the phase
 - [ ] Infinite loop → `TIME_LIMIT_EXCEEDED`, container reaped, host CPU normal
@@ -459,6 +478,8 @@ Apply in every phase, not at the end:
 
 - [ ] Tests before implementation for the three engines — non-negotiable
 - [ ] `pnpm build` before every commit (catches `TS6133` orphans a dev server hides)
+- [ ] `pnpm --filter @guruji/web test:e2e` before calling any UI phase done — a
+      green build says nothing about whether the page renders
 - [ ] Every endpoint validates input and checks ownership in the `WHERE` clause
 - [ ] All timestamps UTC; the browser converts
 - [ ] No secret is `NEXT_PUBLIC_*`

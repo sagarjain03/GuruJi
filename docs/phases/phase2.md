@@ -147,15 +147,23 @@ Nothing in a type system, a linter or a test suite catches this. The only thing
 that catches it is running the data against a second implementation, which is
 now a step, not an afterthought.
 
-### 2. The stale `dist` that was not stale
+### 2. `prisma migrate dev` does not regenerate the client
 
 The API typecheck failed with "Property 'problem' does not exist on type
-'PrismaClient'" against a `packages/database/dist` that had been rebuilt after
-the migration. Rebuilding it again with `--force` fixed nothing, because nothing
-was wrong with it — the failing run had read the directory mid-write. The lesson
-is narrow: in a workspace where one package's build output is another's type
-source, a failure straight after a regeneration is worth repeating once before
-being investigated.
+'PrismaClient'" straight after the migration had been applied successfully.
+
+The cause, confirmed while starting Phase 3: **`prisma migrate dev` applies the
+migration but does not reliably run the generator.** The database had the new
+tables, and `packages/database/generated` — which is the type source for the
+whole workspace — still described the old schema. Rebuilding `dist` from it
+faithfully rebuilt the stale types.
+
+The fix is at the source, not at the call site: `pnpm db:migrate` now runs
+`prisma migrate dev && prisma generate && tsc -b`, so applying a migration and
+publishing the types it implies are one step and cannot drift apart.
+
+*(An earlier draft of this document blamed a mid-write read. That was a guess
+and it was wrong.)*
 
 ### 3. Two React rules the compiler enforces now
 

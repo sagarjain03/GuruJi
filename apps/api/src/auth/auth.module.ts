@@ -17,6 +17,8 @@ import { RefreshTokenService } from './refresh-token.service'
     RateLimitService,
     AccessTokenGuard,
   ],
-  exports: [AccessTokenGuard],
+  // JwtModule travels with the guard: a module that imports AuthModule to use
+  // AccessTokenGuard cannot construct it without JwtService.
+  exports: [AccessTokenGuard, JwtModule],
 })
 export class AuthModule {}

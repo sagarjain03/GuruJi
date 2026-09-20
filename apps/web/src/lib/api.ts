@@ -1,7 +1,10 @@
 import type {
   AuthSession,
   ErrorEnvelope,
+  Draft,
+  DraftsResponse,
   Hint,
+  Language,
   Me,
   Paginated,
   PatternSummary,
@@ -9,6 +12,10 @@ import type {
   ProblemListItem,
   ProblemQuery,
   Roadmap,
+  Submission,
+  SubmissionAccepted,
+  SubmissionDetail,
+  SubmitRequest,
   TopicDetail,
   TopicSummary,
 } from '@guruji/types'
@@ -39,10 +46,19 @@ export function getAccessToken(): string | null {
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST'
+  method?: 'GET' | 'POST' | 'PUT'
   body?: unknown
   /** Set on the refresh call itself, so a failed refresh cannot recurse. */
   skipRefresh?: boolean
+  /**
+   * Let the request outlive the page.
+   *
+   * Without this a `fetch` started while the tab is closing is cancelled with
+   * it. Used by the draft autosave flush, which exists precisely for that
+   * moment. The browser caps keepalive bodies at 64KB, which is under the
+   * server's own draft limit.
+   */
+  keepalive?: boolean
 }
 
 async function parseError(response: Response): Promise<ApiError> {
@@ -69,6 +85,7 @@ async function send<T>(path: string, options: RequestOptions = {}): Promise<T> {
       ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
     },
     ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+    ...(options.keepalive ? { keepalive: true } : {}),
   })
 
   if (response.status === 401 && !options.skipRefresh) {
@@ -130,11 +147,44 @@ export const contentApi = {
 }
 
 /**
+ * Unsubmitted code. Every call here needs a session — a draft belongs to one
+ * person and there is no anonymous read of one.
+ */
+export const draftApi = {
+  /** Every language's draft for a problem, in one request. */
+  list: (slug: string) => send<DraftsResponse>(`/problems/${encodeURIComponent(slug)}/drafts`),
+
+  save: (slug: string, language: Language, code: string, keepalive = false) =>
+    send<Draft>(`/problems/${encodeURIComponent(slug)}/drafts/${language}`, {
+      method: 'PUT',
+      body: { code },
+      ...(keepalive ? { keepalive: true } : {}),
+    }),
+}
+
+/**
+ * Running code.
+ *
+ * `submit` answers with an id and nothing else — the verdict arrives on the
+ * socket. `get` exists for the case the socket missed it: a tab that was
+ * asleep, a reconnect, or a page opened fresh on a submission from yesterday.
+ */
+export const submissionApi = {
+  submit: (body: SubmitRequest) =>
+    send<SubmissionAccepted>('/submissions', { method: 'POST', body }),
+
+  get: (id: string) => send<SubmissionDetail>(`/submissions/${encodeURIComponent(id)}`),
+
+  list: (query: { problemId?: string; cursor?: string; limit?: number } = {}) =>
+    send<Paginated<Submission>>(`/submissions${toQueryString(query)}`),
+}
+
+/**
  * Undefined and empty values are dropped rather than sent as empty strings: the
  * API validates with `forbidNonWhitelisted`, and `?q=` is not the same request
  * as one with no `q` at all.
  */
-function toQueryString(query: Partial<ProblemQuery>): string {
+function toQueryString(query: Record<string, unknown>): string {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
     if (value !== undefined && value !== null && String(value).length > 0) {

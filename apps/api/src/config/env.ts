@@ -28,6 +28,16 @@ const envSchema = z.object({
   JWT_ACCESS_TTL: z.string().min(1).default('15m'),
   JWT_REFRESH_TTL: z.string().min(1).default('30d'),
 
+  /**
+   * Shared with the code runner, and with nothing else.
+   *
+   * It authenticates the result callback — the one route that writes a verdict
+   * without a user session behind it. Same minimum length as the JWT secrets:
+   * a guessable one turns that route into "anybody can mark any submission
+   * accepted".
+   */
+  CODE_RUNNER_SHARED_SECRET: z.string().min(32),
+
   // OWASP guidance, mirrored in docs/security.md.
   ARGON2_MEMORY_COST: z.coerce.number().int().positive().default(19456),
   ARGON2_TIME_COST: z.coerce.number().int().positive().default(2),

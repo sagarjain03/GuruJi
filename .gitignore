@@ -44,3 +44,8 @@ apps/code-runner/tmp/
 
 # playwright mcp scratch
 .playwright-mcp/
+
+# Playwright
+apps/web/e2e/.auth/
+apps/web/test-results/
+apps/web/playwright-report/

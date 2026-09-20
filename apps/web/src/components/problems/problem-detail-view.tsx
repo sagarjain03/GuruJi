@@ -1,10 +1,12 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import type { ProblemDetail } from '@guruji/types'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { DifficultyBadge, ErrorState, LoadingState } from '@/components/content/states'
 import { Markdown } from '@/components/markdown'
+import { Workspace } from '@/components/problems/workspace'
 import { ApiError, contentApi } from '@/lib/api'
 
 export function ProblemDetailView({ slug }: { slug: string }) {
@@ -38,8 +40,15 @@ export function ProblemDetailView({ slug }: { slug: string }) {
     )
   }
 
+  // The statement is passed into the workspace rather than rendered beside it:
+  // which pane it belongs in, and how wide that pane is, is the workspace's
+  // business, and this component should not have to know the layout to fill it.
+  return <Workspace problem={data} statement={<Statement problem={data} />} />
+}
+
+function Statement({ problem: data }: { problem: ProblemDetail }) {
   return (
-    <article className="mx-auto flex max-w-3xl flex-col gap-5">
+    <article className="flex flex-col gap-5">
       <Link
         href="/problems"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.14em] uppercase"
@@ -108,26 +117,11 @@ export function ProblemDetailView({ slug }: { slug: string }) {
         </div>
       </Section>
 
-      <Section title="Sample test cases">
-        <div className="flex flex-col gap-3">
-          {data.sampleTestCases.map((testCase) => (
-            <div
-              key={testCase.id}
-              className="border-border bg-card/70 grid gap-3 border p-4 sm:grid-cols-2"
-            >
-              <Block label="Input" value={testCase.input} />
-              <Block label="Expected" value={testCase.expectedOutput} />
-            </div>
-          ))}
-        </div>
-        <p className="text-muted-foreground mt-2 text-xs">
-          These are the cases you can see. Submissions are graded against more.
-        </p>
-      </Section>
-
+      {/* Sample cases live in the editor's test panel now, next to where you
+          would act on them, rather than at the bottom of the statement. */}
       <p className="border-border text-muted-foreground border border-dashed p-4 text-xs">
-        The editor, the hint ladder and Run/Submit arrive in Phases 3 and 4. Until the runner exists
-        there is nothing honest to put here, so there is nothing here.
+        The sample cases are in the panel under the editor. Submissions are graded against more
+        than those. Run and Submit arrive in Phase 4, with the sandbox behind them.
       </p>
     </article>
   )

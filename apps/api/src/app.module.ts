@@ -5,7 +5,10 @@ import { randomUUID } from 'node:crypto'
 import { loadEnv } from './config/env'
 import { AuthModule } from './auth/auth.module'
 import { ContentModule } from './content/content.module'
+import { EditorModule } from './editor/editor.module'
+import { ExecutionModule } from './execution/execution.module'
 import { HealthModule } from './health/health.module'
+import { RealtimeModule } from './realtime/realtime.module'
 import { RedisModule } from './redis/redis.module'
 
 @Module({
@@ -38,6 +41,9 @@ import { RedisModule } from './redis/redis.module'
     RedisModule,
     AuthModule,
     ContentModule,
+    EditorModule,
+    ExecutionModule,
+    RealtimeModule,
     HealthModule,
   ],
 })

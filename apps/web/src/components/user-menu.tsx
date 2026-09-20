@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { authApi, setAccessToken } from '@/lib/api'
+import { closeSocket } from '@/lib/socket'
 import { useSessionStore } from '@/stores/session-store'
 
 export function UserMenu() {
@@ -24,6 +25,9 @@ export function UserMenu() {
       await authApi.logout()
     } finally {
       setAccessToken(null)
+      // The room this socket is in was decided by the token it handshook with.
+      // Left open, it would keep pushing the previous user's verdicts into the page.
+      closeSocket()
       clearSession()
       router.replace('/login')
     }

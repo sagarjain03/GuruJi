@@ -101,6 +101,24 @@ Distinguishing them turns the endpoint into an account-enumeration oracle.
 Hidden test cases are excluded in the repository layer, not the controller — a
 new endpoint cannot accidentally expose them.
 
+### `drafts`
+
+| Method | Route | Notes |
+|---|---|---|
+| GET | `/problems/:slug/drafts` | The caller's own drafts for this problem, one per language |
+| PUT | `/problems/:slug/drafts/:language` | Autosave. Upserts on (user, problem, language) |
+
+Guarded as a whole — a draft belongs to exactly one person, and there is no
+anonymous read of one. Ownership is a `WHERE` clause on `userId`, never a check
+performed after the row has been fetched.
+
+All of a problem's drafts are returned together rather than one per request:
+switching language in the editor is a click, and a round trip per click makes
+the switch feel broken.
+
+The body carries only `code`. The problem and language come from the path, so
+there is no second copy of them that could disagree with it.
+
 ### `submissions`
 
 | Method | Route | Notes |
