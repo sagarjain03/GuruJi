@@ -317,33 +317,41 @@ exit criteria waived.**
 **Goal:** solved problems come back at the right time.
 
 ### Database
-- [ ] `RevisionItem` — interval, ease, repetitions, lapses, state, `dueAt`
-- [ ] Index on `(userId, dueAt)` — hottest query in the product
+- [x] `RevisionItem` — interval, ease, repetitions, lapses, state, `dueAt`
+- [x] Index on `(userId, dueAt)` — hottest query in the product
+- [x] `RevisionReview` — one row per completed review. Needed because `retention`
+      is a *rate* over attempts, and a counter that only moves forward cannot be
+      recomputed from source by the reconciliation job
 
 ### API
-- [ ] SM-2-derived scheduler per `docs/revision-engine.md`
-- [ ] Scheduling inside the submission transaction
-- [ ] Daily queue with a configurable cap; overflow carries forward, never dropped
-- [ ] Backlog re-spacing after a long absence
-- [ ] Due-today resolved against the user's IANA timezone, not UTC midnight
-- [ ] `GET /revision/due`, `/revision/upcoming`, `POST /revision/:id/complete`
+- [x] SM-2-derived scheduler per `docs/revision-engine.md`
+- [x] Scheduling inside the submission transaction
+- [x] Daily queue with a configurable cap; overflow carries forward, never dropped
+- [x] Backlog re-spacing after a long absence
+- [x] Due-today resolved against the user's IANA timezone, not UTC midnight
+- [x] `GET /revision/due`, `/revision/upcoming`, `POST /revision/:id/complete`
 
 ### Frontend
-- [ ] Revision dashboard + due-today queue
-- [ ] Outcome capture after a revision solve
-- [ ] Upcoming-week calendar
+- [x] Revision dashboard + due-today queue
+- [x] Outcome capture after a revision solve
+- [x] Upcoming-week calendar
 
 ### Tests
-- [ ] First solve schedules at day 1
-- [ ] Success advances the ladder × ease
-- [ ] `STRUGGLED` halves without advancing, floor of 1 day
-- [ ] `FAILED` resets, increments lapses, sets `LAPSED`
-- [ ] Ease clamps at both ends
-- [ ] `MASTERED` needs consecutive successes, not one
-- [ ] Day-cap overflow carries forward
-- [ ] 30-day absence re-spaces instead of dumping
-- [ ] Due-today is correct across a DST transition
-- [ ] Revision + mastery commit atomically (forced failure rolls both back)
+- [x] First solve schedules at day 1
+- [x] Success advances the ladder × ease
+- [x] `STRUGGLED` halves without advancing, floor of 1 day
+- [x] `FAILED` resets, increments lapses, sets `LAPSED` — **only if it had reached
+      `REVIEWING`**. Failing something still being learned is not a lapse, and
+      marking it one spends the priority reserved for knowledge actually lost
+- [x] Ease clamps at both ends
+- [x] `MASTERED` needs consecutive successes, not one
+- [x] Day-cap overflow carries forward. **Found a real off-by-one**: the due
+      query used `dueAt <= endOfLocalDay`, and re-spacing puts items exactly on
+      that boundary — so they came straight back to today and the cap silently
+      stopped holding
+- [x] 30-day absence re-spaces instead of dumping
+- [x] Due-today is correct across a DST transition, in both directions
+- [x] Revision + mastery commit atomically (forced failure rolls both back)
 
 **Exit:** scheduling is deterministic and tested across success / struggle / fail.
 

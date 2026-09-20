@@ -83,16 +83,24 @@ export function AuthForm({ mode }: { mode: Mode }) {
   })
 
   return (
-    <div className="w-full max-w-sm">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">{copy.title}</h1>
-      <p className="text-muted-foreground mt-1 text-sm">{copy.subtitle}</p>
+    <div className="w-full max-w-md">
+      <svg viewBox="0 0 28 28" className="size-7" fill="none" aria-hidden="true">
+        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="#A78BFA" />
+        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="#7C3AED" />
+        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="#6366F1" />
+      </svg>
 
-      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4" noValidate>
+      <h1 className="font-display mt-6 text-4xl font-semibold tracking-tight">{copy.title}</h1>
+      <p className="text-muted-foreground mt-3 max-w-sm text-sm leading-relaxed">{copy.subtitle}</p>
+
+      <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-5" noValidate>
         {mode === 'register' && (
           <Field id="displayName" label="Name" error={errors.displayName?.message}>
             <Input
               id="displayName"
               {...register('displayName')}
+              className="h-11"
+              placeholder="Your name"
               autoComplete="name"
               aria-invalid={Boolean(errors.displayName)}
             />
@@ -103,6 +111,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <Input
             id="email"
             {...register('email')}
+            className="h-11"
+            placeholder="you@yourdomain.com"
             type="email"
             autoComplete="email"
             aria-invalid={Boolean(errors.email)}
@@ -113,6 +123,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <Input
             id="password"
             {...register('password')}
+            className="h-11"
+            placeholder={mode === 'register' ? 'Create a password' : 'Your password'}
             type="password"
             autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
             aria-invalid={Boolean(errors.password)}
@@ -125,14 +137,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </p>
         )}
 
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Working…' : copy.submit}
         </Button>
       </form>
 
-      <p className="text-muted-foreground mt-6 text-sm">
+      <p className="text-muted-foreground mt-8 text-center text-sm">
         {copy.switchText}{' '}
-        <Link href={copy.switchHref} className="text-foreground underline underline-offset-4">
+        <Link
+          href={copy.switchHref}
+          className="text-primary font-medium underline-offset-4 hover:underline"
+        >
           {copy.switchLabel}
         </Link>
       </p>
@@ -152,7 +167,7 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {/* Without htmlFor the input has no accessible name, and a screen reader
           announces three unlabelled boxes. */}
       <Label htmlFor={id}>{label}</Label>

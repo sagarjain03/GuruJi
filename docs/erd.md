@@ -110,6 +110,24 @@ CONTEST CONTEST
 ASSESSMENT ASSESSMENT
         }
     
+
+
+        revision_outcome {
+            SOLVED_EASILY SOLVED_EASILY
+SOLVED_WITH_EFFORT SOLVED_WITH_EFFORT
+STRUGGLED STRUGGLED
+FAILED FAILED
+        }
+    
+
+
+        revision_state {
+            LEARNING LEARNING
+REVIEWING REVIEWING
+MASTERED MASTERED
+LAPSED LAPSED
+        }
+    
   "users" {
     String id "🗝️"
     String email 
@@ -371,6 +389,34 @@ ASSESSMENT ASSESSMENT
     StudySessionSource source 
     }
   
+
+  "revision_items" {
+    String id "🗝️"
+    String user_id 
+    String problem_id 
+    Int interval_days 
+    Float ease 
+    Int ladder_index 
+    Int repetitions 
+    Int lapses 
+    Int streak 
+    RevisionState state 
+    DateTime due_at 
+    DateTime last_reviewed_at "❓"
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "revision_reviews" {
+    String id "🗝️"
+    String revision_item_id 
+    String submission_id "❓"
+    RevisionOutcome outcome 
+    Int interval_days 
+    DateTime created_at 
+    }
+  
     "users" |o--|| "role" : "enum:role"
     "profiles" |o--|| "language" : "enum:preferred_language"
     "profiles" |o--|| "experience_level" : "enum:experience_level"
@@ -413,4 +459,9 @@ ASSESSMENT ASSESSMENT
     "mistakes" }o--|o "submissions" : "submission"
     "study_sessions" |o--|| "study_session_source" : "enum:source"
     "study_sessions" }o--|| "users" : "user"
+    "revision_items" |o--|| "revision_state" : "enum:state"
+    "revision_items" }o--|| "users" : "user"
+    "revision_items" }o--|| "problems" : "problem"
+    "revision_reviews" |o--|| "revision_outcome" : "enum:outcome"
+    "revision_reviews" }o--|| "revision_items" : "item"
 ```

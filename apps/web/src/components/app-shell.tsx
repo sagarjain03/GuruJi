@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { DockItem, FloatingDock } from '@/components/ui/floating-dock'
 import { UserMenu } from '@/components/user-menu'
 import { cn } from '@/lib/utils'
 import { useSessionStore } from '@/stores/session-store'
@@ -28,7 +29,7 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard, ready: true },
   { href: '/roadmap', label: 'Roadmap', Icon: Map, ready: true },
   { href: '/problems', label: 'Problems', Icon: BookOpen, ready: true },
-  { href: '/revision', label: 'Revision', Icon: RotateCcw, ready: false },
+  { href: '/revision', label: 'Revision', Icon: RotateCcw, ready: true },
   { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: true },
   { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: false },
   { href: '/mentor', label: 'AI Mentor', Icon: Bot, ready: false },
@@ -42,60 +43,36 @@ function IconRail() {
   const profile = useSessionStore((state) => state.profile)
 
   return (
-    <aside className="hidden shrink-0 overflow-y-auto py-4 pl-4 lg:block">
-      <nav
-        aria-label="Main"
-        className="border-border/60 bg-card/70 sticky top-4 flex flex-col items-center gap-1 rounded-none border p-2 backdrop-blur-xl"
-      >
+    // No `overflow-y-auto` here: magnified tiles spill to the right of the rail
+    // and a scroll container would clip them. Nine items fit without scrolling.
+    <aside className="hidden shrink-0 py-4 pl-4 lg:block">
+      <FloatingDock aria-label="Main" className="sticky top-4">
         {NAV.map((item) => {
-          const { href, label, Icon } = item
-          const active = pathname === href || pathname.startsWith(`${href}/`)
-
-          if (!item.ready) {
-            return (
-              <span
-                key={href}
-                aria-disabled="true"
-                title={`${label} — not built yet`}
-                className="text-muted-foreground/25 grid size-10 cursor-not-allowed place-items-center rounded-none"
-              >
-                <Icon className="size-[18px]" />
-                <span className="sr-only">{label} (not built yet)</span>
-              </span>
-            )
-          }
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
 
           return (
-            <Link
-              key={href}
-              href={item.href}
-              title={label}
-              aria-current={active ? 'page' : undefined}
-              className={cn(
-                'grid size-10 place-items-center rounded-none transition-all',
-                active
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-              )}
-            >
-              <Icon className="size-[18px]" />
-              <span className="sr-only">{label}</span>
-            </Link>
+            <DockItem
+              key={item.href}
+              label={item.label}
+              Icon={item.Icon}
+              href={item.ready ? item.href : undefined}
+              disabled={!item.ready}
+              active={active}
+            />
           )
         })}
 
         {profile && (
           <>
             <span className="bg-border my-1 h-px w-6" aria-hidden="true" />
-            <span
-              title={profile.displayName}
-              className="bg-primary text-primary-foreground grid size-10 place-items-center font-mono text-xs font-semibold"
-            >
-              {initials(profile.displayName)}
-            </span>
+            <DockItem label={profile.displayName}>
+              <span className="font-mono text-xs font-semibold">
+                {initials(profile.displayName)}
+              </span>
+            </DockItem>
           </>
         )}
-      </nav>
+      </FloatingDock>
     </aside>
   )
 }

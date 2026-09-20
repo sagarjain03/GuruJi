@@ -1,8 +1,12 @@
 import type {
   AnalyticsOverview,
   AuthSession,
+  CompleteRevisionRequest,
+  CompleteRevisionResponse,
   CreateMistakeRequest,
+  DueQueue,
   ErrorEnvelope,
+  UpcomingDay,
   Draft,
   DraftsResponse,
   Hint,
@@ -205,6 +209,28 @@ export const mistakeApi = {
 
   /** The aggregation — what keeps happening, and in which topics. */
   patterns: () => send<MistakePatternsResponse>('/mistakes/patterns'),
+}
+
+/**
+ * What to revise, and when.
+ *
+ * The queue arrives already ordered and already capped — the server decides
+ * both, because the ordering *is* the product and a client that re-sorted it
+ * would quietly undo the reasoning behind it.
+ */
+export const revisionApi = {
+  due: () => send<DueQueue>('/revision/due'),
+
+  upcoming: (days = 7) => send<UpcomingDay[]>(`/revision/upcoming?days=${String(days)}`),
+
+  complete: (id: string, body: CompleteRevisionRequest) =>
+    send<CompleteRevisionResponse>(`/revision/${encodeURIComponent(id)}/complete`, {
+      method: 'POST',
+      body,
+    }),
+
+  /** Spreads a backlog forward. A POST because it rewrites `dueAt` on many rows. */
+  respace: () => send<{ moved: number }>('/revision/respace', { method: 'POST' }),
 }
 
 /**

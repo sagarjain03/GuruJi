@@ -14,6 +14,7 @@ import { AppError, NotFoundError } from '../common/app-error'
 import { RateLimitService } from '../auth/rate-limit.service'
 import { decodeCursor, encodeCursor } from '../content/cursor'
 import { ProgressService } from '../mastery/progress.service'
+import { RevisionService } from '../revision/revision.service'
 import { SubmissionQueueService } from './submission-queue.service'
 
 /** docs/api.md — ten a minute per user, counted in Redis so it holds across instances. */
@@ -48,6 +49,7 @@ export class SubmissionsService {
     private readonly queue: SubmissionQueueService,
     private readonly rateLimit: RateLimitService,
     private readonly progress: ProgressService,
+    private readonly revision: RevisionService,
   ) {}
 
   /**
@@ -280,6 +282,22 @@ export class SubmissionsService {
         isRun: updated.isRun,
         hintsUsedAtSubmit: updated.hintsUsedAtSubmit,
         timeSpentMs: updated.timeSpentMs,
+      })
+
+      /*
+       * Scheduling rides in the same transaction as the counters.
+       *
+       * Mastery moving while revision does not is a silent corruption of the
+       * learning model: the score says you know it, and nothing is ever
+       * scheduled to check whether you still do. The two commit together or
+       * neither does.
+       */
+      await this.revision.onSubmission(tx, {
+        submissionId: updated.id,
+        userId: updated.userId,
+        problemId: updated.problemId,
+        verdict: updated.verdict ?? 'INTERNAL_ERROR',
+        isRun: updated.isRun,
       })
     })
 

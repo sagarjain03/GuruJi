@@ -11,6 +11,7 @@ import { ExecutionModule } from './execution/execution.module'
 import { MasteryModule } from './mastery/mastery.module'
 import { HealthModule } from './health/health.module'
 import { RealtimeModule } from './realtime/realtime.module'
+import { RevisionModule } from './revision/revision.module'
 import { RedisModule } from './redis/redis.module'
 
 @Module({
@@ -50,6 +51,7 @@ import { RedisModule } from './redis/redis.module'
     EditorModule,
     ExecutionModule,
     MasteryModule,
+    RevisionModule,
     RealtimeModule,
     HealthModule,
   ],

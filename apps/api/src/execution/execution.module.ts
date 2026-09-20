@@ -3,6 +3,7 @@ import { AuthModule } from '../auth/auth.module'
 import { RealtimeModule } from '../realtime/realtime.module'
 import { RateLimitService } from '../auth/rate-limit.service'
 import { ProgressService } from '../mastery/progress.service'
+import { RevisionService } from '../revision/revision.service'
 import { RunnerCallbackController } from './runner-callback.controller'
 import { RunnerSecretGuard } from './guards/runner-secret.guard'
 import { SubmissionEventsService } from './submission-events.service'
@@ -26,9 +27,10 @@ import { SubmissionsService } from './submissions.service'
     SubmissionEventsService,
     RateLimitService,
     RunnerSecretGuard,
-    // The counters move in the same transaction as the verdict. That is the
-    // whole reason this lives here rather than behind an event.
+    // Both move in the same transaction as the verdict. That is the whole
+    // reason they live here rather than behind an event.
     ProgressService,
+    RevisionService,
   ],
 })
 export class ExecutionModule {}

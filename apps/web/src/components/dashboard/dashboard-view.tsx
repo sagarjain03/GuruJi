@@ -3,8 +3,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Clock3, Flame, Globe2, Layers, Sparkles, Target } from 'lucide-react'
 import type { AnalyticsOverview } from '@guruji/types'
+import Link from 'next/link'
 import { MasteryBar } from '@/components/dashboard/mastery-bar'
-import { analyticsApi } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { analyticsApi, revisionApi } from '@/lib/api'
 import { useSessionStore } from '@/stores/session-store'
 import { cn } from '@/lib/utils'
 
@@ -370,6 +372,17 @@ function TopicsPanel({
 }
 
 function RevisionPanel() {
+  const due = useQuery({
+    queryKey: ['revision', 'due'],
+    queryFn: () => revisionApi.due(),
+    staleTime: 30_000,
+  })
+
+  // The number the user is actually asked for, not the raw backlog. Showing
+  // "40 due" on a dashboard is how someone decides not to start.
+  const today = Math.min(due.data?.totalDue ?? 0, due.data?.cap ?? 0)
+  const carried = due.data?.carriedForward ?? 0
+
   return (
     <Panel className="flex flex-col">
       <header className="mb-4">
@@ -379,12 +392,26 @@ function RevisionPanel() {
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 py-4">
         <div className="border-border/70 grid size-16 place-items-center rounded-none border border-dashed">
-          <span className="font-display text-xl font-semibold">0</span>
+          <span className="font-display text-xl font-semibold">{today}</span>
         </div>
-        <p className="text-muted-foreground text-center text-xs leading-relaxed">
-          Solve a problem and it joins the queue, then comes back exactly when you are about to
-          forget it.
-        </p>
+
+        {today === 0 ? (
+          <p className="text-muted-foreground text-center text-xs leading-relaxed">
+            Solve a problem and it joins the queue, then comes back exactly when you are about to
+            forget it.
+          </p>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-muted-foreground text-center text-xs leading-relaxed">
+              {carried > 0
+                ? `${String(carried)} more are waiting — they carry forward, nothing is dropped.`
+                : 'Ready when you are.'}
+            </p>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/revision">Start revising</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </Panel>
   )
