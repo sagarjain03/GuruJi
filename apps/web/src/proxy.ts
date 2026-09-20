@@ -52,15 +52,39 @@ function contentSecurityPolicy(nonce: string): string {
      * What is left still says: nothing inline without today's nonce, nothing
      * from another origin, and no `eval` outside development.
      */
-    `script-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-eval'" : ''}`,
+    /*
+     * `wasm-unsafe-eval` is not `unsafe-eval`, and the difference is the point.
+     *
+     * The landing page's 3D scene decodes its model through a WebAssembly
+     * decoder, and `WebAssembly.instantiate` counts as compilation under
+     * `script-src`. The narrow keyword permits exactly that and still refuses
+     * `eval()` of a string — which is the promise `docs/security.md` actually
+     * makes, and the reason Monaco ships without its language services.
+     */
+    `script-src 'self' 'nonce-${nonce}' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     // Monaco's worker is built by Turbopack and served from our own origin.
     "worker-src 'self' blob:",
-    // The WebSocket that carries submission verdicts is on the API host but not
-    // on the API's scheme, so both are listed. Development adds the HMR socket.
-    `connect-src 'self' ${API_ORIGIN} ${API_WS_ORIGIN}${isDev ? ' ws: wss:' : ''}`,
+    /*
+     * Three sources, and **no third-party origin at all**.
+     *
+     * `'self'` and the API origin are the product. The API's WebSocket is
+     * listed by scheme as well, because a scheme is part of a CSP source and
+     * `http://` does not cover `ws://`.
+     *
+     * `blob:` is the 3D model loader fetching textures it decoded itself back
+     * out of object URLs — data the page made, not a request to anywhere.
+     *
+     * There was briefly a CDN host here, for the lighting map that drei's
+     * `Environment preset` fetches at runtime. Allowing it meant the first page
+     * anyone sees depended on a host we do not control, and the first attempt
+     * allowed the wrong one anyway — the preset redirects. Chasing hosts one
+     * redirect at a time is how an allowlist stops meaning anything, so the
+     * file is served from `public/hdri/` instead and the entry is gone.
+     */
+    `connect-src 'self' ${API_ORIGIN} ${API_WS_ORIGIN} blob:${isDev ? ' ws: wss:' : ''}`,
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",

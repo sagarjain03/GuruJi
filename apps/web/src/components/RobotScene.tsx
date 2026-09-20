@@ -177,7 +177,14 @@ export default function RobotScene({ onReady }: { onReady: () => void }) {
         <Robot reducedMotion={reducedMotion} />
         {/* Studio HDRI drives the metal. Without it a metallic material has
             nothing to reflect and renders as flat black. */}
-        <Environment preset="studio" environmentIntensity={0.42} />
+        {/*
+          The file, not the preset.
+          `preset="studio"` fetches this exact map from a public CDN at runtime,
+          which makes the first page anyone sees depend on a host we do not
+          control — and it forced a third-party origin into `connect-src`. It is
+          1.6 MB, served from our own origin, and the policy is narrower for it.
+        */}
+        <Environment files="/hdri/studio_small_03_1k.hdr" environmentIntensity={0.42} />
       </Suspense>
     </Canvas>
   )
