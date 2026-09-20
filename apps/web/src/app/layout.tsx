@@ -50,6 +50,21 @@ const serif = Instrument_Serif({
   display: 'swap',
 })
 
+/**
+ * Every route is rendered per request, so that every route can carry a nonce.
+ *
+ * A prerendered page's HTML is written at build time, which is before any nonce
+ * exists — Next serves that fixed HTML, the inline bootstrap it contains has no
+ * nonce attribute, and the policy in `src/proxy.ts` refuses it. The page then
+ * arrives with markup and no hydration: an empty `<main>`, every route.
+ *
+ * The alternative is `'unsafe-inline'` on `script-src`, which would hand the
+ * main XSS vector back to keep a handful of pages static. Nothing here is
+ * usefully static anyway — the dashboard, the problem list and the editor are
+ * all per-user, and the landing page is one document.
+ */
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: {
     default: 'GuruJi — Train Your DSA Skills',

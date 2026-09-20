@@ -1,6 +1,6 @@
 # Phase 4 — Code runner
 
-> **Status:** in progress · 2026-09-20
+> **Status:** done · 2026-09-20
 > **One sentence:** Run and Submit now produce real verdicts, from real code
 > running in a real container that cannot reach anything.
 >
@@ -74,12 +74,32 @@ entrypoint, interpreter boot — was inside the budget. Idle, that is tens of
 milliseconds and invisible. Under a hundred concurrent submissions it was
 seconds, and trivial correct programs came back `TIME_LIMIT_EXCEEDED`.
 
-A verdict that depends on how busy the host was is not a verdict. Two changes:
+A verdict that depends on how busy the host was is not a verdict. It took two
+tries to fix properly.
 
-- the outer kill gets `SANDBOX_STARTUP_GRACE_MS` (5 s) of headroom on top of the
-  problem's limit, because startup is our cost;
-- the *reported* runtime is read from the daemon's own `StartedAt`/`FinishedAt`
-  rather than measured around the CLI, so it is the program's time and not ours.
+**The first attempt was a fixed grace**, five seconds on top of the problem's
+limit. It was a guess, and under load it was the wrong guess: one trivial
+submission in ten still came back `TIME_LIMIT_EXCEEDED`.
+
+**The second attempt polled** `docker inspect` every 200 ms to learn when the
+container really started. That is a CLI process per poll per container — four
+concurrent runs put twenty process spawns a second on the host, and the test
+runner died with `FATAL ERROR: Zone Allocation failed - process out of memory`.
+
+**What actually works** is to stop needing a tight outer clock at all. The two
+timeouts catch different programs, and only one of them is in a hurry:
+
+- `--ulimit cpu` stops anything that *burns* its budget, inside the container,
+  at the limit, for free;
+- so the outer kill is left to catch programs that use no CPU — one sleeping for
+  an hour, or a container the daemon has wedged. Those cost nothing while they
+  wait, so waiting longer to be sure costs nothing either. It sits at the
+  problem's limit plus `SANDBOX_STARTUP_CEILING_MS` (30 s) and never decides a
+  verdict on its own.
+
+The *reported* runtime, and the check for an overrun, both come from the
+daemon's own `StartedAt`/`FinishedAt` rather than from a stopwatch around the
+CLI — the container's own life, with none of our startup overhead in it.
 
 ### The inner timeout had never actually been built
 
@@ -106,6 +126,68 @@ sets `OOMKilled`, and our own kill sets `timedOut`. Inside a container with no
 network, no shell and one process, nothing else is in a position to send it. So
 a bare 137 is the CPU budget, and it reads as a time limit — "runtime error"
 would send someone hunting a bug that is not there.
+
+### A legitimate callback was too big to accept
+
+Express gives every route a 100 KB body limit. The runner's contract allows
+64 KB of output *per test case* plus another 64 KB of compiler output, so the
+second test case with real output already exceeds it. The oversized body is
+rejected before any handler runs, which surfaced as a 500 — and BullMQ then
+retried it three times and dead-lettered the job, so a submission that had run
+perfectly well was reported to the user as `INTERNAL_ERROR`.
+
+The callback route now parses at 8 MB. Everything else keeps the small default:
+the largest thing a client sends is 64 KB of code, and a generous body limit in
+front of handlers anyone can reach is a denial-of-service primitive rather than
+a convenience.
+
+### …and fixing that turned the whole API into a 400
+
+Mounting a path-scoped `express.json()` disabled body parsing for every other
+route. Nest registers its own parsers during `init()`, but only if it cannot
+already find a middleware named `jsonParser` on the stack — and a path-scoped
+one is still named `jsonParser`. Nest concluded the job was done, registered
+nothing, and every request arrived with an empty body. Registration succeeded
+before the change and answered 400 after it.
+
+Both parsers are now declared explicitly in `configureApp`, which is where the
+file already claims everything that turns a bare Nest application into this one
+lives. Working with the detection beats hiding from it.
+
+### The production build had no working JavaScript at all
+
+Not a Phase 4 bug, but Phase 4's browser suite is what found it. The
+Content-Security-Policy added in Phase 3 carried a flat `script-src 'self'`.
+Next emits inline bootstrap scripts; the browser refused every one; hydration
+never ran; React tore the page down with error #412. Every route served markup
+and an empty `<main>`.
+
+Nothing caught it because the development policy carried `unsafe-inline` to keep
+the dev overlay working, and every browser test until now ran against
+`pnpm dev`. The only build anyone had opened in a browser was the relaxed one.
+
+Fixing it took three attempts, each corrected by the browser rather than by
+reasoning:
+
+1. **A per-request nonce**, built in `src/proxy.ts` — inline scripts passed,
+   every chunk was still refused. `'strict-dynamic'` turns off host-based
+   allowlisting, and Turbopack does not put the nonce on the chunk `<script>`
+   tags it emits.
+2. **Nonce without `'strict-dynamic'`** — chunks passed, inline scripts were
+   refused again. A statically prerendered page's HTML is written at build time,
+   before any nonce exists, so Next has nothing to stamp onto it.
+3. **`export const dynamic = 'force-dynamic'`** on the root layout, so every
+   route is rendered per request and can carry one. The alternative was
+   `'unsafe-inline'`, which hands back the main XSS vector to keep a handful of
+   pages static — and nothing here is usefully static.
+
+One inline script was still left: next-themes writes its own, to set the theme
+before first paint, and Next does not nonce what it did not emit. The layouts
+now read `x-nonce` from the request and hand it down.
+
+`connect-src` was wrong too, and would have blocked the new WebSocket: a scheme
+is part of a CSP source, so `http://localhost:4000` does not cover
+`ws://localhost:4000`.
 
 ### A 4 GB allocation is not a 4 GB allocation
 
@@ -183,6 +265,25 @@ something behind it.
 
 ---
 
+## Gate 4 — the finish line
+
+| Check | Result |
+|---|---|
+| Adversarial suite | 11 / 11 |
+| 100 concurrent submissions | pass — 100/100 `ACCEPTED` in 164 s, never more than 4 containers |
+| `pnpm --filter @guruji/api test` | 59 passed |
+| `test:e2e` (browser, real runner) | 5 passed, nothing logged to the console |
+| `pnpm typecheck` · `pnpm lint` | clean across api, code-runner, web |
+| `pnpm --filter @guruji/web build` | clean |
+| Containers alive after the suite | none |
+
+Six real defects, every one found by running the thing rather than reading it:
+three in how the clock was measured, one in how a `SIGKILL` was read back, two in
+API body parsing — and a seventh, inherited from Phase 3, that left the
+production build with no working JavaScript on any route.
+
+---
+
 ## Running it yourself
 
 ```bash
@@ -202,8 +303,31 @@ pnpm --filter @guruji/api test                       # API side, no runner neede
 pnpm --filter @guruji/web test:e2e                   # browser, needs all of it
 ```
 
+Run **one** of each. Two API instances fight over port 4000, and two runners
+race for the same jobs — both look exactly like "the verdict never arrived", and
+both cost an afternoon here before they were spotted.
+
 The adversarial suite starts real containers and is slow by nature. On the
 development host — 4 cores, 3.9 GB, Docker Desktop on WSL2 — a single trivial
 run takes about 2 seconds idle and about 11 under four concurrent containers.
 The hundred-submission row is minutes. That is a property of this laptop, not of
 the design.
+
+**Docker Desktop has died twice during the hundred-submission row**, taking
+Postgres and Redis with it, and once taking the Node test runner down with
+`FATAL ERROR: Zone Allocation failed - process out of memory`. Restart it and
+re-run. This is recorded rather than shrugged off because it is the honest
+reading of "no host degradation" on a 3.9 GB laptop: the sandbox holds, the
+containers stay bounded, and the machine around them still runs out of room.
+A real execution host is the answer, and it is already on the deferred-hardening
+list in `docs/code-execution.md`.
+
+---
+
+## What comes next
+
+**Phase 5 — Progress engine.** The hooks it needs are already in place and
+deliberately unused: `countsAgainstAccuracy` in `packages/types/src/submission.ts`
+is the rule about `INTERNAL_ERROR`, `isRun` separates exploration from a real
+attempt, and `hintsUsedAtSubmit` and `timeSpentMs` are recorded on every row
+waiting for something to read them.

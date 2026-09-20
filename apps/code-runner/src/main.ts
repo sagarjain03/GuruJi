@@ -4,8 +4,15 @@ import { loadEnv } from './config/env'
 import { startReaper } from './reaper'
 import { startWorker } from './worker'
 
-// One .env at the repo root, same as the API. The runner never keeps its own.
-process.loadEnvFile(path.resolve(__dirname, '../../../../.env'))
+/*
+ * One .env at the repo root, same as the API. The runner never keeps its own.
+ *
+ * Resolved from the working directory, not from `__dirname`. `pnpm dev` runs
+ * this file from `src/` and `pnpm start` runs the compiled copy from
+ * `dist/src/` — two different depths, so any fixed number of `..` is wrong for
+ * one of them. pnpm sets the working directory to the package root for both.
+ */
+process.loadEnvFile(path.resolve(process.cwd(), '../../.env'))
 
 const env = loadEnv()
 

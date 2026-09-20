@@ -14,7 +14,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 | 1 | Foundation | L | ✅ Done |
 | 2 | Question platform | L | ✅ Done |
 | 3 | Code editor | M | ✅ Done |
-| 4 | Code runner 🔴 | XL | ⬜ |
+| 4 | Code runner 🔴 | XL | ✅ Done |
 | 5 | Progress engine | M | ⬜ |
 | 6 | Revision engine | M | ⬜ |
 | 7 | Recommendation engine | L | ⬜ |
@@ -207,7 +207,7 @@ paginates without fetching everything.
 
 ---
 
-## Phase 4 — Code runner 🔴
+## Phase 4 — Code runner 🔴 ✅
 
 **Goal:** Run and Submit produce real verdicts. **This phase does not get its
 exit criteria waived.**
@@ -219,21 +219,23 @@ exit criteria waived.**
 - [x] Image build script
 
 ### Sandbox controls — every one of these, per `docs/code-execution.md`
-- [ ] `--network none`
-- [ ] `--memory` 256 MB, `--memory-swap` equal
-- [ ] `--cpus` 1.0
-- [ ] `--pids-limit` 64
-- [ ] `--read-only` root, `--tmpfs /tmp` with `noexec,nosuid`
-- [ ] `--cap-drop ALL`, `--security-opt no-new-privileges`
-- [ ] Non-root user, `--ulimit fsize`
-- [ ] **Timeout enforced twice** — inside the container and by the worker
-- [ ] **Worker runs containers detached and kills by id** (`docker run -d --name`
+- [x] `--network none`
+- [x] `--memory` 256 MB, `--memory-swap` equal
+- [x] `--cpus` 1.0
+- [x] `--pids-limit` 64
+- [x] `--read-only` root, `--tmpfs /tmp` with `noexec,nosuid`
+- [x] `--cap-drop ALL`, `--security-opt no-new-privileges`
+- [x] Non-root user, `--ulimit fsize`
+- [x] **Timeout enforced twice** — `--ulimit cpu` inside (kernel kills anything
+      that burns its CPU budget) and the worker's kill outside (catches a program
+      that sleeps instead, and a wedged container). Different programs, both needed
+- [x] **Worker runs containers detached and kills by id** (`docker run -d --name`
       → `docker kill <id>`). Killing the CLI process leaves the container running —
       confirmed in the Phase 1 spike. Applies to timeout, cancel and every error path
-- [ ] Output capped at 64 KB, truncated at the source — **and the container still
+- [x] Output capped at 64 KB, truncated at the source — **and the container still
       killed**; truncating our read does not stop the program
-- [ ] Container reaper for orphans (backstop, not the primary mechanism)
-- [ ] Compilation runs under the same limits, with its own longer timeout
+- [x] Container reaper for orphans (backstop, not the primary mechanism)
+- [x] Compilation runs under the same limits, with its own longer timeout
 
 ### API
 - [x] `POST /submissions` → `202` + id, validated and enqueued
@@ -247,18 +249,23 @@ exit criteria waived.**
 - [x] Result panel — per-test results, runtime, memory, compile errors
 
 ### 🔴 Adversarial suite — every row must pass to exit the phase
-- [ ] Infinite loop → `TIME_LIMIT_EXCEEDED`, container reaped, host CPU normal
-- [ ] Fork bomb → blocked by `pids-limit`, host unaffected
-- [ ] 4 GB allocation → `MEMORY_LIMIT_EXCEEDED`, OOM inside the container only
-- [ ] Output flood → truncated at 64 KB, database write bounded
-- [ ] Filesystem probe (`/etc/passwd`, walk `/`) → nothing sensitive reachable
-- [ ] Write outside `/tmp` → fails (read-only root)
-- [ ] Write + execute in `/tmp` → fails (`noexec`)
-- [ ] HTTP request and DNS lookup → both fail
-- [ ] Fill `/tmp` → bounded by tmpfs, no host disk impact
-- [ ] C++ compile-time memory bomb → bounded, `COMPILE_ERROR`
-- [ ] 100 concurrent submissions → queue drains, no host degradation
-- [ ] `INTERNAL_ERROR` is never recorded against user accuracy
+- [x] Infinite loop → `TIME_LIMIT_EXCEEDED`, container reaped, host CPU normal
+- [x] Fork bomb → blocked by `pids-limit`, host unaffected. The verdict itself is
+      not asserted: every forked child runs the rest of the program too, so dozens
+      of processes share one stdout and which verdict lands is scheduling
+- [x] 4 GB allocation → `MEMORY_LIMIT_EXCEEDED`, OOM inside the container only.
+      The bytes must be **written** — `bytearray(4 << 30)` is mapped lazily, never
+      faulted in, and passes a 256 MB limit untouched
+- [x] Output flood → truncated at 64 KB, database write bounded
+- [x] Filesystem probe (`/etc/passwd`, walk `/`) → nothing sensitive reachable
+- [x] Write outside `/tmp` → fails (read-only root)
+- [x] Write + execute in `/tmp` → fails (`noexec`)
+- [x] HTTP request and DNS lookup → both fail
+- [x] Fill `/tmp` → bounded by tmpfs, no host disk impact
+- [x] C++ compile-time memory bomb → bounded, `COMPILE_ERROR`
+- [x] 100 concurrent submissions → queue drains, no host degradation. 100/100
+      `ACCEPTED` in 164 s on the dev host, never more than 4 containers alive
+- [x] `INTERNAL_ERROR` is never recorded against user accuracy
 
 **Exit:** every adversarial test contained *and* returning the correct verdict.
 

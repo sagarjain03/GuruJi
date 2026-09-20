@@ -20,19 +20,21 @@ setup('create an account', async ({ page }) => {
   await page.waitForURL('**/dashboard')
 
   /**
-   * Reload, and wait for the refresh call to *finish* before capturing state.
+   * Wait for the token to stop moving, then capture it. No reload.
    *
-   * The refresh token rotates on every use. `SessionGate` exchanges it on mount,
-   * so capturing the cookie jar while that request is in flight saves the token
-   * the server has already consumed — and replaying a consumed token is treated
-   * as theft, which revokes the chain and signs the whole suite out. Waiting for
-   * the response means the jar holds the new, unused cookie.
+   * The refresh token rotates on every use, and `SessionGate` exchanges it the
+   * moment it mounts on the dashboard. Capturing the jar while that request is
+   * open saves a token the server has already spent — and replaying a spent
+   * token is treated as theft, which revokes the chain and signs the whole
+   * suite out on a login page with nothing obviously wrong.
+   *
+   * This used to reload and wait for a second exchange, which only widened the
+   * window: the reload aborts the first exchange *after* the server rotated but
+   * *before* the browser stored the replacement. It passed most of the time and
+   * failed under load. Letting the network settle once removes the race instead
+   * of timing around it, and the heading below proves the session is live.
    */
-  const refreshed = page.waitForResponse(
-    (response) => response.url().includes('/auth/refresh') && response.status() === 200,
-  )
-  await page.reload()
-  await refreshed
+  await page.waitForLoadState('networkidle')
   await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
 
   await page.context().storageState({ path: STORAGE_STATE })

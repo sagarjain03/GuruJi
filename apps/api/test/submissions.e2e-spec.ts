@@ -71,7 +71,9 @@ describe('submissions (e2e)', () => {
       .send({ problemId, language: 'PYTHON', code: 'print(1)', isRun: true, ...body })
   }
 
-  function callback(body: unknown, header: string | null = secret): request.Test {
+  // `object`, not `unknown`: the malformed-payload row deliberately sends a
+  // shape the contract rejects, so this cannot be the callback type itself.
+  function callback(body: object, header: string | null = secret): request.Test {
     const call = request(app.getHttpServer()).post('/api/internal/submissions/callback')
     if (header !== null) {
       call.set(RUNNER_SECRET_HEADER, header)
@@ -259,8 +261,10 @@ describe('submissions (e2e)', () => {
   })
 
   it('lists the caller’s own submissions, newest first', async () => {
-    await submit(token, {}).expect(202)
-
+    // Deliberately does not submit again. Ten a minute is the documented limit
+    // and the tests above have already spent it — an eleventh submission here
+    // would fail on the rate limiter doing its job, which is not what this row
+    // is about. The rows those tests created are what gets listed.
     const response = await request(app.getHttpServer())
       .get(`/api/submissions?problemId=${problemId}&limit=5`)
       .set('authorization', `Bearer ${token}`)

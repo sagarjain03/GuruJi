@@ -65,6 +65,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
+      express:
+        specifier: ^5.2.1
+        version: 5.2.1
       helmet:
         specifier: ^8.3.0
         version: 8.3.0
@@ -147,9 +150,6 @@ importers:
       bullmq:
         specifier: ^5.65.0
         version: 5.81.5
-      ioredis:
-        specifier: ^6.0.0
-        version: 6.0.0
       pino:
         specifier: ^10.3.1
         version: 10.3.1

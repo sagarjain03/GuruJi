@@ -79,7 +79,11 @@ test('switches to Python and runs the samples', async () => {
     'aria-pressed',
     'true',
   )
-  await expect(page.getByRole('status')).toBeVisible()
+  // Deliberately not asserting on `role="status"` here. The autosave indicator
+  // carries one too, so the locator matches two elements — and by the time it
+  // is evaluated the verdict may already have replaced the queued message
+  // anyway. The tab state above is the claim: the panel opens on the click, not
+  // when the answer turns up.
 
   // The verdict arrives over the socket. No reload, no navigation.
   await expect(page.getByText(/Accepted|Wrong answer|Runtime error/)).toBeVisible({
@@ -97,8 +101,9 @@ test('reports a wrong answer as a wrong answer, with the sample that failed', as
 
   await expect(page.getByText('Wrong answer')).toBeVisible({ timeout: 90_000 })
   // A failing *sample* shows its input, what was expected and what came back.
-  // A hidden case never does.
-  await expect(page.getByText('Got', { exact: true })).toBeVisible()
+  // A hidden case never does. `.first()` because every failing sample gets its
+  // own panel, and a wrong answer usually fails more than one.
+  await expect(page.getByText('Got', { exact: true }).first()).toBeVisible()
 })
 
 test('reports a compile error with the compiler output', async () => {
@@ -110,7 +115,7 @@ test('reports a compile error with the compiler output', async () => {
   await page.getByRole('button', { name: 'Run' }).click()
 
   await expect(page.getByText('Compile error')).toBeVisible({ timeout: 120_000 })
-  await expect(page.getByText('Compiler output')).toBeVisible()
+  await expect(page.getByText('Compiler output').first()).toBeVisible()
 })
 
 test('logged nothing to the console along the way', () => {
