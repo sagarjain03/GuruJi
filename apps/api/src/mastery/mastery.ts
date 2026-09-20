@@ -3,6 +3,7 @@ import {
   CONFIDENCE_ATTEMPTS,
   DIFFICULTY_WEIGHTS,
   HINT_DEPENDENCY_WEIGHT,
+  HINT_LEVEL_WEIGHTS,
   MASTERY_BANDS,
   type ComponentName,
 } from './mastery-weights'
@@ -191,6 +192,32 @@ function clamp01(value: number): number {
     return 0
   }
   return Math.min(1, Math.max(0, value))
+}
+
+/**
+ * How the time taken compares with what the problem was expected to take.
+ *
+ * Clamped per problem before it is ever averaged, so a tab left open overnight
+ * costs exactly one bad sample instead of poisoning the mean. A self-reported
+ * zero means the client did not measure it — not that it was instant — so it
+ * contributes the neutral 1 rather than a free maximum.
+ *
+ * Lives here, beside the formula, because both the incremental write path and
+ * the nightly job that checks it have to derive this the same way. Two copies
+ * that "must match" is the exact failure the reconciliation job exists to
+ * catch — and it would be reporting its own arithmetic.
+ */
+export function speedRatio(timeSpentMs: number, estimatedMinutes: number): number {
+  if (timeSpentMs <= 0 || estimatedMinutes <= 0) {
+    return 1
+  }
+  return clamp01(estimatedMinutes / (timeSpentMs / 60_000))
+}
+
+/** Level 1 is a nudge, level 4 is most of the answer. They are not the same. */
+export function hintWeight(hintsUsed: number): number {
+  const index = Math.min(Math.max(hintsUsed, 0), HINT_LEVEL_WEIGHTS.length - 1)
+  return HINT_LEVEL_WEIGHTS[index] ?? 1
 }
 
 export function bandFor(score: number): string {

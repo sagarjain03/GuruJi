@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import type { Difficulty, Prisma } from '@guruji/database'
-import { computeMastery, type MasteryCounters } from './mastery'
-import { HINT_LEVEL_WEIGHTS } from './mastery-weights'
+import { computeMastery, hintWeight, speedRatio, type MasteryCounters } from './mastery'
 
 /** Everything a progress update needs to know about the submission that caused it. */
 export interface GradedSubmission {
@@ -288,24 +287,3 @@ function toCounters(
   return { ...row, patternsSolved, patternsAvailable }
 }
 
-/**
- * How the time taken compares with what the problem was expected to take.
- *
- * Clamped per problem before it is ever averaged, so a tab left open overnight
- * costs exactly one bad sample instead of poisoning the mean. A self-reported
- * zero means the client did not measure it — not that it was instant — so it
- * contributes the neutral 1 rather than a free maximum.
- */
-function speedRatio(timeSpentMs: number, estimatedMinutes: number): number {
-  if (timeSpentMs <= 0 || estimatedMinutes <= 0) {
-    return 1
-  }
-  const takenMinutes = timeSpentMs / 60_000
-  return Math.min(1, Math.max(0, estimatedMinutes / takenMinutes))
-}
-
-/** Level 1 is a nudge, level 4 is most of the answer. They are not the same. */
-function hintWeight(hintsUsed: number): number {
-  const index = Math.min(Math.max(hintsUsed, 0), HINT_LEVEL_WEIGHTS.length - 1)
-  return HINT_LEVEL_WEIGHTS[index] ?? 1
-}

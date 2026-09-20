@@ -6,6 +6,7 @@ import { RUNNER_SECRET_HEADER, type SubmissionAccepted } from '@guruji/types'
 import request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { configureApp } from '../src/app-setup'
+import { ReconciliationService } from '../src/mastery/reconciliation.service'
 
 const PASSWORD = 'a-long-enough-password'
 const SLUG = 'pair-sums-to-target'
@@ -152,5 +153,45 @@ describe('progress (e2e)', () => {
     // diagnoses and collapsing them loses the one that is actionable.
     expect(rows.length).toBeGreaterThan(0)
     expect(rows[0]?.solved).toBe(1)
+  })
+
+  describe('reconciliation', () => {
+    it('agrees with the submissions it was written from', async () => {
+      const reconciliation = app.get(ReconciliationService)
+
+      // The incremental write path and the recount-from-source path are two
+      // different pieces of arithmetic over the same history. If they ever
+      // disagree here, one of them is wrong and the dashboard is guessing.
+      expect(await reconciliation.reconcile(userId, topicId)).toEqual([])
+    })
+
+    it('reports a counter that was changed behind the transaction', async () => {
+      const reconciliation = app.get(ReconciliationService)
+
+      // Exactly what a write path bypassing the submission transaction would
+      // leave behind.
+      await prisma.userTopicProgress.update({
+        where: { userId_topicId: { userId, topicId } },
+        data: { solved: { increment: 7 } },
+      })
+
+      const drifts = await reconciliation.reconcile(userId, topicId)
+      const solved = drifts.find((drift) => drift.field === 'solved')
+
+      expect(solved).toBeDefined()
+      expect(solved?.stored).toBe(8)
+      expect(solved?.recomputed).toBe(1)
+
+      // Reported, not repaired. The number is a symptom; the write that made it
+      // is the bug, and correcting the number quietly removes the only evidence
+      // that the write exists.
+      const after = await topicProgress()
+      expect(after?.solved).toBe(8)
+
+      await prisma.userTopicProgress.update({
+        where: { userId_topicId: { userId, topicId } },
+        data: { solved: { decrement: 7 } },
+      })
+    })
   })
 })

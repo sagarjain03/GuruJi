@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { ScheduleModule } from '@nestjs/schedule'
 import { LoggerModule } from 'nestjs-pino'
 import { randomUUID } from 'node:crypto'
 import { loadEnv } from './config/env'
@@ -7,6 +8,7 @@ import { AuthModule } from './auth/auth.module'
 import { ContentModule } from './content/content.module'
 import { EditorModule } from './editor/editor.module'
 import { ExecutionModule } from './execution/execution.module'
+import { MasteryModule } from './mastery/mastery.module'
 import { HealthModule } from './health/health.module'
 import { RealtimeModule } from './realtime/realtime.module'
 import { RedisModule } from './redis/redis.module'
@@ -38,11 +40,16 @@ import { RedisModule } from './redis/redis.module'
         ...(process.env.NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {}),
       },
     }),
+    // Cron jobs. Only the nightly reconciliation so far, and it is scheduled in
+    // UTC — a job on local time fires twice or not at all on the two days a
+    // year the clocks move.
+    ScheduleModule.forRoot(),
     RedisModule,
     AuthModule,
     ContentModule,
     EditorModule,
     ExecutionModule,
+    MasteryModule,
     RealtimeModule,
     HealthModule,
   ],
