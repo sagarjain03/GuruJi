@@ -17,7 +17,7 @@ Sizes are rough working days for one developer: `S` ≤ 1 · `M` 2–3 · `L` 4�
 | 4 | Code runner 🔴 | XL | ✅ Done |
 | 5 | Progress engine | M | ✅ Done |
 | 6 | Revision engine | M | ✅ Done |
-| 7 | Recommendation engine | L | ⬜ |
+| 7 | Recommendation engine | L | ✅ Done |
 | 8 | AI mentor | L | ⬜ |
 | — | **MVP complete** | | |
 | 9 | Visualiser | XL | ⬜ |
@@ -382,10 +382,10 @@ exit criteria waived.**
 - [x] `PUT /profile/onboarding` — experience, language, goal, timezone
 
 ### Frontend
-- [ ] Dashboard **TRAIN NOW** — the single most visible action
-- [ ] "Today's Training" panel — revision due / new / weak-topic / challenge
-- [ ] Reason shown on every recommendation
-- [ ] Onboarding flow — experience, language, initial assessment
+- [x] Dashboard **TRAIN NOW** — the single most visible action
+- [x] "Today's Training" panel — revision due / new / weak-topic / challenge
+- [x] Reason shown on every recommendation
+- [x] Onboarding flow — experience, language, initial assessment
 
 ### Tests
 - [x] Weak topic ranks above strong, all else equal
@@ -407,9 +407,9 @@ exit criteria waived.**
 **Goal:** a mentor that teaches instead of answering.
 
 ### Package
-- [ ] `packages/ai` — `LLMProvider` interface + `GroqProvider`
-- [ ] Nothing outside this package imports `groq-sdk`
-- [ ] Two model tiers (fast for hints, quality for analysis), ids from config
+- [x] `packages/ai` — `LLMProvider` interface + `GroqProvider`
+- [x] Nothing outside this package imports `groq-sdk`
+- [x] Two model tiers (fast for hints, quality for analysis), ids from config
 - [ ] Four-layer prompt assembly; user content fenced and labelled untrusted
 - [ ] Zod schemas per mode; one bounded retry, then a structured error
 

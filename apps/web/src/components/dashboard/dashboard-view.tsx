@@ -125,19 +125,6 @@ function HeroPanel({ name }: { name: string }) {
         <Chip label="Due today" value="0" />
         <Chip label="Hints used" value="0" />
       </div>
-
-      <div className="relative flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          disabled
-          className="bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-35"
-        >
-          Train now
-        </button>
-        <p className="text-muted-foreground text-xs">
-          Unlocks once there are problems to train on.
-        </p>
-      </div>
     </Panel>
   )
 }

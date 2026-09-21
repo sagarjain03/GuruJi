@@ -48,7 +48,7 @@ export function TrainNow() {
       {target?.slug != null && (
         <Button className="mt-3" asChild>
           <Link href={`/problems/${target.slug}`}>
-            {target.title ?? 'Start'}
+            Train now
             <ArrowRight className="size-4" />
           </Link>
         </Button>
