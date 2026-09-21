@@ -3,6 +3,7 @@ import {
   codeAnalysisSchema,
   generatedProblemSchema,
   hintSchema,
+  solutionSchema,
   validateGeneratedReference,
   wrongAnswerSchema,
 } from './schemas'
@@ -32,6 +33,11 @@ describe('AI response schemas', () => {
         missingConcept: 'half-open ranges',
       }).success,
     ).toBe(true)
+  })
+
+  it('requires a deliberate solution response shape', () => {
+    expect(solutionSchema.safeParse({ approach: 'Hash seen values.', code: 'return answer;', complexity: 'O(n)' }).success).toBe(true)
+    expect(solutionSchema.safeParse({ approach: 'Hash seen values.' }).success).toBe(false)
   })
 
   it('rejects a generated problem when its reference solution fails a test case', async () => {

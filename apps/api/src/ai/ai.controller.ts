@@ -31,6 +31,11 @@ export class AIController {
     return this.ai.explainWrongAnswer(user.id, dto)
   }
 
+  @Post('show-solution')
+  showSolution(@CurrentUser() user: AuthenticatedUser, @Body() dto: ExplainDto) {
+    return this.ai.showSolution(user.id, dto)
+  }
+
   @Post('generate-problem')
   generateProblem(@CurrentUser() user: AuthenticatedUser, @Body() dto: GenerateProblemDto) {
     if (user.role !== 'ADMIN') {

@@ -15,11 +15,13 @@ export {
   explanationSchema,
   generatedProblemSchema,
   hintSchema,
+  solutionSchema,
   validateGeneratedReference,
   wrongAnswerSchema,
   type CodeAnalysisResponse,
   type ExplanationResponse,
   type GeneratedProblem,
   type HintResponse,
+  type SolutionResponse,
   type WrongAnswerResponse,
 } from './schemas'

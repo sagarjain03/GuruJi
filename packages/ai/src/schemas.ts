@@ -66,7 +66,14 @@ export const explanationSchema = z.object({
   commonMistakes: z.array(z.string().min(1)),
 })
 
+export const solutionSchema = z.object({
+  approach: z.string().min(1),
+  code: z.string().min(1),
+  complexity: z.string().min(1),
+})
+
 export type HintResponse = z.infer<typeof hintSchema>
 export type CodeAnalysisResponse = z.infer<typeof codeAnalysisSchema>
 export type WrongAnswerResponse = z.infer<typeof wrongAnswerSchema>
 export type ExplanationResponse = z.infer<typeof explanationSchema>
+export type SolutionResponse = z.infer<typeof solutionSchema>

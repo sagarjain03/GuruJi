@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "ai_mode" ADD VALUE 'SHOW_SOLUTION';

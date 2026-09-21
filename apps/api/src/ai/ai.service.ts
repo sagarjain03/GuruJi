@@ -6,12 +6,14 @@ import {
   explanationSchema,
   generatedProblemSchema,
   hintSchema,
+  solutionSchema,
   validateGeneratedReference,
   wrongAnswerSchema,
   type CodeAnalysisResponse,
   type ExplanationResponse,
   type GeneratedProblem,
   type HintResponse,
+  type SolutionResponse,
   type LLMProvider,
   type CompletionUsage,
   type WrongAnswerResponse,
@@ -151,6 +153,19 @@ export class AIService {
     })
   }
 
+  async showSolution(userId: string, request: ExplainDto): Promise<SolutionResponse> {
+    await this.guardQuota(userId)
+    const problem = await this.problem(request.problemSlug)
+    return this.complete(userId, problem.id, 'SHOW_SOLUTION', solutionSchema, {
+      tier: 'QUALITY',
+      messages: assembleMentorPrompt({
+        developer: 'The user explicitly requested the solution. Return the correct approach, complete code, and complexity as JSON matching the schema. This is a separate deliberate action, not a hint.',
+        context: `${problem.title}\n${problem.statement}\n${problem.constraints}`,
+        user: request.question ?? 'Show the complete solution now.',
+      }),
+    })
+  }
+
   async generateProblem(userId: string, request: GenerateProblemDto): Promise<{ id: string; reviewStatus: 'IN_REVIEW' }> {
     await this.guardQuota(userId)
     const generated = await completeStructuredWithRetry<GeneratedProblem>(
@@ -217,7 +232,7 @@ export class AIService {
   private async complete<T extends object>(
     userId: string,
     problemId: string,
-    mode: 'EXPLAIN' | 'ANALYZE_CODE' | 'EXPLAIN_WRONG_ANSWER',
+    mode: 'EXPLAIN' | 'ANALYZE_CODE' | 'EXPLAIN_WRONG_ANSWER' | 'SHOW_SOLUTION',
     schema: { safeParse(value: unknown): { success: boolean } },
     request: Parameters<LLMProvider['complete']>[0],
   ): Promise<T> {

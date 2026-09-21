@@ -182,6 +182,12 @@ export interface MentorAnalysis {
   concepts: string[]
 }
 
+export interface MentorSolution {
+  approach: string
+  code: string
+  complexity: string
+}
+
 export const aiApi = {
   hint: (body: { problemSlug: string; level: number; message?: string }) =>
     send<MentorHint>('/ai/hint', { method: 'POST', body }),
@@ -191,6 +197,9 @@ export const aiApi = {
 
   analyzeCode: (body: { problemSlug: string; code: string }) =>
     send<MentorAnalysis>('/ai/analyze-code', { method: 'POST', body }),
+
+  showSolution: (body: { problemSlug: string }) =>
+    send<MentorSolution>('/ai/show-solution', { method: 'POST', body }),
 }
 
 /**

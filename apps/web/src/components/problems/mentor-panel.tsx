@@ -2,25 +2,26 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { Lightbulb, Loader2, MessageCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { aiApi, type MentorAnalysis, type MentorExplanation } from '@/lib/api'
+import { useState } from 'react'
+import { aiApi, type MentorAnalysis, type MentorExplanation, type MentorSolution } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 
 const MAX_HINT_LEVEL = 4
 
 export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: string }) {
   const storageKey = `guruji:mentor-level:${problemSlug}`
-  const [level, setLevel] = useState(1)
+  const [level, setLevel] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 1
+    }
+    const saved = Number(window.localStorage.getItem(storageKey))
+    return Number.isInteger(saved) && saved >= 1 && saved <= MAX_HINT_LEVEL ? saved : 1
+  })
   const [message, setMessage] = useState('')
   const [explanation, setExplanation] = useState<MentorExplanation | null>(null)
   const [analysis, setAnalysis] = useState<MentorAnalysis | null>(null)
-
-  useEffect(() => {
-    const saved = Number(window.localStorage.getItem(storageKey))
-    if (Number.isInteger(saved) && saved >= 1 && saved <= MAX_HINT_LEVEL) {
-      setLevel(saved)
-    }
-  }, [storageKey])
+  const [solution, setSolution] = useState<MentorSolution | null>(null)
+  const [confirmSolution, setConfirmSolution] = useState(false)
 
   const hint = useMutation({
     mutationFn: () => aiApi.hint({ problemSlug, level, ...(message ? { message } : {}) }),
@@ -38,6 +39,14 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
   const analyze = useMutation({
     mutationFn: () => aiApi.analyzeCode({ problemSlug, code }),
     onSuccess: setAnalysis,
+  })
+
+  const showSolution = useMutation({
+    mutationFn: () => aiApi.showSolution({ problemSlug }),
+    onSuccess: (value) => {
+      setSolution(value)
+      setConfirmSolution(false)
+    },
   })
 
   return (
@@ -73,7 +82,24 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
           {analyze.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <MessageCircle className="size-3.5" />}
           Analyze code
         </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => setConfirmSolution(true)} disabled={showSolution.isPending}>
+          Show solution
+        </Button>
       </div>
+
+      {confirmSolution && (
+        <div className="border-destructive/40 bg-destructive/5 flex flex-col gap-2 border p-3 text-sm">
+          <p>This reveals the complete solution and is recorded in your mentor history.</p>
+          <div className="flex gap-2">
+            <Button type="button" size="sm" onClick={() => showSolution.mutate()}>
+              Reveal solution
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setConfirmSolution(false)}>
+              Keep trying
+            </Button>
+          </div>
+        </div>
+      )}
 
       {hint.data && <div className="border-border bg-background border p-3 text-sm leading-relaxed">{hint.data.hint}</div>}
       {hint.isError && <p className="text-destructive text-xs">The mentor is unavailable right now.</p>}
@@ -92,6 +118,16 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
           <MentorSection title="Implementation" value={explanation.implementation} />
           <MentorSection title="Complexity" value={explanation.complexity} />
           <MentorSection title="Common mistakes" value={explanation.commonMistakes.join(' ')} />
+        </div>
+      )}
+      {solution && (
+        <div className="border-destructive/40 bg-background flex flex-col gap-3 border p-3 text-sm">
+          <MentorSection title="Approach" value={solution.approach} />
+          <MentorSection title="Complexity" value={solution.complexity} />
+          <div>
+            <h3 className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">Code</h3>
+            <pre className="bg-muted mt-1 overflow-x-auto p-3 text-xs whitespace-pre-wrap">{solution.code}</pre>
+          </div>
         </div>
       )}
     </section>

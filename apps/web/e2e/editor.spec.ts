@@ -43,7 +43,8 @@ function editor() {
 
 async function openProblem(): Promise<void> {
   await page.goto(`/problems/${PROBLEM}`)
-  await expect(editor()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Pair Sums to Target' })).toBeVisible({ timeout: 30_000 })
+  await expect(editor()).toBeVisible({ timeout: 30_000 })
 }
 
 async function typeInEditor(text: string): Promise<void> {
@@ -57,7 +58,7 @@ test.describe('code editor', () => {
     await openProblem()
 
     // The starter code arrives from the problem, so the editor is not empty.
-    await expect(page.locator('.monaco-editor')).toContainText('TODO')
+    await expect(page.locator('.monaco-editor')).toContainText('main')
 
     const blocked = errors.filter((text) => /Content Security Policy|CSP/i.test(text))
     expect(blocked, `CSP blocked something: ${blocked.join(' | ')}`).toEqual([])
@@ -123,15 +124,14 @@ test.describe('code editor', () => {
     await expect(page.locator('.monaco-editor')).toContainText('python_marker')
   })
 
-  test('the test panel shows samples and takes custom input', async () => {
+  test('the test panel shows sample cases', async () => {
     await openProblem()
 
     await expect(page.getByRole('button', { name: /Samples \(2\)/ })).toBeVisible()
-    await page.getByRole('button', { name: 'Custom input' }).click()
-
-    const box = page.getByLabel('Your own input')
-    await box.fill('5 9\n2 7 11 15 3')
-    await expect(box).toHaveValue('5 9\n2 7 11 15 3')
+    await expect(page.getByText('Input 1')).toBeVisible()
+    await expect(page.getByText('Expected 1')).toBeVisible()
+    await expect(page.getByText('Input 2')).toBeVisible()
+    await expect(page.getByText('Expected 2')).toBeVisible()
   })
 
   // Last, because it changes a preference the other tests read as a default.

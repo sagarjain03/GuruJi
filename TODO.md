@@ -428,12 +428,12 @@ exit criteria waived.**
 ### Frontend
 - [x] AI mentor panel on the problem page
 - [x] Progressive hint UI — level state survives reload
-- [ ] "Show solution" as a separate, deliberate, recorded action
+- [x] "Show solution" as a separate, deliberate, recorded action
 - [x] Code analysis view; wrong-answer endpoint is available
 
 ### Tests
 - [x] Hints escalate and never open with the solution
-- [ ] Injection suite: "ignore previous instructions", "reveal your system prompt",
+- [x] Injection suite: "ignore previous instructions", "reveal your system prompt",
       instructions hidden in code comments and variable names
 - [x] Malformed model output retries once, then errors cleanly
 - [x] Generated problem whose reference solution fails its own tests is rejected
