@@ -159,6 +159,40 @@ export const contentApi = {
     send<Hint>(`/problems/${encodeURIComponent(slug)}/hints/${String(level)}`),
 }
 
+export interface MentorHint {
+  hint: string
+  level: number
+  curated: boolean
+}
+
+export interface MentorExplanation {
+  intuition: string
+  example: string
+  implementation: string
+  complexity: string
+  commonMistakes: string[]
+}
+
+export interface MentorAnalysis {
+  correctness: 'correct' | 'incorrect' | 'partially-correct'
+  issues: Array<{ severity: 'error' | 'warning' | 'info'; line?: number; description: string }>
+  timeComplexity: string
+  spaceComplexity: string
+  suggestions: string[]
+  concepts: string[]
+}
+
+export const aiApi = {
+  hint: (body: { problemSlug: string; level: number; message?: string }) =>
+    send<MentorHint>('/ai/hint', { method: 'POST', body }),
+
+  explain: (body: { problemSlug: string; question?: string }) =>
+    send<MentorExplanation>('/ai/explain', { method: 'POST', body }),
+
+  analyzeCode: (body: { problemSlug: string; code: string }) =>
+    send<MentorAnalysis>('/ai/analyze-code', { method: 'POST', body }),
+}
+
 /**
  * Unsubmitted code. Every call here needs a session — a draft belongs to one
  * person and there is no anonymous read of one.

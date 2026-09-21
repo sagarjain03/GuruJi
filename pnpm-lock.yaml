@@ -23,6 +23,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@guruji/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@guruji/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -314,13 +317,16 @@ importers:
 
   packages/ai:
     dependencies:
-      groq-sdk:
-        specifier: ^0.37.0
-        version: 0.37.0
-    devDependencies:
       '@guruji/config':
         specifier: workspace:*
         version: link:../config
+      groq-sdk:
+        specifier: ^0.37.0
+        version: 0.37.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
       '@types/node':
         specifier: ^22.15.0
         version: 22.20.3

@@ -14,6 +14,7 @@ import { RealtimeModule } from './realtime/realtime.module'
 import { RecommendationsModule } from './recommendations/recommendations.module'
 import { RevisionModule } from './revision/revision.module'
 import { RedisModule } from './redis/redis.module'
+import { AIModule } from './ai/ai.module'
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { RedisModule } from './redis/redis.module'
     // year the clocks move.
     ScheduleModule.forRoot(),
     RedisModule,
+    AIModule,
     AuthModule,
     ContentModule,
     EditorModule,

@@ -28,6 +28,28 @@ export interface LLMProvider {
   completeStructured<T>(request: CompletionRequest): Promise<T>
 }
 
+export async function completeStructuredWithRetry<T>(
+  provider: LLMProvider,
+  request: CompletionRequest,
+  isValid: (value: unknown) => value is T,
+  onUsage?: (usage: CompletionUsage | null) => void,
+): Promise<T> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await provider.complete(request)
+      onUsage?.(response.usage)
+      const value = JSON.parse(response.content) as unknown
+      if (isValid(value)) {
+        return value
+      }
+    } catch {
+      // A malformed model response is retried once below.
+    }
+  }
+
+  throw new Error('Structured response failed validation after one retry.')
+}
+
 export interface GroqProviderConfig {
   apiKey?: string
   fastModel: string

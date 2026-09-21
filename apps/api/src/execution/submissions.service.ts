@@ -88,6 +88,14 @@ export class SubmissionsService {
       )
     }
 
+    const hintsUsedAtSubmit = await prisma.aIMessage.count({
+      where: {
+        role: 'ASSISTANT',
+        mode: 'HINT',
+        conversation: { userId, problemId: problem.id },
+      },
+    })
+
     const submission = await prisma.submission.create({
       data: {
         // From the verified token, never from the body.
@@ -100,7 +108,9 @@ export class SubmissionsService {
         isRun: request.isRun,
         totalCount: testCases.length,
         timeSpentMs: request.timeSpentMs,
-        hintsUsedAtSubmit: request.hintsUsedAtSubmit,
+        // The browser's counter is advisory only. Mastery uses the persisted
+        // mentor history so a client cannot claim it solved without hints.
+        hintsUsedAtSubmit,
       },
       select: { id: true, status: true },
     })

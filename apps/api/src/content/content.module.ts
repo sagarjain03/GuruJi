@@ -9,5 +9,6 @@ import { TaxonomyService } from './taxonomy.service'
 @Module({
   controllers: [ContentController],
   providers: [TaxonomyService, ProblemsService, ProblemRepository, ContentCache],
+  exports: [ProblemRepository],
 })
 export class ContentModule {}

@@ -6,6 +6,7 @@ import type { Language, ProblemDetail } from '@guruji/types'
 import { CodeEditor } from '@/components/editor/code-editor'
 import { useDrafts, type SaveStatus } from '@/components/editor/use-drafts'
 import { ResultPanel } from '@/components/problems/result-panel'
+import { MentorPanel } from '@/components/problems/mentor-panel'
 import { useSubmission, type RunKind } from '@/components/problems/use-submission'
 import { Button } from '@/components/ui/button'
 import { EDITOR_LANGUAGES, LANGUAGE_LABEL, useEditorStore } from '@/stores/editor-store'
@@ -133,6 +134,7 @@ export function Workspace({
         />
 
         <TestPanel problem={problem} language={language} code={drafts.code} height={testHeight} />
+        <MentorPanel problemSlug={problem.slug} code={drafts.code} />
       </div>
     </div>
   )

@@ -51,6 +51,24 @@ REJECTED REJECTED
     
 
 
+        ai_message_role {
+            SYSTEM SYSTEM
+USER USER
+ASSISTANT ASSISTANT
+        }
+    
+
+
+        ai_mode {
+            HINT HINT
+EXPLAIN EXPLAIN
+ANALYZE_CODE ANALYZE_CODE
+EXPLAIN_WRONG_ANSWER EXPLAIN_WRONG_ANSWER
+GENERATE_PROBLEM GENERATE_PROBLEM
+        }
+    
+
+
         roadmap_section {
             FOUNDATION FOUNDATION
 DATA_STRUCTURES DATA_STRUCTURES
@@ -281,6 +299,30 @@ MOCK_CHALLENGE MOCK_CHALLENGE
     }
   
 
+  "ai_conversations" {
+    String id "🗝️"
+    String user_id 
+    String problem_id "❓"
+    AIMode mode 
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "ai_messages" {
+    String id "🗝️"
+    String conversation_id 
+    AIMessageRole role 
+    AIMode mode 
+    String content 
+    Int hint_level "❓"
+    Int prompt_tokens "❓"
+    Int completion_tokens "❓"
+    Int total_tokens "❓"
+    DateTime created_at 
+    }
+  
+
   "drafts" {
     String id "🗝️"
     String user_id 
@@ -463,6 +505,12 @@ MOCK_CHALLENGE MOCK_CHALLENGE
     "problem_patterns" }o--|| "patterns" : "pattern"
     "test_cases" }o--|| "problems" : "problem"
     "hints" }o--|| "problems" : "problem"
+    "ai_conversations" |o--|| "ai_mode" : "enum:mode"
+    "ai_conversations" }o--|| "users" : "user"
+    "ai_conversations" }o--|o "problems" : "problem"
+    "ai_messages" |o--|| "ai_message_role" : "enum:role"
+    "ai_messages" |o--|| "ai_mode" : "enum:mode"
+    "ai_messages" }o--|| "ai_conversations" : "conversation"
     "drafts" |o--|| "language" : "enum:language"
     "drafts" }o--|| "users" : "user"
     "drafts" }o--|| "problems" : "problem"

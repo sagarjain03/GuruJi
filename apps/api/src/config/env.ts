@@ -38,6 +38,10 @@ const envSchema = z.object({
    */
   CODE_RUNNER_SHARED_SECRET: z.string().min(32),
 
+  GROQ_API_KEY: z.string().min(1).optional(),
+  GROQ_FAST_MODEL: z.string().min(1).default('llama-3.1-8b-instant'),
+  GROQ_QUALITY_MODEL: z.string().min(1).default('llama-3.3-70b-versatile'),
+
   // OWASP guidance, mirrored in docs/security.md.
   ARGON2_MEMORY_COST: z.coerce.number().int().positive().default(19456),
   ARGON2_TIME_COST: z.coerce.number().int().positive().default(2),

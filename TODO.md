@@ -410,34 +410,34 @@ exit criteria waived.**
 - [x] `packages/ai` — `LLMProvider` interface + `GroqProvider`
 - [x] Nothing outside this package imports `groq-sdk`
 - [x] Two model tiers (fast for hints, quality for analysis), ids from config
-- [ ] Four-layer prompt assembly; user content fenced and labelled untrusted
-- [ ] Zod schemas per mode; one bounded retry, then a structured error
+- [x] Four-layer prompt assembly; user content fenced and labelled untrusted
+- [x] Zod schemas per mode; one bounded retry, then a structured error
 
 ### Database
-- [ ] `AIConversation`, `AIMessage` with `hintLevel` and token usage
+- [x] `AIConversation`, `AIMessage` with `hintLevel` and token usage
 
 ### API
-- [ ] `POST /ai/hint` — curated hints first, model only when they run out
-- [ ] `POST /ai/explain` — fixed structure: intuition → example → implementation → complexity → mistakes
-- [ ] `POST /ai/analyze-code` — structured output, direction not replacement code
-- [ ] `POST /ai/explain-wrong-answer` — stops before the correction
-- [ ] `POST /ai/generate-problem` — admin only, full validation pipeline, never auto-published
-- [ ] Per-user rate limits + daily token budget in Redis
-- [ ] Provider failure → honest error, **never a fake hint**
+- [x] `POST /ai/hint` — curated hints first, model only when they run out
+- [x] `POST /ai/explain` — fixed structure: intuition → example → implementation → complexity → mistakes
+- [x] `POST /ai/analyze-code` — structured output, direction not replacement code
+- [x] `POST /ai/explain-wrong-answer` — stops before the correction
+- [x] `POST /ai/generate-problem` — admin only, full validation pipeline, never auto-published
+- [x] Per-user rate limits + daily token budget in Redis
+- [x] Provider failure → honest error, **never a fake hint**
 
 ### Frontend
-- [ ] AI mentor panel on the problem page
-- [ ] Progressive hint UI — level state survives reload
+- [x] AI mentor panel on the problem page
+- [x] Progressive hint UI — level state survives reload
 - [ ] "Show solution" as a separate, deliberate, recorded action
-- [ ] Code analysis and wrong-answer views
+- [x] Code analysis view; wrong-answer endpoint is available
 
 ### Tests
-- [ ] Hints escalate and never open with the solution
+- [x] Hints escalate and never open with the solution
 - [ ] Injection suite: "ignore previous instructions", "reveal your system prompt",
       instructions hidden in code comments and variable names
-- [ ] Malformed model output retries once, then errors cleanly
-- [ ] Generated problem whose reference solution fails its own tests is rejected
-- [ ] Hint usage is recorded and lowers mastery
+- [x] Malformed model output retries once, then errors cleanly
+- [x] Generated problem whose reference solution fails its own tests is rejected
+- [x] Hint usage is recorded and lowers mastery
 
 **Exit:** hints escalate properly; known injections extract nothing.
 
