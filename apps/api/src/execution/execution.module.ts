@@ -3,6 +3,7 @@ import { AuthModule } from '../auth/auth.module'
 import { RealtimeModule } from '../realtime/realtime.module'
 import { RateLimitService } from '../auth/rate-limit.service'
 import { ProgressService } from '../mastery/progress.service'
+import { RecommendationsModule } from '../recommendations/recommendations.module'
 import { RevisionService } from '../revision/revision.service'
 import { RunnerCallbackController } from './runner-callback.controller'
 import { RunnerSecretGuard } from './guards/runner-secret.guard'
@@ -19,7 +20,9 @@ import { SubmissionsService } from './submissions.service'
  * Nothing in this module executes user code — that boundary is the whole design.
  */
 @Module({
-  imports: [AuthModule, RealtimeModule],
+  // RecommendationsModule for the cache drop after a verdict: a recommendation
+  // that survives a submission contradicts what the user just did.
+  imports: [AuthModule, RealtimeModule, RecommendationsModule],
   controllers: [SubmissionsController, RunnerCallbackController],
   providers: [
     SubmissionsService,

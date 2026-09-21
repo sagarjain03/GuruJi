@@ -4,12 +4,13 @@ import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { AccessTokenGuard } from './guards/access-token.guard'
 import { PasswordService } from './password.service'
+import { ProfileController } from './profile.controller'
 import { RateLimitService } from './rate-limit.service'
 import { RefreshTokenService } from './refresh-token.service'
 
 @Module({
   imports: [JwtModule.register({})],
-  controllers: [AuthController],
+  controllers: [AuthController, ProfileController],
   providers: [
     AuthService,
     PasswordService,

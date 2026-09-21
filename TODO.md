@@ -362,14 +362,24 @@ exit criteria waived.**
 **Goal:** **TRAIN NOW** knows what to do.
 
 ### API
-- [ ] Candidate generation — four pools, bounded, ~50 candidates
-- [ ] Scoring with the weights from `docs/recommendation-engine.md`
-- [ ] Diversity filter — max 2 per topic in the top 5, always one outside the weakest topic
-- [ ] Reason generation from the scoring breakdown — **derived, never LLM-written**
-- [ ] `GET /recommendations/next` with the precedence ladder
-- [ ] `GET /recommendations`, `POST /recommendations/:id/dismiss`
-- [ ] Redis cache, 15 min, invalidated on any submission by that user
-- [ ] Cold start: onboarding assessment seeds initial mastery; honest reasons before it
+- [x] Candidate generation — four pools, bounded, ~50 candidates
+- [x] Scoring with the weights from `docs/recommendation-engine.md`. `LAPSED_BOOST`
+      raised from 0.35 to 1: at 0.35 "a failed revision beats new material" only
+      held when the item happened to be overdue enough — now it is structural
+- [x] Diversity filter — max 2 per topic in the top 5, always one outside the weakest topic
+- [x] Reason generation from the scoring breakdown — **derived, never LLM-written**
+- [x] `GET /recommendations/next` with the precedence ladder
+- [x] `GET /recommendations`, `POST /recommendations/:id/dismiss`
+- [x] Redis cache, 15 min, invalidated on any submission by that user
+- [x] Cold start: honest reasons before any history. **Deviation:** onboarding seeds
+      `difficultyTolerance` from stated experience, and **not** mastery — a score
+      written from "I am intermediate" is fabricated data the engine would reason
+      from confidently. Real mastery arrives through solved problems
+- [x] Prerequisite gate: a prerequisite topic with no published problems counts as
+      satisfied. Without this the gate was a dead end — the head of the chain has
+      nothing to solve, so every topic stayed blocked and a new account got an
+      empty dashboard
+- [x] `PUT /profile/onboarding` — experience, language, goal, timezone
 
 ### Frontend
 - [ ] Dashboard **TRAIN NOW** — the single most visible action
@@ -378,15 +388,15 @@ exit criteria waived.**
 - [ ] Onboarding flow — experience, language, initial assessment
 
 ### Tests
-- [ ] Weak topic ranks above strong, all else equal
-- [ ] Recently solved ranks below an equivalent unsolved
-- [ ] Failed revision beats new material
-- [ ] Difficulty adapts upward as mastery rises
-- [ ] No duplicate across consecutive batches
-- [ ] Topic diversity holds
-- [ ] Unmet prerequisite scores **zero**, not merely low
-- [ ] Cold-start user gets roadmap order with honest reasons
-- [ ] Every recommendation has a non-empty reason
+- [x] Weak topic ranks above strong, all else equal
+- [x] Recently solved ranks below an equivalent unsolved
+- [x] Failed revision beats new material
+- [x] Difficulty adapts upward as mastery rises
+- [x] No duplicate across consecutive batches
+- [x] Topic diversity holds
+- [x] Unmet prerequisite scores **zero**, not merely low
+- [x] Cold-start user gets roadmap order with honest reasons
+- [x] Every recommendation has a non-empty reason
 
 **Exit:** all of the above pass.
 

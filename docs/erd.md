@@ -128,6 +128,16 @@ MASTERED MASTERED
 LAPSED LAPSED
         }
     
+
+
+        recommendation_kind {
+            REVISION REVISION
+WEAK_TOPIC WEAK_TOPIC
+NEW_PATTERN NEW_PATTERN
+NEW_PROBLEM NEW_PROBLEM
+MOCK_CHALLENGE MOCK_CHALLENGE
+        }
+    
   "users" {
     String id "🗝️"
     String email 
@@ -417,6 +427,20 @@ LAPSED LAPSED
     DateTime created_at 
     }
   
+
+  "recommendations" {
+    String id "🗝️"
+    String user_id 
+    String problem_id "❓"
+    RecommendationKind kind 
+    Float score 
+    String reason 
+    DateTime generated_at 
+    DateTime consumed_at "❓"
+    DateTime dismissed_at "❓"
+    DateTime expires_at 
+    }
+  
     "users" |o--|| "role" : "enum:role"
     "profiles" |o--|| "language" : "enum:preferred_language"
     "profiles" |o--|| "experience_level" : "enum:experience_level"
@@ -464,4 +488,7 @@ LAPSED LAPSED
     "revision_items" }o--|| "problems" : "problem"
     "revision_reviews" |o--|| "revision_outcome" : "enum:outcome"
     "revision_reviews" }o--|| "revision_items" : "item"
+    "recommendations" |o--|| "recommendation_kind" : "enum:kind"
+    "recommendations" }o--|| "users" : "user"
+    "recommendations" }o--|o "problems" : "problem"
 ```

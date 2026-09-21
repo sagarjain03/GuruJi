@@ -13,6 +13,10 @@ import type {
   Mistake,
   MistakeCategory,
   MistakePatternsResponse,
+  OnboardingRequest,
+  PublicProfile,
+  Recommendation,
+  TrainNow,
   Language,
   Me,
   Paginated,
@@ -231,6 +235,28 @@ export const revisionApi = {
 
   /** Spreads a backlog forward. A POST because it rewrites `dueAt` on many rows. */
   respace: () => send<{ moved: number }>('/revision/respace', { method: 'POST' }),
+}
+
+/**
+ * What to do next.
+ *
+ * `next` is the single button; `list` is the panel behind it. Both arrive
+ * already ordered and already explained — the client never re-ranks, because
+ * the ordering *is* the reasoning and a client that sorted it again would
+ * quietly undo the engine.
+ */
+export const profileApi = {
+  onboarding: (body: OnboardingRequest) =>
+    send<PublicProfile>('/profile/onboarding', { method: 'PUT', body }),
+}
+
+export const recommendationApi = {
+  list: () => send<Recommendation[]>('/recommendations'),
+
+  next: () => send<TrainNow>('/recommendations/next'),
+
+  dismiss: (id: string) =>
+    send<void>(`/recommendations/${encodeURIComponent(id)}/dismiss`, { method: 'POST' }),
 }
 
 /**

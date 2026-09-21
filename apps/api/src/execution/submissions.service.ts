@@ -14,6 +14,7 @@ import { AppError, NotFoundError } from '../common/app-error'
 import { RateLimitService } from '../auth/rate-limit.service'
 import { decodeCursor, encodeCursor } from '../content/cursor'
 import { ProgressService } from '../mastery/progress.service'
+import { RecommendationsService } from '../recommendations/recommendations.service'
 import { RevisionService } from '../revision/revision.service'
 import { SubmissionQueueService } from './submission-queue.service'
 
@@ -50,6 +51,7 @@ export class SubmissionsService {
     private readonly rateLimit: RateLimitService,
     private readonly progress: ProgressService,
     private readonly revision: RevisionService,
+    private readonly recommendations: RecommendationsService,
   ) {}
 
   /**
@@ -300,6 +302,16 @@ export class SubmissionsService {
         isRun: updated.isRun,
       })
     })
+
+    /*
+     * Outside the transaction, and on purpose.
+     *
+     * This is a cache drop, not a write anyone depends on being atomic — and a
+     * Redis hiccup must not roll back a verdict that was correctly judged. The
+     * cost of it failing is fifteen minutes of a slightly stale suggestion; the
+     * cost of it being inside is losing the submission.
+     */
+    await this.recommendations.invalidate(submission.userId)
 
     return {
       userId: submission.userId,

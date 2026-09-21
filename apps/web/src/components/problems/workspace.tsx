@@ -12,46 +12,65 @@ import { EDITOR_LANGUAGES, LANGUAGE_LABEL, useEditorStore } from '@/stores/edito
 import { useSessionStore } from '@/stores/session-store'
 import { cn } from '@/lib/utils'
 
-const MIN_PANE = 25
-const MAX_PANE = 70
+/** Statement pane, as a percentage of the workspace width. */
+const STATEMENT = { min: 20, max: 75, initial: 42 }
+/** Test panel height in px, and the room the editor keeps above it. */
+const TEST_MIN = 96
+const EDITOR_MIN = 140
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), Math.max(min, max))
+}
 
 /**
  * Statement on the left, editor on the right, test cases underneath.
  *
- * The split is draggable because the right balance is personal and changes with
- * the task — reading a long statement wants one thing, debugging an indexing
- * mistake wants another.
+ * Both splits are draggable because the right balance is personal and changes
+ * with the task — reading a long statement wants one thing, staring at a
+ * failing case wants another.
  */
-export function Workspace({ problem, statement }: { problem: ProblemDetail; statement: React.ReactNode }) {
+export function Workspace({
+  problem,
+  statement,
+}: {
+  problem: ProblemDetail
+  statement: React.ReactNode
+}) {
   const profile = useSessionStore((state) => state.profile)
   const [language, setLanguage] = useState<Language>(profile?.preferredLanguage ?? 'CPP')
-  const [leftPercent, setLeftPercent] = useState(42)
+  const [leftPercent, setLeftPercent] = useState(STATEMENT.initial)
+  const [testHeight, setTestHeight] = useState(256)
   // Bumped when the editor's content is replaced from outside, which remounts
   // it. See `editorKey` on CodeEditor for why that is not a `value` prop.
   const [contentVersion, setContentVersion] = useState(0)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const columnRef = useRef<HTMLDivElement | null>(null)
 
   const drafts = useDrafts(problem.slug, language, problem.starterCode)
 
-  const onDrag = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    const container = containerRef.current
-    if (!container) {
+  const dragStatement = useCallback((pointer: PointerEvent) => {
+    const bounds = containerRef.current?.getBoundingClientRect()
+    if (!bounds) {
       return
     }
-    event.currentTarget.setPointerCapture(event.pointerId)
+    const percent = ((pointer.clientX - bounds.left) / bounds.width) * 100
+    setLeftPercent(clamp(percent, STATEMENT.min, STATEMENT.max))
+  }, [])
 
-    const move = (pointer: PointerEvent): void => {
-      const bounds = container.getBoundingClientRect()
-      const percent = ((pointer.clientX - bounds.left) / bounds.width) * 100
-      setLeftPercent(Math.min(Math.max(percent, MIN_PANE), MAX_PANE))
+  // Measured from the bottom of the editor column rather than from where the
+  // drag started: the panel then tracks the pointer exactly, instead of drifting
+  // away from it once a clamp has been hit and released.
+  const dragTests = useCallback((pointer: PointerEvent) => {
+    const bounds = columnRef.current?.getBoundingClientRect()
+    if (!bounds) {
+      return
     }
-    const stop = (): void => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', stop)
-    }
+    setTestHeight(clamp(bounds.bottom - pointer.clientY, TEST_MIN, bounds.height - EDITOR_MIN))
+  }, [])
 
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', stop)
+  const nudgeTests = useCallback((step: number) => {
+    const height = columnRef.current?.getBoundingClientRect().height ?? 0
+    setTestHeight((current) => clamp(current - step * 24, TEST_MIN, height - EDITOR_MIN))
   }, [])
 
   return (
@@ -60,32 +79,28 @@ export function Workspace({ problem, statement }: { problem: ProblemDetail; stat
       className="flex h-[calc(100svh-6.5rem)] min-h-[560px] flex-col lg:flex-row"
     >
       <div
-        className="border-border overflow-y-auto border lg:border-r-0"
-        style={{ flexBasis: `${leftPercent}%` }}
+        className="border-border min-w-0 overflow-y-auto border lg:border-r-0"
+        style={{ flexBasis: `${String(leftPercent)}%` }}
       >
         <div className="p-5">{statement}</div>
       </div>
 
-      {/* Keyboard users resize with the arrow keys; a drag-only handle is not
-          reachable without a pointer. */}
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize the statement panel"
-        tabIndex={0}
-        onPointerDown={onDrag}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowLeft') {
-            setLeftPercent((p) => Math.max(p - 2, MIN_PANE))
-          }
-          if (event.key === 'ArrowRight') {
-            setLeftPercent((p) => Math.min(p + 2, MAX_PANE))
-          }
+      <ResizeHandle
+        axis="x"
+        label="Resize the statement panel"
+        value={leftPercent}
+        min={STATEMENT.min}
+        max={STATEMENT.max}
+        onMove={dragStatement}
+        onNudge={(step) => {
+          setLeftPercent((p) => clamp(p + step * 2, STATEMENT.min, STATEMENT.max))
         }}
-        className="border-border hover:bg-primary/40 focus-visible:bg-primary/60 hidden w-1.5 shrink-0 cursor-col-resize border-y bg-transparent lg:block"
       />
 
-      <div className="border-border flex min-h-0 flex-1 flex-col border">
+      {/* `min-w-0` is load-bearing: without it the column refuses to shrink below
+          Monaco's min-content width, and the statement split can be dragged
+          narrower but never wider. */}
+      <div ref={columnRef} className="border-border flex min-h-0 min-w-0 flex-1 flex-col border">
         <Toolbar
           language={language}
           onLanguage={setLanguage}
@@ -107,8 +122,106 @@ export function Workspace({ problem, statement }: { problem: ProblemDetail; stat
           )}
         </div>
 
-        <TestPanel problem={problem} language={language} code={drafts.code} />
+        <ResizeHandle
+          axis="y"
+          label="Resize the test panel"
+          value={testHeight}
+          min={TEST_MIN}
+          max={2000}
+          onMove={dragTests}
+          onNudge={nudgeTests}
+        />
+
+        <TestPanel problem={problem} language={language} code={drafts.code} height={testHeight} />
       </div>
+    </div>
+  )
+}
+
+/**
+ * A draggable divider.
+ *
+ * Visible at rest on purpose. The statement split was always draggable and its
+ * handle was transparent, so the layout read as fixed and nobody dragged it.
+ *
+ * Keyboard users resize with the arrow keys; a drag-only handle is not
+ * reachable without a pointer.
+ */
+function ResizeHandle({
+  axis,
+  label,
+  value,
+  min,
+  max,
+  onMove,
+  onNudge,
+}: {
+  axis: 'x' | 'y'
+  label: string
+  value: number
+  min: number
+  max: number
+  onMove: (pointer: PointerEvent) => void
+  /** -1 towards the start of the axis, +1 towards the end. */
+  onNudge: (step: number) => void
+}) {
+  const start = (event: React.PointerEvent<HTMLDivElement>): void => {
+    event.preventDefault()
+
+    const move = (pointer: PointerEvent): void => {
+      onMove(pointer)
+    }
+    const stop = (): void => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', stop)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    // The pointer spends the whole drag over Monaco, which would otherwise put
+    // its own cursor back and select every line it passes over.
+    document.body.style.cursor = axis === 'x' ? 'col-resize' : 'row-resize'
+    document.body.style.userSelect = 'none'
+
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', stop)
+  }
+
+  const back = axis === 'x' ? 'ArrowLeft' : 'ArrowUp'
+  const forward = axis === 'x' ? 'ArrowRight' : 'ArrowDown'
+
+  return (
+    <div
+      role="separator"
+      aria-orientation={axis === 'x' ? 'vertical' : 'horizontal'}
+      aria-label={label}
+      aria-valuenow={Math.round(value)}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      tabIndex={0}
+      onPointerDown={start}
+      onKeyDown={(event) => {
+        if (event.key !== back && event.key !== forward) {
+          return
+        }
+        event.preventDefault()
+        onNudge(event.key === back ? -1 : 1)
+      }}
+      className={cn(
+        'group border-border bg-card/50 relative grid shrink-0 place-items-center outline-none',
+        'hover:bg-primary/25 focus-visible:bg-primary/40 transition-colors',
+        axis === 'x'
+          ? 'hidden w-2 cursor-col-resize border-y lg:grid'
+          : 'h-2 cursor-row-resize border-x',
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          'bg-muted-foreground/40 group-hover:bg-primary rounded-full transition-colors',
+          axis === 'x' ? 'h-8 w-0.5' : 'h-0.5 w-8',
+        )}
+      />
     </div>
   )
 }
@@ -261,10 +374,12 @@ function TestPanel({
   problem,
   language,
   code,
+  height,
 }: {
   problem: ProblemDetail
   language: Language
   code: string
+  height: number
 }) {
   const [tab, setTab] = useState<'samples' | 'result'>('samples')
   const run = useSubmission(problem.id)
@@ -283,7 +398,7 @@ function TestPanel({
   }
 
   return (
-    <div className="border-border flex h-64 shrink-0 flex-col border-t">
+    <div style={{ height }} className="border-border flex shrink-0 flex-col border-t">
       <div className="border-border flex flex-wrap items-center gap-2 border-b p-2">
         {(['samples', 'result'] as const).map((option) => (
           <button
@@ -298,7 +413,9 @@ function TestPanel({
               tab === option && 'text-foreground border-foreground/30',
             )}
           >
-            {option === 'samples' ? `Samples (${String(problem.sampleTestCases.length)})` : 'Result'}
+            {option === 'samples'
+              ? `Samples (${String(problem.sampleTestCases.length)})`
+              : 'Result'}
           </button>
         ))}
 

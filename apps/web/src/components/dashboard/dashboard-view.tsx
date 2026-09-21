@@ -5,6 +5,8 @@ import { ChevronRight, Clock3, Flame, Globe2, Layers, Sparkles, Target } from 'l
 import type { AnalyticsOverview } from '@guruji/types'
 import Link from 'next/link'
 import { MasteryBar } from '@/components/dashboard/mastery-bar'
+import { OnboardingCard } from '@/components/dashboard/onboarding-card'
+import { TodaysTraining, TrainNow } from '@/components/dashboard/train-now'
 import { Button } from '@/components/ui/button'
 import { analyticsApi, revisionApi } from '@/lib/api'
 import { useSessionStore } from '@/stores/session-store'
@@ -55,6 +57,15 @@ export function DashboardView() {
           dailyGoalMinutes={profile.dailyGoalMinutes}
           timezone={profile.timezone}
         />
+      </div>
+
+      <OnboardingCard />
+
+      {/* Above everything else. One button is the product's whole claim: that
+          it knows what you should do next. */}
+      <div className="grid gap-3 lg:grid-cols-[1fr_1.2fr]">
+        <TrainNow />
+        <TodaysTraining />
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">

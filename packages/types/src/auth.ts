@@ -61,6 +61,25 @@ export const publicProfileSchema = z.object({
 export type PublicProfile = z.infer<typeof publicProfileSchema>
 
 /**
+ * What onboarding asks, and nothing it could not act on.
+ *
+ * Every field here changes something real: the language picks the starter
+ * code, the experience level sets where the recommendation engine aims its
+ * difficulty, the goal sizes the day. A question whose answer nothing reads is
+ * a question that costs the user time for no reason.
+ *
+ * The timezone is detected by the browser rather than asked for — people do
+ * not know their IANA name, and a wrong one moves their revision day.
+ */
+export const onboardingRequestSchema = z.object({
+  experienceLevel: experienceLevelSchema,
+  preferredLanguage: languageSchema,
+  dailyGoalMinutes: z.number().int().min(10).max(240),
+  timezone: z.string().min(1).max(64),
+})
+export type OnboardingRequest = z.infer<typeof onboardingRequestSchema>
+
+/**
  * What register, login and refresh return.
  *
  * The refresh token is absent on purpose — it travels in an httpOnly cookie and

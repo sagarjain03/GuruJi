@@ -72,6 +72,7 @@ model User {
   mistakes        Mistake[]
   studySessions   StudySession[]
   revisionItems   RevisionItem[]
+  recommendations Recommendation[]
 
   @@map("users")
 }
@@ -303,8 +304,9 @@ model Problem {
   hints       Hint[]
   drafts        Draft[]
   submissions   Submission[]
-  mistakes      Mistake[]
-  revisionItems RevisionItem[]
+  mistakes        Mistake[]
+  revisionItems   RevisionItem[]
+  recommendations Recommendation[]
 
   // The filtered problem list.
   @@index([difficulty, reviewStatus])
@@ -782,4 +784,57 @@ model RevisionReview {
 
   @@index([revisionItemId, createdAt])
   @@map("revision_reviews")
+}
+
+// ---------------------------------------------------------------------------
+// Recommendations (Phase 7). See docs/recommendation-engine.md.
+// ---------------------------------------------------------------------------
+
+/// What TRAIN NOW decided to do, not merely which problem it picked.
+enum RecommendationKind {
+  REVISION
+  WEAK_TOPIC
+  NEW_PATTERN
+  NEW_PROBLEM
+  MOCK_CHALLENGE
+
+  @@map("recommendation_kind")
+}
+
+/// One suggestion, and what happened to it.
+///
+/// Stored rather than computed and thrown away, for two reasons. Dismissals
+/// feed `recencyPenalty`, so the engine has to remember being ignored. And
+/// keeping them makes the engine *evaluable* after the fact — was it accepted,
+/// was it solved, did mastery move — which is how the weights get tuned with
+/// evidence instead of intuition.
+model Recommendation {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  /// Null for a MOCK_CHALLENGE, which is an activity rather than a problem.
+  problemId String? @map("problem_id") @db.Uuid
+
+  kind  RecommendationKind
+  score Float
+
+  /// Derived from the scoring breakdown, never written by a model. It is the
+  /// user's only window into the engine, and a plausible invented explanation
+  /// would be worse than none.
+  reason String
+
+  generatedAt DateTime  @default(now()) @map("generated_at") @db.Timestamptz(3)
+  /// Set when the user acted on it.
+  consumedAt  DateTime? @map("consumed_at") @db.Timestamptz(3)
+  /// Set when they said no. Feeds `recencyPenalty` on the next batch.
+  dismissedAt DateTime? @map("dismissed_at") @db.Timestamptz(3)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem? @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  /// "What did we last show this user" — read on every batch to build the
+  /// recency penalty, and the only query on this table that runs hot.
+  @@index([userId, generatedAt])
+  @@index([userId, problemId, generatedAt])
+  @@map("recommendations")
 }
