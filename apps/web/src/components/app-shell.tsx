@@ -31,7 +31,7 @@ const NAV = [
   { href: '/problems', label: 'Problems', Icon: BookOpen, ready: true },
   { href: '/revision', label: 'Revision', Icon: RotateCcw, ready: true },
   { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: true },
-  { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: false },
+  { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: true },
   { href: '/mentor', label: 'AI Mentor', Icon: Bot, ready: false },
   { href: '/analytics', label: 'Analytics', Icon: BarChart3, ready: false },
   { href: '/contest', label: 'Contest', Icon: Swords, ready: false },

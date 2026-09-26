@@ -158,6 +158,33 @@ around.
 
 ---
 
+## As built (Phase 9)
+
+Where the build differs from the sketch above, and why:
+
+- **`state` is a tagged union**, `kind: 'array' | 'list' | 'tree' | 'graph' |
+  'table'`. The canvas is picked by `state.kind` in one `switch`, so the
+  registry never names a component. Lasting status (visited, settled, found,
+  pivot, waiting, ruled out) lives in the snapshot's `tags`; the step's
+  `indices` / `nodeIds` / `cells` are only the momentary focus.
+- **DP steps carry `cells`**: the first is the cell being written, the rest are
+  the cells it reads. The table canvas draws those as a filled cell plus dashed
+  outlines rather than literal arrows — same information, no overlay geometry.
+- **Algorithms take text.** Each registry entry owns its parser, hint and
+  default input, which is what lets the UI stay a single text box for every
+  algorithm. All size caps live in `LIMITS` (`packages/algorithms/src/input.ts`)
+  and are raised as `VisualizerInputError`, shown to the person verbatim.
+- **CSS transitions, not Framer Motion.** Nothing moves far enough between steps
+  to need spring physics; `motion-reduce:transition-none` covers
+  `prefers-reduced-motion`.
+- **Array bars are DOM, not `<canvas>`.** At the 50-element cap that is 50
+  elements, well inside budget.
+- **Accessible name from the package.** `describeSnapshot()` renders any
+  structure as a sentence; every canvas uses it as its `aria-label`, and it is
+  unit-tested with the algorithms.
+
+---
+
 ## Bounds
 
 Input sizes are capped per category (arrays ~50 elements, graphs ~30 nodes) and

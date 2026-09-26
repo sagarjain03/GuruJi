@@ -187,6 +187,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@guruji/algorithms':
+        specifier: workspace:*
+        version: link:../../packages/algorithms
       '@guruji/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -335,6 +338,24 @@ importers:
         version: 9.39.5(jiti@2.7.0)
       typescript:
         specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.3)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.13)
+
+  packages/algorithms:
+    devDependencies:
+      '@guruji/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.15.0
+        version: 22.20.3
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(jiti@2.7.0)
+      typescript:
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^3.2.4

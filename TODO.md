@@ -447,19 +447,19 @@ exit criteria waived.**
 
 ## Phase 9 — Visualiser
 
-- [ ] `packages/algorithms` — `AlgorithmStep` event model
-- [ ] Sorting (6) + searching (2) → array canvas
-- [ ] Linked list (4) → node-chain canvas
-- [ ] Trees (6) → tree canvas
-- [ ] Graphs (5) → graph canvas
-- [ ] DP (4) → table canvas
-- [ ] Playback controls; step-back is exact (index − 1), not re-approximated
-- [ ] Variable panel + live metrics
-- [ ] Single rAF loop, not per-element timers
+- [x] `packages/algorithms` — `AlgorithmStep` event model
+- [x] Sorting (6) + searching (2) → array canvas
+- [x] Linked list (4) → node-chain canvas
+- [x] Trees (6) → tree canvas
+- [x] Graphs (5) → graph canvas
+- [x] DP (4) → table canvas
+- [x] Playback controls; step-back is exact (index − 1), not re-approximated
+- [x] Variable panel + live metrics
+- [x] Single rAF loop, not per-element timers
 - [ ] Accessibility — text descriptions, keyboard controls, not colour-only,
       `prefers-reduced-motion`
-- [ ] Input-size caps with a clear message
-- [ ] Per-algorithm event-sequence tests
+- [x] Input-size caps with a clear message
+- [x] Per-algorithm event-sequence tests
 
 **Exit test:** adding an algorithm touches no React.
 
