@@ -74,7 +74,7 @@ export function MistakesView() {
               onClick={() => {
                 setCategory(null)
               }}
-              className="text-muted-foreground hover:text-foreground font-mono text-[10px] tracking-[0.14em] uppercase"
+              className="text-muted-foreground hover:text-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase"
             >
               Clear filter
             </button>
@@ -147,12 +147,12 @@ function MistakeRow({ mistake }: { mistake: Mistake }) {
         >
           {mistake.problemTitle}
         </Link>
-        <span className="border-border text-muted-foreground border px-1.5 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase">
+        <span className="border-border text-muted-foreground border px-1.5 py-0.5 font-mono text-[11px] sm:text-[10px] tracking-[0.12em] uppercase">
           {MISTAKE_CATEGORY_LABEL[mistake.category]}
         </span>
         <time
           dateTime={mistake.createdAt}
-          className="text-muted-foreground ml-auto font-mono text-[10px]"
+          className="text-muted-foreground ml-auto font-mono text-[11px] sm:text-[10px]"
         >
           {new Date(mistake.createdAt).toLocaleDateString()}
         </time>
@@ -162,7 +162,7 @@ function MistakeRow({ mistake }: { mistake: Mistake }) {
 
       {mistake.correctIdea !== null && (
         <p className="text-muted-foreground mt-1.5 text-sm whitespace-pre-wrap">
-          <span className="font-mono text-[10px] tracking-[0.14em] uppercase">Right idea — </span>
+          <span className="font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">Right idea — </span>
           {mistake.correctIdea}
         </p>
       )}

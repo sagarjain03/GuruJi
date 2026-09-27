@@ -35,8 +35,8 @@ export function ArrayCanvas({ step, state }: { step: AlgorithmStep; state: Array
                   outlineOffset: 2,
                 }}
               />
-              <span className="text-muted-foreground font-mono text-[10px]">{index}</span>
-              <span className="text-primary h-3 font-mono text-[10px] leading-3">{pointersAt.get(index)?.join(' ')}</span>
+              <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">{index}</span>
+              <span className="text-primary h-3 font-mono text-[11px] sm:text-[10px] leading-3">{pointersAt.get(index)?.join(' ')}</span>
             </div>
           )
         })}

@@ -29,9 +29,9 @@ export function TrainNow() {
   const target = payload?.recommendation ?? null
 
   return (
-    <section className="border-border border p-4">
+    <section className="card-spot border-border bg-card border p-4">
       <header className="mb-3">
-        <p className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
           Train now
         </p>
         <h2 className="font-display mt-1 text-lg font-semibold tracking-tight">
@@ -46,10 +46,10 @@ export function TrainNow() {
       </p>
 
       {target?.slug != null && (
-        <Button className="mt-3" asChild>
+        <Button className="group mt-3" asChild>
           <Link href={`/problems/${target.slug}`}>
             Train now
-            <ArrowRight className="size-4" />
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </Button>
       )}
@@ -91,7 +91,7 @@ export function TodaysTraining() {
   const items = batch.data ?? []
 
   return (
-    <section className="border-border border p-4">
+    <section className="card-spot border-border bg-card border p-4">
       <header className="mb-3">
         <h2 className="font-display text-base font-semibold">Today&rsquo;s training</h2>
         <p className="text-muted-foreground text-xs">
@@ -143,12 +143,12 @@ function Row({
           </Link>
         )}
 
-        <span className="border-border text-muted-foreground border px-1.5 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase">
+        <span className="border-border text-muted-foreground border px-1.5 py-0.5 text-xs">
           {RECOMMENDATION_KIND_LABEL[item.kind]}
         </span>
 
         {item.difficulty !== null && (
-          <span className="text-muted-foreground font-mono text-[10px]">{item.difficulty}</span>
+          <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">{item.difficulty}</span>
         )}
 
         <button

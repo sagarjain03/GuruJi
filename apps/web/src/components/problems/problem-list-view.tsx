@@ -140,7 +140,7 @@ export function ProblemListView() {
       {list.isFetchingNextPage && <LoadingState label="Loading more…" />}
 
       {!list.hasNextPage && items.length > 0 && (
-        <p className="text-muted-foreground py-4 text-center font-mono text-[10px] tracking-[0.14em] uppercase">
+        <p className="text-muted-foreground py-4 text-center font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           End of list · {items.length} shown
         </p>
       )}
@@ -158,7 +158,7 @@ function ProblemRow({ problem }: { problem: ProblemListItem }) {
         <span className="font-display text-base font-semibold tracking-tight">{problem.title}</span>
         <div className="flex items-center gap-2">
           <DifficultyBadge difficulty={problem.difficulty} />
-          <span className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+          <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
             ~{problem.estimatedMinutes}m
           </span>
         </div>
@@ -169,7 +169,7 @@ function ProblemRow({ problem }: { problem: ProblemListItem }) {
           <span
             key={tag.slug}
             className={cn(
-              'border-border/60 text-muted-foreground border px-2 py-0.5 font-mono text-[10px]',
+              'border-border/60 text-muted-foreground border px-2 py-0.5 font-mono text-[11px] sm:text-[10px]',
               tag.relevance === 'PRIMARY' && 'text-foreground/80 border-foreground/25',
             )}
           >
@@ -241,7 +241,7 @@ function FilterBar({
               onChange('difficulty', filters.difficulty === level ? undefined : level)
             }}
             className={cn(
-              'border-border text-muted-foreground border px-3 py-1 font-mono text-[10px] tracking-[0.14em] uppercase',
+              'tap-target border-border text-muted-foreground border px-3 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
               filters.difficulty === level && 'bg-primary text-primary-foreground border-primary',
             )}
           >
@@ -274,7 +274,7 @@ function FilterBar({
                 onChange(key, undefined)
               }
             }}
-            className="text-muted-foreground hover:text-foreground px-2 py-1 font-mono text-[10px] tracking-[0.14em] uppercase underline underline-offset-4"
+            className="tap-target text-muted-foreground hover:text-foreground px-2 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase underline underline-offset-4"
           >
             Clear
           </button>
@@ -302,7 +302,7 @@ function Select({
       onChange={(event) => {
         onChange(event.target.value.length > 0 ? event.target.value : undefined)
       }}
-      className="border-border bg-background/40 text-muted-foreground border px-2 py-1 font-mono text-[10px] tracking-[0.14em] uppercase outline-none"
+      className="border-border bg-background/40 text-muted-foreground pointer-coarse:min-h-11 border px-2 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase outline-none"
     >
       <option value="">{label}: any</option>
       {options.map((option) => (

@@ -21,6 +21,10 @@
 @custom-variant light (&:is(.light *));
 
 :root {
+  /* Tells the browser to draw native UI — <select> option lists, scrollbars,
+     date pickers — dark as well. Without it a dark <select> opens a light
+     grey list whose light text is unreadable. */
+  color-scheme: dark;
   --radius: 0;
 
   /* ground */
@@ -67,16 +71,13 @@
   --mastery-strong: #34d399;
   --mastery-mastered: #f4f4f5;
 
-  /* The backdrop grid. Barely there on purpose — you should notice the page
-     has structure without being able to say why. */
-  --grid-line: rgba(255, 255, 255, 0.045);
-
   --sidebar: #0b0b0e;
   --sidebar-foreground: #e6e6ea;
   --sidebar-border: rgba(255, 255, 255, 0.08);
 }
 
 .light {
+  color-scheme: light;
   --background: #fbfbfc;
   --foreground: #121215;
 
@@ -114,8 +115,6 @@
   --mastery-proficient: #2563eb;
   --mastery-strong: #059669;
   --mastery-mastered: #18181b;
-
-  --grid-line: rgba(10, 10, 14, 0.055);
 
   --sidebar: #ffffff;
   --sidebar-foreground: #26262c;
@@ -188,6 +187,129 @@
 
   ::selection {
     background: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+}
+
+/* ---------- ambient backdrop (components/ambient-background.tsx) ----------
+   A dot field instead of a grid: structure without lines. The pointer carries
+   a wide soft spotlight and lights the dots right under it. --cursor-* are set
+   on <html> by the component; --cursor-on fades both out when the pointer
+   leaves the window. */
+@layer components {
+  .ambient {
+    --dot: color-mix(in oklab, var(--foreground) 13%, transparent);
+    --dot-lit: color-mix(in oklab, var(--foreground) 55%, transparent);
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
+  }
+
+  .ambient > * {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ambient__dots,
+  .ambient__lit {
+    background-size: 22px 22px;
+    background-position: 11px 11px;
+  }
+
+  .ambient__dots {
+    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.5px);
+    mask-image: linear-gradient(to bottom, black 10%, transparent 80%);
+  }
+
+  .ambient__lit {
+    background-image: radial-gradient(circle, var(--dot-lit) 1px, transparent 1.5px);
+    mask-image: radial-gradient(
+      180px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+      black,
+      transparent 75%
+    );
+    opacity: var(--cursor-on, 0);
+    transition: opacity 0.4s ease;
+  }
+
+  .ambient__glow {
+    background: radial-gradient(
+      520px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+      color-mix(in oklab, var(--foreground) 5%, transparent),
+      transparent 65%
+    );
+    opacity: var(--cursor-on, 0);
+    transition: opacity 0.4s ease;
+  }
+
+  @media (hover: none) {
+    .ambient__lit,
+    .ambient__glow {
+      display: none;
+    }
+  }
+}
+
+/* ---------- auth screen ----------
+   Chrome paints autofilled inputs pale blue with dark text, which on the
+   graphite fields reads as a broken input. Repaint them in the theme's own
+   card and foreground colours. */
+.auth-screen input:-webkit-autofill,
+.auth-screen input:-webkit-autofill:hover,
+.auth-screen input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+}
+
+/* The same dot field as the app backdrop, static, fading towards the bottom. */
+.auth-dots {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--foreground) 13%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+/* ---------- touch hit area ----------
+   On touch screens, grows a control's hit area to at least 44×44 with an
+   invisible ::after, so small controls keep their visual size. Not for
+   replaced elements (<select>, <input>), which cannot carry a pseudo-element. */
+@media (pointer: coarse) {
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ---------- card hover ----------
+   A brighter hairline and a 2px lift. Unlayered on purpose: the hover border
+   has to beat the cards' `border-border` utility. */
+.card-spot {
+  position: relative;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-spot:hover {
+  border-color: color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card-spot:hover {
+    transform: translateY(-2px);
   }
 }
 

@@ -123,7 +123,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <p className="font-display text-xl font-semibold">{value}</p>
-      <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         {label}
       </p>
     </div>
@@ -152,7 +152,7 @@ function QueueRow({ item }: { item: QueueItem }) {
 
         <span
           className={cn(
-            'border-border text-muted-foreground border px-1.5 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase',
+            'border-border text-muted-foreground border px-1.5 py-0.5 font-mono text-[11px] sm:text-[10px] tracking-[0.12em] uppercase',
             // Lapsed is the one worth noticing: it is knowledge that was had and
             // lost, which is the cheapest thing on the list to recover.
             item.state === 'LAPSED' && 'border-hard/40 text-hard',
@@ -161,9 +161,9 @@ function QueueRow({ item }: { item: QueueItem }) {
           {REVISION_STATE_LABEL[item.state]}
         </span>
 
-        <span className="text-muted-foreground font-mono text-[10px]">{item.difficulty}</span>
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">{item.difficulty}</span>
 
-        <span className="text-muted-foreground ml-auto font-mono text-[10px]">
+        <span className="text-muted-foreground ml-auto font-mono text-[11px] sm:text-[10px]">
           {item.overdueDays > 0
             ? `${String(item.overdueDays)}d overdue`
             : item.overdueDays === 0
@@ -174,7 +174,7 @@ function QueueRow({ item }: { item: QueueItem }) {
 
       {reporting ? (
         <div className="mt-2 flex flex-col gap-2">
-          <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+          <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
             How did it go?
           </p>
           <div className="flex flex-wrap gap-1">
@@ -251,12 +251,12 @@ function UpcomingWeek({ days, isLoading }: { days: UpcomingDay[]; isLoading: boo
       <ol className="mt-3 flex items-end gap-2">
         {days.map((day) => (
           <li key={day.date} className="flex flex-1 flex-col items-center gap-1">
-            <span className="text-muted-foreground font-mono text-[10px]">{day.capped}</span>
+            <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">{day.capped}</span>
             <div
               className="bg-primary/70 w-full"
               style={{ height: `${String(Math.round((day.capped / busiest) * 48) + 2)}px` }}
             />
-            <span className="text-muted-foreground font-mono text-[10px]">
+            <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">
               {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, {
                 weekday: 'short',
                 timeZone: 'UTC',

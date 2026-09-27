@@ -51,7 +51,7 @@ function Statement({ problem: data }: { problem: ProblemDetail }) {
     <article className="flex flex-col gap-5">
       <Link
         href="/problems"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.14em] uppercase"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase"
       >
         <ChevronLeft className="size-3" />
         All problems
@@ -67,14 +67,14 @@ function Statement({ problem: data }: { problem: ProblemDetail }) {
           {[...data.topics, ...data.patterns].map((tag) => (
             <span
               key={tag.slug}
-              className="border-border/60 text-muted-foreground border px-2 py-0.5 font-mono text-[10px]"
+              className="border-border/60 text-muted-foreground border px-2 py-0.5 font-mono text-[11px] sm:text-[10px]"
             >
               {tag.name}
             </span>
           ))}
         </div>
 
-        <dl className="text-muted-foreground flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] tracking-[0.12em] uppercase">
+        <dl className="text-muted-foreground flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11px] sm:text-[10px] tracking-[0.12em] uppercase">
           <Meta label="Time limit" value={`${data.timeLimitMs} ms`} />
           <Meta label="Memory" value={`${data.memoryLimitMb} MB`} />
           <Meta label="Estimated" value={`${data.estimatedMinutes} min`} />
@@ -100,7 +100,7 @@ function Statement({ problem: data }: { problem: ProblemDetail }) {
         <div className="flex flex-col gap-3">
           {data.examples.map((example, index) => (
             <div key={index} className="border-border bg-card/70 border p-4">
-              <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+              <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
                 Example {index + 1}
               </p>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -131,7 +131,7 @@ function Statement({ problem: data }: { problem: ProblemDetail }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+      <h2 className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
         {title}
       </h2>
       {children}
@@ -151,7 +151,7 @@ function Meta({ label, value }: { label: string; value: string }) {
 function Block({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         {label}
       </p>
       <pre className="bg-muted mt-1 overflow-x-auto p-2 font-mono text-xs whitespace-pre-wrap">

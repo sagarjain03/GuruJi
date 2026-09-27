@@ -20,7 +20,7 @@ export function TableCanvas({ step, state }: { step: AlgorithmStep; state: Table
             <tr>
               <th className="p-1" />
               {state.columnLabels.map((label, column) => (
-                <th key={column} className="text-muted-foreground min-w-9 p-1 text-center text-[10px] font-normal">
+                <th key={column} className="text-muted-foreground min-w-9 p-1 text-center text-[11px] sm:text-[10px] font-normal">
                   {label}
                 </th>
               ))}
@@ -29,7 +29,7 @@ export function TableCanvas({ step, state }: { step: AlgorithmStep; state: Table
           <tbody>
             {state.cells.map((row, rowIndex) => (
               <tr key={rowIndex}>
-                <th className="text-muted-foreground p-1 pr-2 text-right text-[10px] font-normal whitespace-nowrap">
+                <th className="text-muted-foreground p-1 pr-2 text-right text-[11px] sm:text-[10px] font-normal whitespace-nowrap">
                   {state.rowLabels[rowIndex]}
                 </th>
                 {row.map((cell, column) => {

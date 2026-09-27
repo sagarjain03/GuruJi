@@ -98,7 +98,7 @@ export function ActivityHeatmap({ from, to, days }: { from: string; to: string; 
         </svg>
       </div>
       <p className="text-muted-foreground text-xs">{summary}</p>
-      <ul className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px]" aria-label="Legend">
+      <ul className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] sm:text-[10px]" aria-label="Legend">
         {SHADE.map((fill, index) => (
           <li key={index} className="flex items-center gap-1">
             <svg width={CELL} height={CELL} aria-hidden="true">

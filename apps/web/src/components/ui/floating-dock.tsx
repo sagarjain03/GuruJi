@@ -12,7 +12,6 @@ import {
 } from 'motion/react'
 import Link from 'next/link'
 import { createContext, useContext, useRef, useState } from 'react'
-import { GlowingEffect } from '@/components/ui/glowing-effect'
 import { cn } from '@/lib/utils'
 
 /**
@@ -50,11 +49,10 @@ export function FloatingDock({ children, className, ...props }: React.ComponentP
         onPointerMove={(e) => pointerY.set(e.clientY)}
         onPointerLeave={() => pointerY.set(Number.POSITIVE_INFINITY)}
         className={cn(
-          'border-border/60 bg-card/70 relative flex w-14 flex-col items-center gap-1 rounded-full border p-2 backdrop-blur-xl',
+          'border-border bg-card relative flex w-14 flex-col items-center gap-1 border p-2',
           className,
         )}
       >
-        <GlowingEffect disabled={false} glow spread={38} proximity={72} inactiveZone={0.01} />
         {children}
       </nav>
     </PointerY.Provider>
@@ -121,7 +119,7 @@ export function DockItem<TRoute>({
   const slot = reduced ? { height: SIZE.base } : { height: size }
 
   const face = cn(
-    'grid size-full place-items-center rounded-full transition-colors',
+    'grid size-full place-items-center transition-colors',
     disabled
       ? 'text-muted-foreground/25 cursor-not-allowed'
       : href
@@ -170,7 +168,7 @@ export function DockItem<TRoute>({
             initial={{ opacity: 0, x: -6 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -6 }}
-            className="border-border/60 bg-popover text-popover-foreground pointer-events-none absolute top-1/2 left-full z-20 ml-5 -translate-y-1/2 rounded-full border px-3 py-1 text-xs whitespace-nowrap"
+            className="border-border bg-popover text-popover-foreground pointer-events-none absolute top-1/2 left-full z-20 ml-5 -translate-y-1/2 border px-3 py-1 text-xs whitespace-nowrap"
           >
             {label}
             {disabled && <span className="text-muted-foreground"> — soon</span>}

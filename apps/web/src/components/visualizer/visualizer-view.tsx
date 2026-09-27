@@ -108,10 +108,10 @@ export function VisualizerView() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-5 lg:p-8" onKeyDown={onKeyDown}>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-5 lg:p-8" onKeyDown={onKeyDown}>
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
             Algorithm laboratory · {CATEGORY_LABEL[definition.category]}
           </p>
           <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight">{definition.name}</h1>
@@ -119,7 +119,7 @@ export function VisualizerView() {
             {definition.summary} <span className="font-mono text-xs">{definition.complexity}</span>
           </p>
         </div>
-        <label className="text-muted-foreground flex flex-col gap-1 font-mono text-[10px] tracking-[0.14em] uppercase">
+        <label className="text-muted-foreground flex flex-col gap-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Algorithm
           <select
             value={definition.id}
@@ -200,7 +200,7 @@ export function VisualizerView() {
 
           <div className="border-border bg-muted grid gap-3 border p-4 text-sm sm:grid-cols-[1fr_auto]">
             <p aria-live="polite" aria-atomic="true">
-              <span className="text-muted-foreground mr-2 font-mono text-[10px] tracking-[0.14em] uppercase">{step.type}</span>
+              <span className="text-muted-foreground mr-2 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">{step.type}</span>
               {step.description}
             </p>
             <p className="text-muted-foreground font-mono text-xs">
@@ -213,12 +213,12 @@ export function VisualizerView() {
             <ValuePanel title="Metrics" values={step.metrics} empty="" />
           </div>
 
-          <p className="text-muted-foreground font-mono text-[10px]">
+          <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">
             Keys: Space play/pause · ← → step · Home / End jump to the first or last step.
           </p>
         </section>
       )}
-    </main>
+    </div>
   )
 }
 
@@ -262,7 +262,7 @@ function InputForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
-      <label htmlFor="visualizer-input" className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <label htmlFor="visualizer-input" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         Input
       </label>
       <div className="flex flex-wrap gap-2">
@@ -297,7 +297,7 @@ function ValuePanel({ title, values, empty }: { title: string; values: object; e
   const entries = Object.entries(values)
   return (
     <div className="border-border border p-3">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">{title}</h2>
+      <h2 className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">{title}</h2>
       {entries.length === 0 ? (
         <p className="text-muted-foreground mt-2 text-xs">{empty}</p>
       ) : (

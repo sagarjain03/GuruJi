@@ -59,7 +59,7 @@ export function MasteryBar({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
             <span className="truncate text-sm font-medium">{name}</span>
-            <span className="text-muted-foreground shrink-0 font-mono text-[10px] tracking-[0.14em] uppercase">
+            <span className="text-muted-foreground shrink-0 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
               {/* The band, not the number alone — a decimal place would imply a
                   precision the model does not have. */}
               {mastery.lowData ? 'Low data' : mastery.band}
@@ -84,7 +84,7 @@ export function MasteryBar({
           </div>
 
           {meta !== undefined && (
-            <p className="text-muted-foreground mt-1 font-mono text-[10px]">{meta}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{meta}</p>
           )}
         </div>
       </button>
@@ -113,7 +113,7 @@ function Breakdown({ mastery }: { mastery: Mastery }) {
               <span className="text-xs">{COMPONENT_LABEL[component.name]}</span>
               <span
                 className={cn(
-                  'shrink-0 font-mono text-[10px]',
+                  'shrink-0 font-mono text-[11px] sm:text-[10px]',
                   component.value === null && 'text-muted-foreground',
                   component.name === 'hintDependency' &&
                     component.value !== null &&

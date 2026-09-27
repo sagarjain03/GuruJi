@@ -63,7 +63,7 @@ export function GraphCanvas({ step, state }: { step: AlgorithmStep; state: Graph
               {(edge.weight !== undefined || edge.state === 'rejected') && (
                 <g transform={`translate(${midX}, ${midY})`}>
                   <rect x={-12} y={-9} width={24} height={16} fill="var(--card)" />
-                  <text y={3} textAnchor="middle" className="font-mono text-[10px]" fill={style.stroke}>
+                  <text y={3} textAnchor="middle" className="font-mono text-[11px] sm:text-[10px]" fill={style.stroke}>
                     {edge.state === 'rejected' ? '✕' : ''}
                     {edge.weight ?? ''}
                   </text>
@@ -96,7 +96,7 @@ export function GraphCanvas({ step, state }: { step: AlgorithmStep; state: Graph
                 {focused ? ACTIVE.glyph : tag === undefined ? '' : TAG_STYLE[tag].glyph}
               </text>
               {label !== undefined && (
-                <text y={RADIUS + 13} textAnchor="middle" className="fill-muted-foreground font-mono text-[10px]">
+                <text y={RADIUS + 13} textAnchor="middle" className="fill-muted-foreground font-mono text-[11px] sm:text-[10px]">
                   {label}
                 </text>
               )}

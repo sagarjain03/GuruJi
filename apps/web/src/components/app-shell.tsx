@@ -16,6 +16,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { AmbientBackground } from '@/components/ambient-background'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { DockItem, FloatingDock } from '@/components/ui/floating-dock'
 import { UserMenu } from '@/components/user-menu'
@@ -102,7 +103,7 @@ function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
               className={cn(base, 'text-muted-foreground/35 cursor-not-allowed')}
             >
               {body}
-              <span className="border-border/70 text-muted-foreground/60 ml-auto rounded-none border px-2 py-0.5 text-[10px]">
+              <span className="border-border/70 text-muted-foreground/60 ml-auto rounded-none border px-2 py-0.5 text-[11px] sm:text-[10px]">
                 soon
               </span>
             </span>
@@ -130,7 +131,7 @@ function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
   )
 }
 
-function Brand() {
+function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/dashboard" className="flex items-center gap-2">
       <svg viewBox="0 0 28 28" className="size-5" fill="none" aria-hidden="true">
@@ -138,7 +139,9 @@ function Brand() {
         <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="currentColor" fillOpacity={0.6} />
         <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="currentColor" fillOpacity={0.35} />
       </svg>
-      <span className="font-display text-base font-semibold tracking-tight">GuruJi</span>
+      <span className={cn('font-display text-base font-semibold tracking-tight', compact && 'max-sm:sr-only')}>
+        GuruJi
+      </span>
     </Link>
   )
 }
@@ -171,21 +174,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex h-svh overflow-hidden">
-      {/* A engineering-drawing grid rather than a coloured wash. Hairlines at
-          64px, faded out towards the bottom so the page has a top edge without
-          a gradient doing the work. Colour is reserved for things you can act
-          on — nothing decorative is tinted. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.55]"
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-          maskImage: 'linear-gradient(to bottom, black, transparent 65%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black, transparent 65%)',
-        }}
-      />
+      <AmbientBackground />
 
       <a
         href="#content"
@@ -202,7 +191,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70"
           />
           <div className="bg-sidebar border-sidebar-border absolute inset-y-0 left-0 flex w-72 flex-col border-r p-4">
             <div className="mb-4 flex h-10 items-center justify-between">
@@ -211,7 +200,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label="Close menu"
                 onClick={() => setOpen(false)}
-                className="text-muted-foreground hover:text-foreground"
+                className="tap-target text-muted-foreground hover:text-foreground"
               >
                 <X className="size-5" />
               </button>
@@ -230,12 +219,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen(true)}
-            className="text-muted-foreground hover:text-foreground lg:hidden"
+            className="tap-target text-muted-foreground hover:text-foreground lg:hidden"
           >
             <Menu className="size-5" />
           </button>
-          <Brand />
-          <div className="ml-auto flex items-center gap-3">
+          <Brand compact />
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <UserMenu />
             <ThemeToggle />
           </div>

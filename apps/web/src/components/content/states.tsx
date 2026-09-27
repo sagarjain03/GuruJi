@@ -85,7 +85,7 @@ export function DifficultyBadge({ difficulty }: { difficulty: string }) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 border px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] uppercase',
+        'inline-flex shrink-0 border px-2 py-0.5 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
         DIFFICULTY_STYLE[difficulty] ?? 'text-muted-foreground border-border',
       )}
     >

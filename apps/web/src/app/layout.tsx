@@ -66,6 +66,9 @@ const serif = Instrument_Serif({
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  // Resolves the generated opengraph-image to an absolute URL, which link
+  // previews require. Set NEXT_PUBLIC_SITE_URL to the public origin in production.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: {
     default: 'GuruJi — Train Your DSA Skills',
     template: '%s · GuruJi',

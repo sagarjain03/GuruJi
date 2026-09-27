@@ -99,7 +99,7 @@ function Panel({ className, children }: { className?: string; children: React.Re
   return (
     <section
       className={cn(
-        'border-border bg-card/70 relative overflow-hidden border p-5 backdrop-blur-xl',
+        'card-spot border-border bg-card relative overflow-hidden border p-5',
         className,
       )}
     >
@@ -123,7 +123,7 @@ function HeroPanel({
   return (
     <Panel className="flex flex-col gap-4">
       <div className="relative">
-        <span className="border-border/70 text-muted-foreground inline-flex items-center gap-1.5 border px-3 py-1 font-mono text-[10px] tracking-[0.18em] uppercase">
+        <span className="border-border/70 text-muted-foreground inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-medium">
           <Sparkles className="size-3" />
           Today&apos;s training
         </span>
@@ -160,7 +160,7 @@ function HeroPanel({
 function Chip({ label, value }: { label: string; value: string }) {
   return (
     <span className="border-border/60 bg-background/40 inline-flex items-center gap-2 border px-3 py-1.5">
-      <span className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         {label}
       </span>
       <span className="font-mono text-xs font-semibold">{value}</span>
@@ -207,7 +207,7 @@ function SetupPanel({
               <span
                 className={cn(
                   'grid size-8 place-items-center rounded-none',
-                  highlight ? 'bg-white/20' : 'bg-background/60 text-muted-foreground',
+                  highlight ? 'bg-primary-foreground/10' : 'bg-background/60 text-muted-foreground',
                 )}
               >
                 <Icon className="size-4" />
@@ -217,7 +217,7 @@ function SetupPanel({
                 <span
                   className={cn(
                     'block truncate text-xs',
-                    highlight ? 'text-white/80' : 'text-muted-foreground',
+                    highlight ? 'text-primary-foreground/70' : 'text-muted-foreground',
                   )}
                 >
                   {value}
@@ -226,7 +226,7 @@ function SetupPanel({
               <ChevronRight
                 className={cn(
                   'ml-auto size-4 shrink-0',
-                  highlight ? 'text-white/70' : 'text-muted-foreground/50',
+                  highlight ? 'text-primary-foreground/60' : 'text-muted-foreground/50',
                 )}
               />
             </div>
@@ -263,7 +263,7 @@ function Gauge({ value, label }: { value: number | null; label: string }) {
         <span className="font-display text-3xl font-semibold tracking-tight">
           {value === null ? '—' : value}
         </span>
-        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
           {label}
         </span>
       </div>
@@ -475,7 +475,7 @@ function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div>
       <p className="font-display text-2xl leading-none font-semibold">{value}</p>
-      <p className="text-muted-foreground mt-1 font-mono text-[10px] tracking-[0.18em] uppercase">
+      <p className="text-muted-foreground mt-1 font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
         {label}
       </p>
     </div>

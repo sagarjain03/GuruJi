@@ -1,6 +1,9 @@
 import { DashboardView } from '@/components/dashboard/dashboard-view'
 
-export const metadata = { title: 'Dashboard' }
+export const metadata = {
+  title: 'Dashboard',
+  description: 'What to practise next, what is due for revision, and where you stand.',
+}
 
 /**
  * Phase 1 dashboard.

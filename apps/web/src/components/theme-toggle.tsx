@@ -41,7 +41,7 @@ export function ThemeToggle() {
             aria-label={label}
             onClick={() => setTheme(value)}
             className={cn(
-              'grid size-7 place-items-center rounded-none transition-colors',
+              'tap-target grid size-7 place-items-center rounded-none transition-colors',
               active
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground hover:text-foreground',

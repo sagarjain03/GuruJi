@@ -53,12 +53,12 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
     <section className="border-primary/30 bg-primary/5 flex flex-col gap-3 border p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h2 className="flex items-center gap-2 font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
             <Lightbulb className="size-3.5" /> Mentor
           </h2>
           <p className="text-muted-foreground mt-1 text-xs">Ask for a nudge. The answer stays yours.</p>
         </div>
-        <span className="text-muted-foreground font-mono text-[10px] uppercase">Level {level}</span>
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] uppercase">Level {level}</span>
       </div>
 
       <textarea
@@ -102,7 +102,7 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
       )}
 
       {hint.data && <div className="border-border bg-background border p-3 text-sm leading-relaxed">{hint.data.hint}</div>}
-      {hint.isError && <p className="text-destructive text-xs">The mentor is unavailable right now.</p>}
+      {hint.isError && <p role="alert" className="text-destructive text-xs">The mentor is unavailable right now.</p>}
       {analysis && (
         <div className="border-border bg-background flex flex-col gap-3 border p-3 text-sm">
           <MentorSection title="Correctness" value={analysis.correctness} />
@@ -125,7 +125,7 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
           <MentorSection title="Approach" value={solution.approach} />
           <MentorSection title="Complexity" value={solution.complexity} />
           <div>
-            <h3 className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">Code</h3>
+            <h3 className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">Code</h3>
             <pre className="bg-muted mt-1 overflow-x-auto p-3 text-xs whitespace-pre-wrap">{solution.code}</pre>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
 function MentorSection({ title, value }: { title: string; value: string }) {
   return (
     <div>
-      <h3 className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">{title}</h3>
+      <h3 className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">{title}</h3>
       <p className="mt-1 leading-relaxed">{value}</p>
     </div>
   )

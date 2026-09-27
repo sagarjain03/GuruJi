@@ -35,11 +35,11 @@ export function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       {/* The only route to the profile on a phone, where the icon rail is hidden. */}
       <Link
         href="/profile"
-        className="text-muted-foreground hover:text-foreground max-w-32 truncate text-sm underline-offset-4 hover:underline sm:max-w-48"
+        className="text-muted-foreground hover:text-foreground max-w-20 truncate text-sm underline-offset-4 hover:underline sm:max-w-48"
       >
         {profile.displayName}
       </Link>

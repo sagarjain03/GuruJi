@@ -51,7 +51,7 @@ export function RoadmapView() {
 
       {data?.sections.map((group) => (
         <section key={group.section} className="flex flex-col gap-2">
-          <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">
+          <h2 className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
             {SECTION_LABEL[group.section]}
           </h2>
           <div className="flex flex-col gap-2">
@@ -94,7 +94,7 @@ function TopicCard({ node }: { node: RoadmapNode }) {
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-base font-semibold tracking-tight">{topic.name}</h3>
-        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           {topic.problemCount} {topic.problemCount === 1 ? 'problem' : 'problems'} ·{' '}
           {node.estimatedHours}h
         </span>
@@ -103,7 +103,7 @@ function TopicCard({ node }: { node: RoadmapNode }) {
       <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">{topic.description}</p>
 
       {topic.prerequisiteSlugs.length > 0 && (
-        <p className="text-muted-foreground mt-2 font-mono text-[10px] tracking-[0.1em]">
+        <p className="text-muted-foreground mt-2 font-mono text-[11px] sm:text-[10px] tracking-[0.1em]">
           NEEDS FIRST: {topic.prerequisiteSlugs.join(' · ')}
         </p>
       )}

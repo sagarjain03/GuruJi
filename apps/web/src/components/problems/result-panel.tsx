@@ -85,7 +85,7 @@ export function ResultPanel({
 
       {submission.compileOutput !== null && submission.compileOutput.length > 0 && (
         <div>
-          <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+          <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
             Compiler output
           </p>
           <pre className="bg-muted mt-1 max-h-40 overflow-auto p-2 font-mono text-xs whitespace-pre-wrap">
@@ -137,18 +137,18 @@ function TestResult({ result }: { result: SubmissionResult }) {
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={cn(
-            'font-mono text-[10px] tracking-[0.14em] uppercase',
+            'font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
             result.passed ? 'text-easy' : 'text-hard',
           )}
         >
           {result.passed ? 'Pass' : 'Fail'}
         </span>
-        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.12em] uppercase">
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.12em] uppercase">
           Case {String(result.index + 1)}
           {result.isSample ? ' · sample' : ' · hidden'}
         </span>
         {result.runtimeMs !== null && (
-          <span className="text-muted-foreground ml-auto font-mono text-[10px]">
+          <span className="text-muted-foreground ml-auto font-mono text-[11px] sm:text-[10px]">
             {String(result.runtimeMs)} ms
           </span>
         )}
@@ -174,7 +174,7 @@ function TestResult({ result }: { result: SubmissionResult }) {
 function Pane({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         {label}
       </p>
       <pre className="bg-muted mt-1 max-h-28 overflow-auto p-2 font-mono text-xs whitespace-pre-wrap">

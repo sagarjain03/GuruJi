@@ -57,7 +57,7 @@ export function ChartPanel({
         <>
           {children}
           <details className="text-xs">
-            <summary className="text-muted-foreground hover:text-foreground cursor-pointer font-mono text-[10px] tracking-[0.14em] uppercase">
+            <summary className="text-muted-foreground hover:text-foreground cursor-pointer font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
               Show data
             </summary>
             <div className="mt-2 max-h-64 overflow-auto">

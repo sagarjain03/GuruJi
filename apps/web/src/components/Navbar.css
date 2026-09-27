@@ -1,5 +1,5 @@
-/* Reference: logo hard left, links in a centred outlined capsule where each item
-   carries its own soft chip, one white pill CTA hard right. Bar is transparent. */
+/* Logo hard left, links in a centred hairline capsule, sign-in and one CTA hard
+   right. Bar is transparent; the capsule and controls are solid graphite. */
 .nav {
   position: absolute;
   inset: 0 0 auto;
@@ -31,9 +31,7 @@
   padding: 5px;
   border: 1px solid var(--hair);
   border-radius: 0;
-  background: rgba(14, 14, 18, 0.42);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: var(--ground);
 }
 
 .nav__pill ul {
@@ -45,7 +43,8 @@
   list-style: none;
 }
 
-.nav__pill a {
+.nav__pill a,
+.nav__pill .nav__soon {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -53,6 +52,9 @@
   border-radius: 0;
   font-size: 13.5px;
   font-weight: 450;
+}
+
+.nav__pill a {
   color: rgba(245, 245, 245, 0.82);
   background: rgba(255, 255, 255, 0.05);
   transition:
@@ -64,16 +66,41 @@
   color: #fff;
 }
 
-.nav__chev {
-  width: 10px;
-  height: 10px;
-  opacity: 0.7;
+.nav__soon {
+  color: var(--ink-ghost);
+  cursor: not-allowed;
+}
+
+.nav__soon-tag {
+  padding: 1px 6px;
+  border: 1px solid var(--hair);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+@media (min-width: 640px) {
+  .nav__soon-tag {
+    font-size: 10px;
+  }
 }
 
 .nav__actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+}
+
+.nav__signin {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 13.5px;
+  font-weight: 450;
+  color: rgba(245, 245, 245, 0.82);
+  transition: color 0.3s var(--ease-out);
+}
+.nav__signin:hover {
+  color: #fff;
 }
 
 .nav__cta {
@@ -84,12 +111,11 @@
 .nav__burger {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--hair);
   border-radius: 0;
-  background: rgba(14, 14, 18, 0.5);
-  backdrop-filter: blur(10px);
+  background: var(--ground);
 }
 .nav__burger svg {
   width: 20px;
@@ -98,12 +124,11 @@
 
 .nav__sheet {
   position: fixed;
-  inset: 68px 12px auto;
+  inset: 72px 12px auto;
   padding: 18px;
   border: 1px solid var(--hair);
   border-radius: 0;
-  background: rgba(5, 5, 6, 0.94);
-  backdrop-filter: blur(20px);
+  background: var(--ground-deep);
 }
 .nav__sheet ul {
   margin: 0 0 14px;
@@ -112,11 +137,16 @@
   display: grid;
   gap: 2px;
 }
-.nav__sheet li a {
-  display: block;
+.nav__sheet li a,
+.nav__sheet li .nav__soon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 10px;
   border-radius: 0;
   font-size: 16px;
+}
+.nav__sheet li a {
   color: rgba(245, 245, 245, 0.86);
 }
 .nav__sheet li a:hover {
@@ -133,7 +163,8 @@
 }
 
 @media (max-width: 480px) {
-  .nav__cta {
+  .nav__cta,
+  .nav__signin {
     display: none;
   }
 }

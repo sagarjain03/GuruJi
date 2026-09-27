@@ -2,7 +2,10 @@ import { Suspense } from 'react'
 import { LoadingState } from '@/components/content/states'
 import { ProblemListView } from '@/components/problems/problem-list-view'
 
-export const metadata = { title: 'Problems' }
+export const metadata = {
+  title: 'Problems',
+  description: 'Every problem written for GuruJi, with its own test cases and hints.',
+}
 
 /**
  * The filters live in the URL, so the view reads `useSearchParams` — which the

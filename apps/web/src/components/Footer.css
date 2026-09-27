@@ -1,0 +1,44 @@
+/* One hairline row: mark and year on the left, the real pages on the right. */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 20px var(--gutter);
+  border-top: 1px solid var(--hair-soft);
+  background: var(--ground-deep);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer__logo {
+  width: 16px;
+  height: 16px;
+  color: var(--ink-soft);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer__links a {
+  display: inline-block;
+  padding: 6px 0;
+  color: var(--ink-soft);
+  transition: color 0.2s ease;
+}
+.footer__links a:hover {
+  color: var(--ink);
+}

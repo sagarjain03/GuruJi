@@ -1,6 +1,26 @@
 /* Tailwind utilities for the landing, without preflight. The landing's own
    per-component CSS is the design, so the reset must not run here — only the
-   utilities that shared components in components/ui need. */
-@layer theme, base, components, utilities;
+   utilities that shared components in components/ui need.
+
+   Utilities are deliberately NOT in a cascade layer here. globals.css is
+   unlayered, and unlayered rules beat every layered rule regardless of
+   specificity — so its `a { color: inherit }` was overriding `<Button>`'s
+   `text-primary-foreground` and the CTA rendered white on white. Unlayered,
+   ordinary specificity applies and a utility class beats an element selector. */
+@layer theme;
 @import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tailwindcss/utilities.css';
+
+/* The few app tokens the shared <Button> reads. Values are the dark theme's
+   from styles/app.css — the landing is always dark. Keep the two in step. */
+:root {
+  --primary: #f2f2f4;
+  --primary-foreground: #0b0b0e;
+  --ring: #d4d4d8;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+}

@@ -1,30 +1,89 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { HardLink } from '@/components/hard-link'
+import { Button } from '@/components/ui/button'
 import { ArrowRight, Globe, patterns } from './icons'
-import GradientButton from './ui/button-1'
 import './Hero.css'
 
-// WebGL needs a browser — this never renders on the server. Loading it lazily
-// also keeps three.js out of the initial bundle, so the copy paints first.
+// WebGL needs a browser — this never renders on the server. The chunk (three.js
+// and the model) is only requested once `stage` says so, never on first paint.
 const RobotScene = dynamic(() => import('./RobotScene'), { ssr: false })
 
-const stats = [
-  { value: '247+', label: 'Problems solved' },
-  { value: '76%', label: 'Accuracy' },
-]
+type Stage = 'pending' | 'scene' | 'poster'
 
-const bars = [34, 52, 44, 70, 88]
+/**
+ * Phones and reduced-motion get a still image and never download three.js.
+ * Everyone else gets the live scene, started only after the page has loaded
+ * and the main thread is idle, so it never competes with the copy or the CTA.
+ */
+const STILL_QUERIES = ['(max-width: 767px)', '(prefers-reduced-motion: reduce)']
+
+function subscribeToStill(onChange: () => void): () => void {
+  const lists = STILL_QUERIES.map((query) => window.matchMedia(query))
+  for (const list of lists) list.addEventListener('change', onChange)
+  return () => {
+    for (const list of lists) list.removeEventListener('change', onChange)
+  }
+}
+
+/** Null on the server, where the screen is unknown. */
+function useStill(): boolean | null {
+  return useSyncExternalStore(
+    subscribeToStill,
+    () => STILL_QUERIES.some((query) => window.matchMedia(query).matches),
+    () => null,
+  )
+}
+
+function useStage(): Stage {
+  const still = useStill()
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if (still !== false) return
+
+    let idle = 0
+    let timer = 0
+    const start = () => {
+      if (typeof window.requestIdleCallback === 'function') {
+        idle = window.requestIdleCallback(() => setLoaded(true), { timeout: 2000 })
+      } else {
+        timer = window.setTimeout(() => setLoaded(true), 200)
+      }
+    }
+    if (document.readyState === 'complete') start()
+    else window.addEventListener('load', start, { once: true })
+
+    return () => {
+      window.removeEventListener('load', start)
+      if (idle) window.cancelIdleCallback(idle)
+      window.clearTimeout(timer)
+    }
+  }, [still])
+
+  if (still === null) return 'pending'
+  if (still) return 'poster'
+  return loaded ? 'scene' : 'pending'
+}
 
 export default function Hero() {
   const [ready, setReady] = useState(false)
+  const stage = useStage()
 
   return (
     <section className="hero">
       <div className="hero__media">
-        <div className={`hero__stage ${ready ? 'is-ready' : ''}`} aria-hidden="true">
-          <RobotScene onReady={() => setReady(true)} />
+        <div
+          className={`hero__stage ${ready || stage === 'poster' ? 'is-ready' : ''}`}
+          aria-hidden="true"
+        >
+          {stage === 'scene' && <RobotScene onReady={() => setReady(true)} />}
+          {stage === 'poster' && (
+            // eslint-disable-next-line @next/next/no-img-element -- a fixed, pre-sized still; next/image adds nothing here
+            <img className="hero__poster" src="/robot-poster.webp" alt="" decoding="async" />
+          )}
         </div>
         <div className="hero__scrim" aria-hidden="true" />
         {/* Two rules, not the original three — the middle one ran straight down
@@ -47,11 +106,11 @@ export default function Hero() {
           </p>
 
           <h1 className="hero__title">
-            Train Your
+            Know What
             <br />
-            DSA Skills
+            to Practise
             <br />
-            Like a <em>Pro</em>
+            <em>Next</em>
           </h1>
 
           <p className="hero__sub">
@@ -59,58 +118,14 @@ export default function Hero() {
           </p>
 
           <div className="hero__cta">
-            <GradientButton className="hero__go" href="#main" width="200px" height="54px">
-              Start training
-              <ArrowRight aria-hidden="true" />
-            </GradientButton>
-
-            <div className="hero__proof">
-              <div className="hero__faces" aria-hidden="true">
-                <i style={{ '--a': '#fafafa', '--b': '#d4d4d8' } as React.CSSProperties} />
-                <i style={{ '--a': '#d4d4d8', '--b': '#a1a1aa' } as React.CSSProperties} />
-                <i style={{ '--a': '#a1a1aa', '--b': '#71717a' } as React.CSSProperties} />
-                <i style={{ '--a': '#71717a', '--b': '#52525b' } as React.CSSProperties} />
-              </div>
-              <span className="hero__proof-text">
-                <strong>10K+ Problems Practiced</strong>
-                AI Guided Training
-              </span>
-            </div>
+            <Button asChild size="lg">
+              <HardLink href="/register">
+                Start training
+                <ArrowRight />
+              </HardLink>
+            </Button>
           </div>
-
-          <ul className="hero__stats">
-            {stats.map((stat) => (
-              <li key={stat.label} className="stat">
-                <span className="stat__mark" aria-hidden="true">
-                  *
-                </span>
-                <span className="stat__value">{stat.value}</span>
-                <span className="stat__label">{stat.label}</span>
-                <span className="stat__rule" aria-hidden="true" />
-              </li>
-            ))}
-          </ul>
         </div>
-
-        <aside className="hero__ghost" aria-hidden="true">
-          <div className="ghost__row">
-            <div className="ghost__bars">
-              {bars.map((h, i) => (
-                <span key={i} style={{ height: `${h}%` }} />
-              ))}
-            </div>
-            <p className="ghost__kpi">
-              <strong>+42%</strong>Problem Solving
-              <br />
-              Performance
-            </p>
-          </div>
-          <h2 className="ghost__title">Track Your Progress</h2>
-          <p className="ghost__copy">
-            We track every attempt through meaningful metrics and adapt the training path until the
-            pattern feels effortless.
-          </p>
-        </aside>
       </div>
 
       <div className="hero__foot">

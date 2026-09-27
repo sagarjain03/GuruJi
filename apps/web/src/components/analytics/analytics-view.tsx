@@ -52,9 +52,9 @@ export function AnalyticsView() {
   }))
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-3 p-5 lg:p-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 p-5 lg:p-8">
       <header className="mb-2">
-        <p className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">Analytics</p>
+        <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">Analytics</p>
         <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight">Your progress, measured</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           Every number here comes from what you have already submitted, revised and logged. Days and weeks are in UTC,
@@ -215,6 +215,6 @@ export function AnalyticsView() {
           />
         </ChartPanel>
       </div>
-    </main>
+    </div>
   )
 }

@@ -95,24 +95,46 @@ export async function judge(job: RunnerJob): Promise<RunnerCallback> {
     const results: RunnerResult[] = []
     let verdict: Verdict = 'ACCEPTED'
     let slowestMs = 0
+    let timeLimitConfirmed = false
 
-    for (const testCase of job.testCases) {
-      const run = await runSandboxed({
+    const runCase = (input: string) =>
+      runSandboxed({
         image: plan.image,
         // Read-only: the program must not be able to rewrite the binary it is.
         workDir,
         mount: 'ro',
         entrypoint: plan.run.entrypoint,
         args: plan.run.args,
-        stdin: testCase.input,
+        stdin: input,
         timeoutMs: job.timeLimitMs,
         memoryLimitMb: job.memoryLimitMb,
         outputCapBytes: OUTPUT_CAP_BYTES,
       })
 
-      slowestMs = Math.max(slowestMs, run.wallMs)
+    for (const testCase of job.testCases) {
+      let run = await runCase(testCase.input)
+      let outcome = classify(run, testCase.expectedOutput, job.timeLimitMs)
 
-      const outcome = classify(run, testCase.expectedOutput, job.timeLimitMs)
+      /*
+       * A time limit is confirmed before it is reported.
+       *
+       * The clock is the container's wall time, and that includes the
+       * interpreter booting. On a busy host the boot alone spiked past two
+       * seconds, and about one correct submission in seven came back
+       * TIME_LIMIT_EXCEEDED. So an overrunning case runs once more, and the
+       * second run is the one that counts.
+       *
+       * Only until a time limit is confirmed: after that the program is
+       * genuinely slow, and retrying every remaining case would double the cost
+       * of exactly the submissions that are already the most expensive.
+       */
+      if (outcome.verdict === 'TIME_LIMIT_EXCEEDED' && !timeLimitConfirmed) {
+        run = await runCase(testCase.input)
+        outcome = classify(run, testCase.expectedOutput, job.timeLimitMs)
+        timeLimitConfirmed = outcome.verdict === 'TIME_LIMIT_EXCEEDED'
+      }
+
+      slowestMs = Math.max(slowestMs, run.wallMs)
       verdict = worst(verdict, outcome.verdict)
 
       results.push({

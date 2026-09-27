@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   MISTAKE_CATEGORY_LABEL,
   MISTAKE_TEXT_MAX,
@@ -50,6 +51,7 @@ export function MistakeForm({
       setOpen(false)
       setWhatWentWrong('')
       setCorrectIdea('')
+      toast('Mistake saved.')
     },
   })
 
@@ -76,7 +78,7 @@ export function MistakeForm({
       }}
     >
       <fieldset className="flex flex-wrap gap-1">
-        <legend className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.14em] uppercase">
+        <legend className="text-muted-foreground mb-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           What kind of mistake
         </legend>
         {CATEGORIES.map((option) => (
@@ -98,7 +100,7 @@ export function MistakeForm({
       </fieldset>
 
       <label className="flex flex-col gap-1">
-        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           What went wrong
         </span>
         <textarea
@@ -114,7 +116,7 @@ export function MistakeForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+        <span className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           The right idea (optional)
         </span>
         <textarea

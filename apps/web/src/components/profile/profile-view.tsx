@@ -32,7 +32,7 @@ export function ProfileView() {
   const data = overview.data
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-5 lg:p-8">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-5 lg:p-8">
       <header className="border-border bg-card/70 flex flex-wrap items-center gap-5 border p-5">
         <span
           aria-hidden="true"
@@ -46,7 +46,7 @@ export function ProfileView() {
             .toUpperCase()}
         </span>
         <div className="min-w-0">
-          <p className="text-muted-foreground font-mono text-[10px] tracking-[0.18em] uppercase">Profile</p>
+          <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">Profile</p>
           <h1 className="font-display mt-1 truncate text-3xl font-semibold tracking-tight">{profile.displayName}</h1>
           <p className="text-muted-foreground mt-1 truncate text-sm">
             {user.email} · joined {JOINED.format(new Date(user.createdAt))}
@@ -55,7 +55,7 @@ export function ProfileView() {
       </header>
 
       <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-stats">
-        <h2 id="profile-stats" className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+        <h2 id="profile-stats" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Progress
         </h2>
         {overview.isPending ? (
@@ -80,7 +80,7 @@ export function ProfileView() {
       </section>
 
       <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-preferences">
-        <h2 id="profile-preferences" className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+        <h2 id="profile-preferences" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Preferences
         </h2>
         <dl className="mt-3 grid gap-4 text-sm sm:grid-cols-2">
@@ -90,7 +90,7 @@ export function ProfileView() {
           <Field label="Time zone" value={profile.timezone} />
         </dl>
       </section>
-    </main>
+    </div>
   )
 }
 

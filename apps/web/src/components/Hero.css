@@ -77,6 +77,20 @@ body[data-dragging] {
   height: 100% !important;
 }
 
+/* The still used on phones and with reduced motion: a frame of the live scene,
+   full height and centred, as the canvas frames it. */
+.hero__poster {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Asymmetric, as in the original: a wash under the copy, a soft floor for the
    pattern strip, and almost nothing over the subject. Values are neutral
    near-black — a warm tint read brown against graphite. Lighter through the
@@ -193,164 +207,6 @@ body[data-dragging] {
   margin-top: calc(26px * var(--scale));
 }
 
-.hero__go {
-  font-size: calc(15px * var(--ui-scale));
-  font-weight: 600;
-}
-.hero__go svg {
-  width: 1.15em;
-  height: 1.15em;
-}
-
-.hero__proof {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.hero__faces {
-  display: flex;
-}
-.hero__faces i {
-  width: calc(28px * var(--ui-scale));
-  height: calc(28px * var(--ui-scale));
-  margin-left: -9px;
-  border-radius: 0;
-  border: 2px solid rgba(8, 8, 10, 0.85);
-  background: linear-gradient(140deg, var(--a), var(--b));
-}
-.hero__faces i:first-child {
-  margin-left: 0;
-}
-
-.hero__proof-text {
-  display: grid;
-  font-size: calc(10px * var(--ui-scale));
-  line-height: 1.4;
-  color: var(--ink-faint);
-}
-.hero__proof-text strong {
-  font-size: calc(12px * var(--ui-scale));
-  font-weight: 550;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* ---------- stat cards ---------- */
-.hero__stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: calc(14px * var(--scale));
-  margin: calc(30px * var(--scale)) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stat {
-  position: relative;
-  display: grid;
-  align-content: space-between;
-  width: calc(200px * var(--scale));
-  min-height: calc(132px * var(--scale));
-  padding: calc(18px * var(--ui-scale));
-  border: 1px solid var(--hair);
-  border-radius: 0;
-  background: var(--glass);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
-}
-.stat:nth-child(2) {
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.16), rgba(200, 200, 206, 0.06));
-}
-
-.stat__mark {
-  position: absolute;
-  top: calc(14px * var(--ui-scale));
-  right: calc(16px * var(--ui-scale));
-  font-size: calc(15px * var(--ui-scale));
-  color: var(--ink-faint);
-}
-
-.stat__value {
-  font-family: var(--font-display);
-  font-size: calc(clamp(1.7rem, 2.4vw, 2.3rem) * var(--scale));
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-
-.stat__label {
-  font-size: calc(11.5px * var(--ui-scale));
-  color: var(--ink-faint);
-}
-
-.stat__rule {
-  position: absolute;
-  right: calc(16px * var(--ui-scale));
-  bottom: calc(22px * var(--ui-scale));
-  width: 14px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-/* ---------- ghost analytics panel ---------- */
-.hero__ghost {
-  display: none;
-  align-self: start;
-  margin-top: calc(40px * var(--scale));
-  max-width: 330px;
-  color: rgba(245, 245, 245, 0.26);
-}
-
-.ghost__row {
-  display: flex;
-  align-items: flex-end;
-  gap: 18px;
-}
-
-.ghost__bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 5px;
-  height: 74px;
-}
-.ghost__bars span {
-  width: 9px;
-  border-radius: 0;
-  background: rgba(255, 255, 255, 0.5);
-}
-.ghost__bars span:last-child {
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.ghost__kpi {
-  font-size: 13px;
-  line-height: 1.4;
-}
-.ghost__kpi strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: rgba(245, 245, 245, 0.55);
-}
-
-.ghost__title {
-  margin-top: 30px;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: rgba(245, 245, 245, 0.4);
-}
-
-.ghost__copy {
-  margin-top: 8px;
-  font-size: 12.5px;
-  line-height: 1.6;
-}
-
 /* ---------- footer band ---------- */
 .hero__foot {
   position: relative;
@@ -404,39 +260,15 @@ body[data-dragging] {
   height: calc(17px * var(--ui-scale));
 }
 
-/* ---------- entrance ---------- */
-.hero__note,
-.hero__title,
-.hero__sub,
-.hero__cta,
-.hero__stats,
-.hero__foot {
-  animation: rise 0.95s var(--ease-out) both;
-}
-.hero__title {
-  animation-delay: 0.06s;
-}
-.hero__sub {
-  animation-delay: 0.14s;
-}
-.hero__cta {
-  animation-delay: 0.2s;
-}
-.hero__stats {
-  animation-delay: 0.28s;
-}
-.hero__foot {
-  animation-delay: 0.36s;
+/* ---------- entrance ----------
+   One quiet fade on the copy block, nothing staggered, nothing moving. */
+.hero__lead {
+  animation: hero-in 0.6s ease-out both;
 }
 
-@keyframes rise {
+@keyframes hero-in {
   from {
     opacity: 0;
-    transform: translateY(22px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -445,10 +277,6 @@ body[data-dragging] {
   .hero__inner {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
     align-items: start;
-  }
-  .hero__ghost {
-    display: block;
-    justify-self: end;
   }
 }
 
@@ -481,10 +309,6 @@ body[data-dragging] {
   .hero__title {
     letter-spacing: -0.03em;
   }
-  .stat {
-    flex: 1 1 140px;
-    width: auto;
-  }
   .hero__watermark {
     display: none;
   }
@@ -495,12 +319,7 @@ body[data-dragging] {
     opacity: 1;
     transform: none;
   }
-  .hero__note,
-  .hero__title,
-  .hero__sub,
-  .hero__cta,
-  .hero__stats,
-  .hero__foot {
+  .hero__lead {
     animation: none;
   }
 }

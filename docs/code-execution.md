@@ -144,10 +144,22 @@ attacker.
 |---|---|
 | `ACCEPTED` | Every test case passed within limits |
 | `WRONG_ANSWER` | Ran cleanly, output mismatch |
-| `TIME_LIMIT_EXCEEDED` | Wall-clock limit hit |
+| `TIME_LIMIT_EXCEEDED` | Wall-clock limit hit — on two runs of the same case (see below) |
 | `MEMORY_LIMIT_EXCEEDED` | Container OOM-killed |
 | `RUNTIME_ERROR` | Non-zero exit, signal, or uncaught exception |
 | `COMPILE_ERROR` | Compilation failed — compiler output returned |
+
+**A time limit is confirmed before it is reported.** The clock is the
+container's wall time, which includes the interpreter booting, and on a busy
+host that boot alone spiked past two seconds — about one correct submission in
+seven came back `TIME_LIMIT_EXCEEDED`. So a case that overruns is run once
+more and the second run counts. Retries stop at the first confirmed time
+limit: a genuinely slow program costs one extra run, not double. No other
+verdict is retried; load cannot turn right output into wrong output.
+
+**The compiler has its own memory budget** (`COMPILE_MEMORY_MB`, 512 MB). The
+problem's limit bounds the program; given to `cc1plus` as well, it killed the
+compiler on `#include <bits/stdc++.h>`.
 | `INTERNAL_ERROR` | **Our** failure |
 
 `INTERNAL_ERROR` is deliberately separate and is **never counted against the

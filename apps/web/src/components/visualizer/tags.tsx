@@ -23,7 +23,7 @@ export function Legend({ tags, extra = [] }: { tags: Iterable<Tag>; extra?: { gl
     ...extra,
   ]
   return (
-    <ul className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px]" aria-label="Legend">
+    <ul className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] sm:text-[10px]" aria-label="Legend">
       {entries.map((entry) => (
         <li key={entry.label} className="flex items-center gap-1.5">
           <span aria-hidden="true" style={{ color: entry.color }}>

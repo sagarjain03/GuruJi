@@ -47,6 +47,9 @@ export function Workspace({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const columnRef = useRef<HTMLDivElement | null>(null)
 
+  // Below `lg` only one pane shows at a time. Desktop ignores this entirely.
+  const [pane, setPane] = useState<Pane>('statement')
+
   const drafts = useDrafts(problem.slug, language, problem.starterCode)
 
   const dragStatement = useCallback((pointer: PointerEvent) => {
@@ -79,8 +82,18 @@ export function Workspace({
       ref={containerRef}
       className="flex h-[calc(100svh-6.5rem)] min-h-[560px] flex-col lg:flex-row"
     >
+      <PaneTabs value={pane} onChange={setPane} />
+
       <div
-        className="border-border min-w-0 overflow-y-auto border lg:border-r-0"
+        id="pane-statement"
+        role="tabpanel"
+        aria-labelledby="tab-statement"
+        className={cn(
+          'border-border min-w-0 overflow-y-auto border lg:border-r-0',
+          // The inline flex-basis is the desktop split; on phones the pane fills.
+          'max-lg:min-h-0 max-lg:flex-1 max-lg:basis-auto!',
+          pane !== 'statement' && 'max-lg:hidden',
+        )}
         style={{ flexBasis: `${String(leftPercent)}%` }}
       >
         <div className="p-5">{statement}</div>
@@ -101,41 +114,119 @@ export function Workspace({
       {/* `min-w-0` is load-bearing: without it the column refuses to shrink below
           Monaco's min-content width, and the statement split can be dragged
           narrower but never wider. */}
-      <div ref={columnRef} className="border-border flex min-h-0 min-w-0 flex-1 flex-col border">
-        <Toolbar
-          language={language}
-          onLanguage={setLanguage}
-          status={drafts.status}
-          onReset={() => {
-            drafts.reset()
-            setContentVersion((version) => version + 1)
-          }}
-        />
+      <div
+        ref={columnRef}
+        className={cn(
+          'border-border flex min-h-0 min-w-0 flex-1 flex-col border',
+          pane === 'statement' && 'max-lg:hidden',
+        )}
+      >
+        {/* Hidden, never unmounted: switching tabs keeps Monaco's state. */}
+        <div
+          id="pane-code"
+          role="tabpanel"
+          aria-labelledby="tab-code"
+          className={cn('flex min-h-0 flex-1 flex-col', pane !== 'code' && 'max-lg:hidden')}
+        >
+          <Toolbar
+            language={language}
+            onLanguage={setLanguage}
+            status={drafts.status}
+            onReset={() => {
+              drafts.reset()
+              setContentVersion((version) => version + 1)
+            }}
+          />
 
-        <div className="min-h-0 flex-1">
-          {drafts.isLoading ? null : (
-            <CodeEditor
-              language={language}
-              editorKey={`${language}:${String(contentVersion)}`}
-              initialValue={drafts.code}
-              onChange={drafts.setCode}
-            />
-          )}
+          <div className="min-h-0 flex-1">
+            {drafts.isLoading ? null : (
+              <CodeEditor
+                language={language}
+                editorKey={`${language}:${String(contentVersion)}`}
+                initialValue={drafts.code}
+                onChange={drafts.setCode}
+              />
+            )}
+          </div>
         </div>
 
-        <ResizeHandle
-          axis="y"
-          label="Resize the test panel"
-          value={testHeight}
-          min={TEST_MIN}
-          max={2000}
-          onMove={dragTests}
-          onNudge={nudgeTests}
-        />
+        <div className="shrink-0 max-lg:hidden">
+          <ResizeHandle
+            axis="y"
+            label="Resize the test panel"
+            value={testHeight}
+            min={TEST_MIN}
+            max={2000}
+            onMove={dragTests}
+            onNudge={nudgeTests}
+          />
+        </div>
 
-        <TestPanel problem={problem} language={language} code={drafts.code} height={testHeight} />
-        <MentorPanel problemSlug={problem.slug} code={drafts.code} />
+        <div
+          id="pane-tests"
+          role="tabpanel"
+          aria-labelledby="tab-tests"
+          className={cn(
+            'flex flex-col lg:shrink-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto',
+            pane !== 'tests' && 'max-lg:hidden',
+          )}
+        >
+          <TestPanel problem={problem} language={language} code={drafts.code} height={testHeight} />
+          <MentorPanel problemSlug={problem.slug} code={drafts.code} />
+        </div>
       </div>
+    </div>
+  )
+}
+
+type Pane = 'statement' | 'code' | 'tests'
+
+const PANES: { value: Pane; label: string }[] = [
+  { value: 'statement', label: 'Statement' },
+  { value: 'code', label: 'Code' },
+  { value: 'tests', label: 'Tests' },
+]
+
+/**
+ * The phone layout's pane switcher. Three panes stacked in one small viewport
+ * leave each of them too short to use; one at a time, each gets the screen.
+ * Arrow keys move between tabs, as the tab pattern expects.
+ */
+function PaneTabs({ value, onChange }: { value: Pane; onChange: (pane: Pane) => void }) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Workspace"
+      className="border-border mb-2 flex shrink-0 border lg:hidden"
+      onKeyDown={(event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+        const index = PANES.findIndex((p) => p.value === value)
+        const next = PANES[(index + (event.key === 'ArrowRight' ? 1 : PANES.length - 1)) % PANES.length]
+        if (!next) return
+        onChange(next.value)
+        document.getElementById(`tab-${next.value}`)?.focus()
+      }}
+    >
+      {PANES.map((p) => (
+        <button
+          key={p.value}
+          id={`tab-${p.value}`}
+          type="button"
+          role="tab"
+          aria-selected={value === p.value}
+          aria-controls={`pane-${p.value}`}
+          tabIndex={value === p.value ? 0 : -1}
+          onClick={() => {
+            onChange(p.value)
+          }}
+          className={cn(
+            'border-border text-muted-foreground min-h-11 flex-1 border-r font-mono text-[11px] tracking-[0.14em] uppercase last:border-r-0',
+            value === p.value && 'bg-primary text-primary-foreground',
+          )}
+        >
+          {p.label}
+        </button>
+      ))}
     </div>
   )
 }
@@ -220,7 +311,7 @@ function ResizeHandle({
       <span
         aria-hidden="true"
         className={cn(
-          'bg-muted-foreground/40 group-hover:bg-primary rounded-full transition-colors',
+          'bg-muted-foreground/40 group-hover:bg-primary transition-colors',
           axis === 'x' ? 'h-8 w-0.5' : 'h-0.5 w-8',
         )}
       />
@@ -254,7 +345,7 @@ function Toolbar({
               onLanguage(option)
             }}
             className={cn(
-              'border-border border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] uppercase',
+              'border-border border px-2.5 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
               'text-muted-foreground -ml-px first:ml-0',
               language === option && 'bg-primary text-primary-foreground border-primary',
             )}
@@ -275,7 +366,7 @@ function Toolbar({
         >
           <Minus className="size-3" />
         </IconButton>
-        <span className="text-muted-foreground w-8 text-center font-mono text-[10px]">
+        <span className="text-muted-foreground w-8 text-center font-mono text-[11px] sm:text-[10px]">
           {fontSize}px
         </span>
         <IconButton
@@ -318,7 +409,7 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     <span
       role="status"
       className={cn(
-        'font-mono text-[10px] tracking-[0.14em] uppercase',
+        'font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
         status === 'error' ? 'text-destructive' : 'text-muted-foreground',
       )}
     >
@@ -356,7 +447,7 @@ function Toggle({ label, on, onClick }: { label: string; on: boolean; onClick: (
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'border-border text-muted-foreground border px-2 py-1 font-mono text-[10px] tracking-[0.14em] uppercase',
+        'border-border text-muted-foreground border px-2 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
         on && 'text-foreground border-foreground/30',
       )}
     >
@@ -400,7 +491,11 @@ function TestPanel({
   }
 
   return (
-    <div style={{ height }} className="border-border flex shrink-0 flex-col border-t">
+    <div
+      style={{ height }}
+      // The inline height is the desktop drag split; on phones the Tests tab gives it the room.
+      className="border-border flex shrink-0 flex-col border-t max-lg:h-auto! max-lg:min-h-80 max-lg:border-t-0"
+    >
       <div className="border-border flex flex-wrap items-center gap-2 border-b p-2">
         {(['samples', 'result'] as const).map((option) => (
           <button
@@ -411,7 +506,7 @@ function TestPanel({
               setTab(option)
             }}
             className={cn(
-              'border-border text-muted-foreground border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] uppercase',
+              'border-border text-muted-foreground border px-2.5 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase',
               tab === option && 'text-foreground border-foreground/30',
             )}
           >
@@ -423,7 +518,7 @@ function TestPanel({
 
         <div className="ml-auto flex items-center gap-2">
           {run.error !== null && (
-            <span role="alert" className="text-destructive font-mono text-[10px]">
+            <span role="alert" className="text-destructive font-mono text-[11px] sm:text-[10px]">
               {run.error}
             </span>
           )}
@@ -474,7 +569,7 @@ function TestPanel({
 function Pane({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-muted-foreground font-mono text-[10px] tracking-[0.14em] uppercase">
+      <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
         {label}
       </p>
       <pre className="bg-muted mt-1 overflow-x-auto p-2 font-mono text-xs whitespace-pre-wrap">

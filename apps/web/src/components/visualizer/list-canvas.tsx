@@ -68,7 +68,7 @@ export function ListCanvas({ step, state }: { step: AlgorithmStep; state: ListSn
                 style={{ transform: `translate(${x(index)}px, ${TOP}px)` }}
                 opacity={tag === 'removed' ? 0.45 : 1}
               >
-                <text x={BOX_WIDTH / 2} y={-26} textAnchor="middle" className="fill-primary font-mono text-[10px]">
+                <text x={BOX_WIDTH / 2} y={-26} textAnchor="middle" className="fill-primary font-mono text-[11px] sm:text-[10px]">
                   {labelsAt.get(node.id)?.join(' ')}
                 </text>
                 <text x={BOX_WIDTH / 2} y={-8} textAnchor="middle" fontSize={12} fill={stroke}>
@@ -80,7 +80,7 @@ export function ListCanvas({ step, state }: { step: AlgorithmStep; state: ListSn
                   {node.value}
                 </text>
                 {node.next === null && (
-                  <text x={VALUE_WIDTH + (BOX_WIDTH - VALUE_WIDTH) / 2} y={BOX_HEIGHT / 2 + 4} textAnchor="middle" className="fill-muted-foreground font-mono text-[10px]">
+                  <text x={VALUE_WIDTH + (BOX_WIDTH - VALUE_WIDTH) / 2} y={BOX_HEIGHT / 2 + 4} textAnchor="middle" className="fill-muted-foreground font-mono text-[11px] sm:text-[10px]">
                     ∅
                   </text>
                 )}

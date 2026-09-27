@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { AppShell } from '@/components/app-shell'
 import { Providers } from '@/components/providers'
 import { SessionGate } from '@/components/session-gate'
+import { Toaster } from '@/components/ui/toaster'
 
 /**
  * The product half. Tailwind 4 + shadcn/ui, tokens in src/styles/app.css.
@@ -20,6 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <SessionGate>
         <AppShell>{children}</AppShell>
       </SessionGate>
+      <Toaster />
     </Providers>
   )
 }

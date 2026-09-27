@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import type { ExperienceLevel, Language } from '@guruji/types'
 import { Button } from '@/components/ui/button'
 import { ApiError, profileApi } from '@/lib/api'
@@ -52,6 +53,7 @@ export function OnboardingCard() {
       }
       // Tolerance moved, so every suggestion computed before it is aimed wrong.
       void queryClient.invalidateQueries({ queryKey: ['recommendations'] })
+      toast('Setup saved. Suggestions now use your answers.')
     },
   })
 
@@ -60,14 +62,14 @@ export function OnboardingCard() {
   }
 
   return (
-    <section className="border-primary/40 border p-4">
+    <section className="card-spot border-primary/40 bg-card border p-4">
       <h2 className="font-display text-base font-semibold">Three quick questions</h2>
       <p className="text-muted-foreground mt-1 text-xs">
         So the first problems are aimed at you, not at everyone.
       </p>
 
       <fieldset className="mt-4">
-        <legend className="text-muted-foreground mb-2 font-mono text-[10px] tracking-[0.14em] uppercase">
+        <legend className="text-muted-foreground mb-2 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Where are you
         </legend>
         <div className="grid gap-2 sm:grid-cols-3">
@@ -92,7 +94,7 @@ export function OnboardingCard() {
       </fieldset>
 
       <fieldset className="mt-4">
-        <legend className="text-muted-foreground mb-2 font-mono text-[10px] tracking-[0.14em] uppercase">
+        <legend className="text-muted-foreground mb-2 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Language
         </legend>
         <div className="flex flex-wrap gap-1">
@@ -116,7 +118,7 @@ export function OnboardingCard() {
       </fieldset>
 
       <fieldset className="mt-4">
-        <legend className="text-muted-foreground mb-2 font-mono text-[10px] tracking-[0.14em] uppercase">
+        <legend className="text-muted-foreground mb-2 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Minutes a day
         </legend>
         <div className="flex flex-wrap gap-1">

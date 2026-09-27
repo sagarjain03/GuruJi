@@ -182,12 +182,10 @@ export default function RobotScene({ onReady }: { onReady: () => void }) {
           `preset="studio"` fetches this exact map from a public CDN at runtime,
           which makes the first page anyone sees depend on a host we do not
           control — and it forced a third-party origin into `connect-src`. It is
-          1.6 MB, served from our own origin, and the policy is narrower for it.
+          served from our own origin (downsampled to 512×256; the map is blurred into reflections, so the lost detail does not show), and the policy is narrower for it.
         */}
-        <Environment files="/hdri/studio_small_03_1k.hdr" environmentIntensity={0.42} />
+        <Environment files="/hdri/studio_small_03_512.hdr" environmentIntensity={0.42} />
       </Suspense>
     </Canvas>
   )
 }
-
-useGLTF.preload(MODEL_URL)

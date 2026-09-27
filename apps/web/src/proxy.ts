@@ -2,7 +2,16 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const REFRESH_COOKIE = 'guruji_refresh'
 
-const PROTECTED = ['/dashboard', '/roadmap', '/problems', '/revision', '/mistakes']
+const PROTECTED = [
+  '/dashboard',
+  '/roadmap',
+  '/problems',
+  '/revision',
+  '/mistakes',
+  '/analytics',
+  '/visualizer',
+  '/profile',
+]
 const AUTH_PAGES = ['/login', '/register']
 
 const API_ORIGIN = new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api').origin
