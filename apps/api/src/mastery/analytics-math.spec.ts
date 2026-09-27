@@ -1,5 +1,14 @@
 import { AppError } from '../common/app-error'
-import { bucketDays, bucketWeeks, median, rangeBounds, resolveRange, weekStart } from './analytics-math'
+import {
+  bucketDays,
+  bucketWeeks,
+  firstTryAccuracy,
+  hintsUsed,
+  median,
+  rangeBounds,
+  resolveRange,
+  weekStart,
+} from './analytics-math'
 
 const NOW = new Date('2026-09-27T10:00:00Z')
 const BOUNDS = { defaultDays: 365, maxDays: 366 }
@@ -99,5 +108,47 @@ describe('bucketWeeks', () => {
       { weekStart: '2026-09-07', submissions: 0, accepted: 0, accuracy: null, medianSolveTimeMs: null },
       { weekStart: '2026-09-14', submissions: 1, accepted: 0, accuracy: 0, medianSolveTimeMs: null },
     ])
+  })
+})
+
+describe('firstTryAccuracy', () => {
+  const at = (minute: number) => new Date(Date.UTC(2026, 8, 1, 10, minute))
+
+  it('is null with nothing attempted — never tried is not 0%', () => {
+    expect(firstTryAccuracy([])).toBeNull()
+  })
+
+  it('counts a problem only by its first graded submission, whatever the input order', () => {
+    const rows = [
+      // a: wrong first, right later — a later fix is not a first-try solve.
+      { problemId: 'a', verdict: 'ACCEPTED', createdAt: at(9) },
+      { problemId: 'a', verdict: 'WRONG_ANSWER', createdAt: at(1) },
+      // b: right first time, then a wrong resubmission that does not undo it.
+      { problemId: 'b', verdict: 'ACCEPTED', createdAt: at(2) },
+      { problemId: 'b', verdict: 'WRONG_ANSWER', createdAt: at(3) },
+      // c: never solved.
+      { problemId: 'c', verdict: 'TIME_LIMIT_EXCEEDED', createdAt: at(4) },
+      // d: right first time.
+      { problemId: 'd', verdict: 'ACCEPTED', createdAt: at(5) },
+    ]
+
+    expect(firstTryAccuracy(rows)).toBe(0.5)
+  })
+})
+
+describe('hintsUsed', () => {
+  it('takes the highest count seen per problem and sums across problems', () => {
+    // The count is cumulative per problem at submit time, so summing every
+    // submission would count the same hint once per resubmission.
+    const rows = [
+      { problemId: 'a', hintsUsedAtSubmit: 1 },
+      { problemId: 'a', hintsUsedAtSubmit: 2 },
+      { problemId: 'a', hintsUsedAtSubmit: 2 },
+      { problemId: 'b', hintsUsedAtSubmit: 0 },
+      { problemId: 'c', hintsUsedAtSubmit: 3 },
+    ]
+
+    expect(hintsUsed(rows)).toBe(5)
+    expect(hintsUsed([])).toBe(0)
   })
 })

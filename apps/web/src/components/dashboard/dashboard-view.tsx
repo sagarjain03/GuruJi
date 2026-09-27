@@ -40,17 +40,25 @@ export function DashboardView() {
     queryFn: () => analyticsApi.overview(),
     staleTime: 30_000,
   })
+  const due = useQuery({
+    queryKey: ['revision', 'due'],
+    queryFn: () => revisionApi.due(),
+    staleTime: 30_000,
+  })
 
   if (!profile) {
     return null
   }
 
   const data = overview.data ?? null
+  // Shared with the revision panel through the query key: one request, and the
+  // two boxes can never disagree about what is due.
+  const dueToday = due.data ? Math.min(due.data.totalDue, due.data.cap) : null
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3">
       <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
-        <HeroPanel name={profile.displayName} />
+        <HeroPanel name={profile.displayName} overview={data} dueToday={dueToday} />
         <SetupPanel
           language={LANGUAGE_LABEL[profile.preferredLanguage] ?? profile.preferredLanguage}
           level={LEVEL_LABEL[profile.experienceLevel] ?? profile.experienceLevel}
@@ -100,7 +108,18 @@ function Panel({ className, children }: { className?: string; children: React.Re
   )
 }
 
-function HeroPanel({ name }: { name: string }) {
+function HeroPanel({
+  name,
+  overview,
+  dueToday,
+}: {
+  name: string
+  overview: AnalyticsOverview | null
+  dueToday: number | null
+}) {
+  const solved = overview?.totalSolved ?? null
+  const accuracy = overview?.firstTryAccuracy
+
   return (
     <Panel className="flex flex-col gap-4">
       <div className="relative">
@@ -114,16 +133,25 @@ function HeroPanel({ name }: { name: string }) {
         </h1>
         <p className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed">
           GuruJi picks one thing for you to do next — a revision that is due, a topic you are weak
-          at, or a pattern you have never seen. It cannot pick yet, because you have not solved
-          anything for it to learn from.
+          at, or a pattern you have never seen.{' '}
+          {solved === null
+            ? null
+            : solved === 0
+              ? 'It cannot pick yet, because you have not solved anything for it to learn from.'
+              : 'Its pick for you is right below.'}
         </p>
       </div>
 
+      {/* Every chip is read from the server; "…" while it loads, "—" when there
+          is nothing to measure yet — never a made-up zero. */}
       <div className="relative flex flex-wrap gap-2">
-        <Chip label="Solved" value="0" />
-        <Chip label="Accuracy" value="—" />
-        <Chip label="Due today" value="0" />
-        <Chip label="Hints used" value="0" />
+        <Chip label="Solved" value={solved === null ? '…' : String(solved)} />
+        <Chip
+          label="First-try accuracy"
+          value={accuracy === undefined ? '…' : accuracy === null ? '—' : `${Math.round(accuracy * 100)}%`}
+        />
+        <Chip label="Due today" value={dueToday === null ? '…' : String(dueToday)} />
+        <Chip label="Hints used" value={overview === null ? '…' : String(overview.hintsUsed)} />
       </div>
     </Panel>
   )

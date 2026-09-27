@@ -88,13 +88,18 @@ export class SubmissionsService {
       )
     }
 
-    const hintsUsedAtSubmit = await prisma.aIMessage.count({
+    // The hint *level reached*, which is what the mastery model weights by —
+    // not a count of requests. Asking for level 1 twice is still level 1, and a
+    // failed call is stored without a level, so it is not a hint taken.
+    const reached = await prisma.aIMessage.aggregate({
       where: {
         role: 'ASSISTANT',
         mode: 'HINT',
         conversation: { userId, problemId: problem.id },
       },
+      _max: { hintLevel: true },
     })
+    const hintsUsedAtSubmit = reached._max.hintLevel ?? 0
 
     const submission = await prisma.submission.create({
       data: {

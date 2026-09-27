@@ -13,7 +13,7 @@ import type {
   TopicProgress,
   TrendsResponse,
 } from '@guruji/types'
-import { bucketDays, bucketWeeks, rangeBounds, resolveRange } from './analytics-math'
+import { bucketDays, bucketWeeks, firstTryAccuracy, hintsUsed, rangeBounds, resolveRange } from './analytics-math'
 import { computeMastery } from './mastery'
 
 /** A year of squares, which is what a heatmap is. */
@@ -38,16 +38,24 @@ const GRADED = { isRun: false, status: 'COMPLETED', verdict: { not: 'INTERNAL_ER
 @Injectable()
 export class AnalyticsService {
   async overview(userId: string): Promise<AnalyticsOverview> {
-    const [topics, patterns, solvedProblems, activity] = await Promise.all([
+    const [topics, patterns, solvedProblems, activity, graded] = await Promise.all([
       this.topics(userId),
       this.patterns(userId),
       this.solvedByDifficulty(userId),
       this.activity(userId),
+      // All time, like the solved counts beside it. One narrow row per graded
+      // submission; the history a person builds by hand stays small.
+      prisma.submission.findMany({
+        where: { userId, ...GRADED },
+        select: { problemId: true, verdict: true, createdAt: true, hintsUsedAtSubmit: true },
+      }),
     ])
 
     return {
       totalAttempted: topics.reduce((total, topic) => total + topic.attempts, 0),
       totalSolved: solvedProblems.easy + solvedProblems.medium + solvedProblems.hard,
+      firstTryAccuracy: firstTryAccuracy(graded),
+      hintsUsed: hintsUsed(graded),
       solvedByDifficulty: solvedProblems,
       streak: streakFrom(activity),
       topics,

@@ -121,3 +121,33 @@ export function bucketWeeks(
     }
   })
 }
+
+/**
+ * Share of attempted problems solved on their first graded submission — the
+ * honest accuracy the mastery model also uses. Ten wrong answers and then a
+ * right one is not 100%. Null with nothing attempted: never tried is not 0%.
+ */
+export function firstTryAccuracy(rows: { problemId: string; verdict: string | null; createdAt: Date }[]): number | null {
+  const first = new Map<string, { verdict: string | null; at: number }>()
+  for (const row of rows) {
+    const seen = first.get(row.problemId)
+    if (seen === undefined || row.createdAt.getTime() < seen.at) {
+      first.set(row.problemId, { verdict: row.verdict, at: row.createdAt.getTime() })
+    }
+  }
+  if (first.size === 0) return null
+  const solvedFirstTime = [...first.values()].filter((entry) => entry.verdict === 'ACCEPTED').length
+  return solvedFirstTime / first.size
+}
+
+/**
+ * Hints taken, across problems. `hintsUsedAtSubmit` is cumulative per problem,
+ * so each problem contributes its highest count, not the sum of its submissions.
+ */
+export function hintsUsed(rows: { problemId: string; hintsUsedAtSubmit: number }[]): number {
+  const highest = new Map<string, number>()
+  for (const row of rows) {
+    highest.set(row.problemId, Math.max(highest.get(row.problemId) ?? 0, row.hintsUsedAtSubmit))
+  }
+  return [...highest.values()].reduce((total, count) => total + count, 0)
+}

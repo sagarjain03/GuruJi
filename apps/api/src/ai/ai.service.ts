@@ -107,7 +107,8 @@ export class AIService {
           role: 'ASSISTANT',
           mode: 'HINT',
           content: 'AI provider unavailable.',
-          hintLevel: request.level,
+          // No level: nothing was shown. The row stays as a record of the
+          // failure, but hint usage is read from `hintLevel` and must not count it.
         },
       })
       throw new ServiceUnavailableException('The mentor is temporarily unavailable.')

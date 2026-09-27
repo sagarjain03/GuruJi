@@ -91,6 +91,13 @@ export type Streak = z.infer<typeof streakSchema>
 export const analyticsOverviewSchema = z.object({
   totalAttempted: z.number().int(),
   totalSolved: z.number().int(),
+  /**
+   * Share of attempted problems solved on their first graded submission. Null
+   * with nothing attempted — never tried is not 0%.
+   */
+  firstTryAccuracy: z.number().nullable(),
+  /** Hints taken across all problems, each problem counted once at its highest. */
+  hintsUsed: z.number().int(),
   solvedByDifficulty: z.object({
     easy: z.number().int(),
     medium: z.number().int(),

@@ -152,6 +152,9 @@ describe('mistakes and analytics (e2e)', () => {
       const body = response.body as AnalyticsOverview
 
       expect(body.solvedByDifficulty).toEqual({ easy: 0, medium: 0, hard: 0 })
+      // Nothing attempted: accuracy is unknown, not zero.
+      expect(body.firstTryAccuracy).toBeNull()
+      expect(body.hintsUsed).toBe(0)
       expect(body.streak.current).toBe(0)
       expect(body.streak.lastActiveDate).toBeNull()
       expect(Array.isArray(body.topics)).toBe(true)

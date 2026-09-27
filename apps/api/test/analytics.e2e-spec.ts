@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { prisma, type Verdict } from '@guruji/database'
-import type { ActivityResponse, ErrorEnvelope, TopicAnalytics, TrendsResponse } from '@guruji/types'
+import type { ActivityResponse, AnalyticsOverview, ErrorEnvelope, TopicAnalytics, TrendsResponse } from '@guruji/types'
 import request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { configureApp } from '../src/app-setup'
@@ -60,7 +60,7 @@ describe('analytics ranges (e2e)', () => {
     await prisma.submission.createMany({
       data: [
         graded(easyId, 'WRONG_ANSWER', daysAgo(2)),
-        graded(easyId, 'ACCEPTED', daysAgo(2), 120_000),
+        { ...graded(easyId, 'ACCEPTED', daysAgo(2), 120_000), hintsUsedAtSubmit: 2 },
         graded(otherEasyId, 'ACCEPTED', daysAgo(1), 30_000),
         graded(mediumId, 'TIME_LIMIT_EXCEEDED', daysAgo(1)),
         // Outside every default range, inside an explicit one.
@@ -139,6 +139,18 @@ describe('analytics ranges (e2e)', () => {
       })
       expect(Array.isArray(body.topics)).toBe(true)
       expect(Array.isArray(body.patterns)).toBe(true)
+    })
+  })
+
+  describe('GET /analytics/overview', () => {
+    it('reports first-try accuracy and hints from the same graded history', async () => {
+      const body = (await get('/analytics/overview').expect(200)).body as AnalyticsOverview
+
+      // Three problems attempted. Only one was right on its first graded
+      // submission: the easy one fixed later does not count, and the medium
+      // one's first attempt is the wrong answer from 200 days ago.
+      expect(body.firstTryAccuracy).toBeCloseTo(1 / 3)
+      expect(body.hintsUsed).toBe(2)
     })
   })
 

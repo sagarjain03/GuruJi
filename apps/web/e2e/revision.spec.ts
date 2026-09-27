@@ -47,7 +47,10 @@ test('the dashboard renders real mastery, not a placeholder', async () => {
 test('a mastery bar opens to show why the score is what it is', async () => {
   await page.goto('/dashboard')
 
-  const bars = page.getByRole('button', { expanded: false })
+  // A mastery bar is the button that carries a mastery progressbar. "Any
+  // collapsed button" also matched the shell's menu button, so on an account
+  // with nothing solved the test opened the menu and looked for a breakdown.
+  const bars = page.getByRole('button', { expanded: false }).filter({ has: page.getByRole('progressbar') })
   const count = await bars.count()
   test.skip(count === 0, 'nothing solved yet on this account, so no bars to open')
 
