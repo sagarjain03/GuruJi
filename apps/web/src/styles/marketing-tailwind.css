@@ -1,0 +1,6 @@
+/* Tailwind utilities for the landing, without preflight. The landing's own
+   per-component CSS is the design, so the reset must not run here — only the
+   utilities that shared components in components/ui need. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);

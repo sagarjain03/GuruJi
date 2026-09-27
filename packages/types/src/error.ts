@@ -17,6 +17,7 @@ export const ERROR_CODES = [
   'PROBLEM_NOT_FOUND',
   'TOPIC_NOT_FOUND',
   'INVALID_CURSOR',
+  'INVALID_RANGE',
 ] as const
 
 export const errorCodeSchema = z.enum(ERROR_CODES)

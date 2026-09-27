@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -35,7 +36,13 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-muted-foreground hidden text-sm sm:inline">{profile.displayName}</span>
+      {/* The only route to the profile on a phone, where the icon rail is hidden. */}
+      <Link
+        href="/profile"
+        className="text-muted-foreground hover:text-foreground max-w-32 truncate text-sm underline-offset-4 hover:underline sm:max-w-48"
+      >
+        {profile.displayName}
+      </Link>
       <Button variant="ghost" size="sm" onClick={signOut} disabled={signingOut}>
         {signingOut ? 'Signing out…' : 'Sign out'}
       </Button>

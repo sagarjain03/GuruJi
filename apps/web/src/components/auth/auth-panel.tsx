@@ -19,12 +19,12 @@ export function AuthPanel() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundColor: 'oklch(0.18 0.03 285)',
+          backgroundColor: 'oklch(0.16 0 0)',
           backgroundImage: [
-            'radial-gradient(60% 55% at 78% 12%, oklch(0.42 0.13 300 / 0.85), transparent 70%)',
-            'radial-gradient(55% 50% at 20% 35%, oklch(0.38 0.11 265 / 0.8), transparent 72%)',
-            'radial-gradient(70% 60% at 30% 95%, oklch(0.74 0.09 120 / 0.35), transparent 68%)',
-            'radial-gradient(45% 40% at 90% 78%, oklch(0.55 0.08 40 / 0.35), transparent 70%)',
+            'radial-gradient(60% 55% at 78% 12%, oklch(0.42 0 0 / 0.85), transparent 70%)',
+            'radial-gradient(55% 50% at 20% 35%, oklch(0.34 0 0 / 0.8), transparent 72%)',
+            'radial-gradient(70% 60% at 30% 95%, oklch(0.62 0 0 / 0.3), transparent 68%)',
+            'radial-gradient(45% 40% at 90% 78%, oklch(0.5 0 0 / 0.3), transparent 70%)',
           ].join(','),
         }}
       />

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { ArrowRight, Globe, patterns } from './icons'
+import GradientButton from './ui/button-1'
 import './Hero.css'
 
 // WebGL needs a browser — this never renders on the server. Loading it lazily
@@ -58,19 +59,17 @@ export default function Hero() {
           </p>
 
           <div className="hero__cta">
-            <a className="btn btn--accent hero__go" href="#main">
+            <GradientButton className="hero__go" href="#main" width="200px" height="54px">
               Start training
-              <span className="hero__go-dot" aria-hidden="true">
-                <ArrowRight />
-              </span>
-            </a>
+              <ArrowRight aria-hidden="true" />
+            </GradientButton>
 
             <div className="hero__proof">
               <div className="hero__faces" aria-hidden="true">
-                <i style={{ '--a': '#8b5cf6', '--b': '#c4b5fd' } as React.CSSProperties} />
-                <i style={{ '--a': '#a78bfa', '--b': '#ddd6fe' } as React.CSSProperties} />
-                <i style={{ '--a': '#6366f1', '--b': '#a5b4fc' } as React.CSSProperties} />
-                <i style={{ '--a': '#4f46e5', '--b': '#818cf8' } as React.CSSProperties} />
+                <i style={{ '--a': '#fafafa', '--b': '#d4d4d8' } as React.CSSProperties} />
+                <i style={{ '--a': '#d4d4d8', '--b': '#a1a1aa' } as React.CSSProperties} />
+                <i style={{ '--a': '#a1a1aa', '--b': '#71717a' } as React.CSSProperties} />
+                <i style={{ '--a': '#71717a', '--b': '#52525b' } as React.CSSProperties} />
               </div>
               <span className="hero__proof-text">
                 <strong>10K+ Problems Practiced</strong>

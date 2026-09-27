@@ -1,5 +1,9 @@
 import type {
+  ActivityResponse,
   AnalyticsOverview,
+  AnalyticsRangeQuery,
+  TopicAnalytics,
+  TrendsResponse,
   AuthSession,
   CompleteRevisionRequest,
   CompleteRevisionResponse,
@@ -244,6 +248,15 @@ export const submissionApi = {
  */
 export const analyticsApi = {
   overview: () => send<AnalyticsOverview>('/analytics/overview'),
+
+  /** Ranges are `YYYY-MM-DD`, UTC, inclusive; the server bounds and echoes them. */
+  activity: (range: AnalyticsRangeQuery = {}) =>
+    send<ActivityResponse>(`/analytics/activity${toQueryString(range)}`),
+
+  topics: () => send<TopicAnalytics>('/analytics/topics'),
+
+  trends: (range: AnalyticsRangeQuery = {}) =>
+    send<TrendsResponse>(`/analytics/trends${toQueryString(range)}`),
 }
 
 /** The mistake journal. Every call needs a session; nothing here is public. */

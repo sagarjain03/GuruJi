@@ -467,11 +467,12 @@ exit criteria waived.**
 
 ## Phase 10 — Analytics
 
-- [ ] `GET /analytics/activity`, `/topics`, `/trends` — ranges bounded server-side
-- [ ] Recharts: weekly activity heatmap, mastery, difficulty distribution,
+- [x] `GET /analytics/activity`, `/topics`, `/trends` — ranges bounded server-side
+- [x] Recharts: weekly activity heatmap, mastery, difficulty distribution,
       solve-time and accuracy trends, mistakes by category, pattern performance
-- [ ] Profile page
-- [ ] No new signals invented — everything already exists by this point
+      (the heatmap is plain SVG — Recharts has no heatmap)
+- [x] Profile page
+- [x] No new signals invented — everything already exists by this point
 
 ---
 

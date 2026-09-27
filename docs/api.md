@@ -170,6 +170,29 @@ indistinguishable from a random pick.
 Range parameters are bounded server-side. An unbounded `from`/`to` is a
 cheap way to ask the database for everything.
 
+As built (Phase 10):
+
+- `from` / `to` are `YYYY-MM-DD`, UTC, inclusive, both optional. `/activity`
+  defaults to the last 365 days, `/trends` to the last 12 weeks. The span may
+  not exceed **366 days**; a backwards, oversized or malformed range is a `400`
+  with code `INVALID_RANGE`. A `to` in the future is clamped to today rather
+  than refused — a client ahead of UTC legitimately thinks it is tomorrow. The
+  range actually used is echoed back as `from` / `to`.
+- "Graded" everywhere means `isRun = false`, `status = COMPLETED` and a verdict
+  other than `INTERNAL_ERROR`: a sample run and a judge failure are not
+  evidence about the user.
+- `/activity` → `{ from, to, days: [{ date, attempted, solved }] }`, distinct
+  problems per UTC day, only days with activity.
+- `/trends` → `{ from, to, weeks: [{ weekStart, submissions, accepted,
+  accuracy, medianSolveTimeMs }] }`, every Monday-start UTC week in range,
+  empty weeks included with `null` accuracy and time. Median, not mean, so one
+  editor left open overnight cannot own the chart.
+- `/topics` → `{ topics, patterns, difficulty }`. Rows are weakest first, with
+  first-attempt `accuracy` (null with no attempts) beside `masteryScore`;
+  `difficulty` counts distinct problems attempted and solved, all time.
+- Mistakes by category is **not** here: `GET /mistakes/patterns` already
+  answers it, and a second endpoint would be a second definition.
+
 ### `ai`
 
 | Method | Route | Notes |

@@ -1,4 +1,4 @@
-/* GuruJi — graphite ground, near-black depth, neutral dark glass, one violet accent.
+/* GuruJi — graphite ground, near-black depth, neutral dark glass, monochrome accent.
    Structure and every measured value below is the original composition; only the
    colour treatment and the branding have moved. */
 :root {
@@ -9,8 +9,8 @@
   --ink-faint: rgba(245, 245, 245, 0.46);
   --ink-ghost: rgba(245, 245, 245, 0.18);
 
-  --accent: #8b5cf6;
-  --accent-lit: #a78bfa;
+  --accent: #d4d4d8;
+  --accent-lit: #fafafa;
 
   /* neutral dark glass — a warm tint reads brown over graphite */
   --glass: rgba(255, 255, 255, 0.055);
@@ -94,46 +94,6 @@ a {
 }
 .skip-link:focus {
   left: 12px;
-}
-
-/* Shared button system — pill geometry, matching the reference's fully-round CTAs. */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 0;
-  font-family: var(--font-body);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition:
-    transform 0.35s var(--ease-out),
-    background-color 0.35s var(--ease-out),
-    box-shadow 0.35s var(--ease-out),
-    border-color 0.35s var(--ease-out);
-}
-
-.btn--light {
-  padding: 0.72em 1.35em;
-  background: #fff;
-  color: #0b0b0d;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
-}
-.btn--light:hover {
-  transform: translateY(-1px);
-  background: #f1ecff;
-}
-
-.btn--accent {
-  padding: 0.5em 0.5em 0.5em 1.5em;
-  background: linear-gradient(96deg, #7c3aed 0%, var(--accent-lit) 100%);
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 14px 40px rgba(124, 58, 237, 0.38);
-}
-.btn--accent:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 52px rgba(124, 58, 237, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {

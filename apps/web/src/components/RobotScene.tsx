@@ -167,10 +167,10 @@ export default function RobotScene({ onReady }: { onReady: () => void }) {
     >
       {/* Key light from the upper left, matching where the copy sits. */}
       <directionalLight position={[-3, 2.5, 2]} intensity={2.1} color="#ffffff" />
-      {/* Violet rim from behind-right — the one place the accent touches the art. */}
-      <directionalLight position={[3.5, 1, -2]} intensity={3.4} color="#8b5cf6" />
-      {/* Cool fill so the shadow side reads graphite rather than black. */}
-      <directionalLight position={[2, -1.5, 1.5]} intensity={0.5} color="#6366f1" />
+      {/* White rim from behind-right to separate the silhouette from the ground. */}
+      <directionalLight position={[3.5, 1, -2]} intensity={3.4} color="#ffffff" />
+      {/* Neutral fill so the shadow side reads graphite rather than black. */}
+      <directionalLight position={[2, -1.5, 1.5]} intensity={0.5} color="#d4d4d8" />
       <ambientLight intensity={0.35} />
 
       <Suspense fallback={null}>

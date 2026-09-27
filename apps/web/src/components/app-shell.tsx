@@ -33,7 +33,7 @@ const NAV = [
   { href: '/mistakes', label: 'Mistakes', Icon: NotebookPen, ready: true },
   { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: true },
   { href: '/mentor', label: 'AI Mentor', Icon: Bot, ready: false },
-  { href: '/analytics', label: 'Analytics', Icon: BarChart3, ready: false },
+  { href: '/analytics', label: 'Analytics', Icon: BarChart3, ready: true },
   { href: '/contest', label: 'Contest', Icon: Swords, ready: false },
 ] as const
 
@@ -65,7 +65,7 @@ function IconRail() {
         {profile && (
           <>
             <span className="bg-border my-1 h-px w-6" aria-hidden="true" />
-            <DockItem label={profile.displayName}>
+            <DockItem label={profile.displayName} href="/profile" active={pathname === '/profile'}>
               <span className="font-mono text-xs font-semibold">
                 {initials(profile.displayName)}
               </span>
@@ -134,9 +134,9 @@ function Brand() {
   return (
     <Link href="/dashboard" className="flex items-center gap-2">
       <svg viewBox="0 0 28 28" className="size-5" fill="none" aria-hidden="true">
-        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="#A78BFA" />
-        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="#7C3AED" />
-        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="#6366F1" />
+        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="currentColor" />
+        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="currentColor" fillOpacity={0.6} />
+        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="currentColor" fillOpacity={0.35} />
       </svg>
       <span className="font-display text-base font-semibold tracking-tight">GuruJi</span>
     </Link>

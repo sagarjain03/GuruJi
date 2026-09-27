@@ -2,15 +2,31 @@ import { Injectable } from '@nestjs/common'
 import { prisma } from '@guruji/database'
 import type {
   ActivityDay,
+  ActivityResponse,
   AnalyticsOverview,
+  AnalyticsRangeQuery,
+  DifficultyDistribution,
   PatternProgress,
+  PerformanceRow,
   Streak,
+  TopicAnalytics,
   TopicProgress,
+  TrendsResponse,
 } from '@guruji/types'
+import { bucketDays, bucketWeeks, rangeBounds, resolveRange } from './analytics-math'
 import { computeMastery } from './mastery'
 
 /** A year of squares, which is what a heatmap is. */
 const ACTIVITY_DAYS = 365
+
+/** A year and a day: enough for "this time last year", not enough for "everything". */
+const MAX_RANGE_DAYS = 366
+
+/** Twelve weeks: long enough to see a trend, short enough that each point is recent. */
+const TREND_DAYS = 12 * 7
+
+/** What counts as a graded attempt everywhere in analytics. */
+const GRADED = { isRun: false, status: 'COMPLETED', verdict: { not: 'INTERNAL_ERROR' } } as const
 
 /**
  * Everything the dashboard reads, in one request.
@@ -144,37 +160,85 @@ export class AnalyticsService {
    */
   private async activity(userId: string): Promise<ActivityDay[]> {
     const since = new Date(Date.now() - ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
+    return bucketDays(await this.graded(userId, { gte: since }))
+  }
 
-    const rows = await prisma.submission.findMany({
-      where: {
-        userId,
-        isRun: false,
-        status: 'COMPLETED',
-        verdict: { not: 'INTERNAL_ERROR' },
-        createdAt: { gte: since },
-      },
-      select: { createdAt: true, verdict: true, problemId: true },
+  async activityRange(userId: string, query: AnalyticsRangeQuery): Promise<ActivityResponse> {
+    const range = resolveRange(query, new Date(), { defaultDays: ACTIVITY_DAYS, maxDays: MAX_RANGE_DAYS })
+    return { ...range, days: bucketDays(await this.graded(userId, rangeBounds(range))) }
+  }
+
+  async trends(userId: string, query: AnalyticsRangeQuery): Promise<TrendsResponse> {
+    const range = resolveRange(query, new Date(), { defaultDays: TREND_DAYS, maxDays: MAX_RANGE_DAYS })
+    return { ...range, weeks: bucketWeeks(await this.graded(userId, rangeBounds(range)), range) }
+  }
+
+  /**
+   * Topics and patterns in the dashboard's order — weakest first — with the
+   * first-attempt accuracy the charts need beside the mastery score.
+   */
+  async topicAnalytics(userId: string): Promise<TopicAnalytics> {
+    const [topics, patterns, topicFirst, patternFirst, difficulty] = await Promise.all([
+      this.topics(userId),
+      this.patterns(userId),
+      prisma.userTopicProgress.findMany({ where: { userId }, select: { topicId: true, firstAttemptSolved: true } }),
+      prisma.userPatternProgress.findMany({ where: { userId }, select: { patternId: true, firstAttemptSolved: true } }),
+      this.difficultyDistribution(userId),
+    ])
+    const topicFirstById = new Map(topicFirst.map((row) => [row.topicId, row.firstAttemptSolved]))
+    const patternFirstById = new Map(patternFirst.map((row) => [row.patternId, row.firstAttemptSolved]))
+
+    return {
+      topics: topics.map((topic) => performance(topic.topicId, topic, topicFirstById.get(topic.topicId) ?? 0)),
+      patterns: patterns.map((pattern) =>
+        performance(pattern.patternId, pattern, patternFirstById.get(pattern.patternId) ?? 0),
+      ),
+      difficulty,
+    }
+  }
+
+  /** Distinct problems attempted and solved per difficulty, over all time. */
+  private async difficultyDistribution(userId: string): Promise<DifficultyDistribution> {
+    const [attempted, solved] = await Promise.all([
+      prisma.submission.findMany({
+        where: { userId, ...GRADED },
+        select: { problemId: true, problem: { select: { difficulty: true } } },
+        distinct: ['problemId'],
+      }),
+      this.solvedByDifficulty(userId),
+    ])
+    const count = (difficulty: string) => attempted.filter((row) => row.problem.difficulty === difficulty).length
+
+    return {
+      easy: { attempted: count('EASY'), solved: solved.easy },
+      medium: { attempted: count('MEDIUM'), solved: solved.medium },
+      hard: { attempted: count('HARD'), solved: solved.hard },
+    }
+  }
+
+  /** Graded submissions in an instant range, oldest first — the input to every bucket. */
+  private graded(userId: string, createdAt: { gte: Date; lt?: Date }) {
+    return prisma.submission.findMany({
+      where: { userId, ...GRADED, createdAt },
+      select: { createdAt: true, verdict: true, problemId: true, timeSpentMs: true },
       orderBy: { createdAt: 'asc' },
     })
+  }
+}
 
-    const byDay = new Map<string, { attempted: Set<string>; solved: Set<string> }>()
-    for (const row of rows) {
-      const date = row.createdAt.toISOString().slice(0, 10)
-      const bucket = byDay.get(date) ?? { attempted: new Set<string>(), solved: new Set<string>() }
-      bucket.attempted.add(row.problemId)
-      if (row.verdict === 'ACCEPTED') {
-        bucket.solved.add(row.problemId)
-      }
-      byDay.set(date, bucket)
-    }
-
-    return [...byDay.entries()]
-      .map(([date, bucket]) => ({
-        date,
-        attempted: bucket.attempted.size,
-        solved: bucket.solved.size,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date))
+function performance(
+  id: string,
+  row: { slug: string; name: string; attempts: number; solved: number; mastery: { score: number } },
+  firstAttemptSolved: number,
+): PerformanceRow {
+  return {
+    id,
+    slug: row.slug,
+    name: row.name,
+    attempts: row.attempts,
+    solved: row.solved,
+    accuracy: row.attempts === 0 ? null : firstAttemptSolved / row.attempts,
+    masteryScore: row.mastery.score,
   }
 }
 

@@ -32,9 +32,9 @@
   --popover: #141418;
   --popover-foreground: #f2f2f4;
 
-  /* violet — the single accent, same hue as the landing CTA */
-  --primary: #8b5cf6;
-  --primary-foreground: #ffffff;
+  /* monochrome — near-white primary, same as the landing CTA */
+  --primary: #f2f2f4;
+  --primary-foreground: #0b0b0e;
 
   --secondary: #1a1a1f;
   --secondary-foreground: #e6e6ea;
@@ -50,7 +50,7 @@
 
   --border: rgba(255, 255, 255, 0.11);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #8b5cf6;
+  --ring: #d4d4d8;
 
   /* Difficulty. Always paired with a text label in the UI — colour alone is not
      an accessible signal, and roughly one in twelve men cannot separate the
@@ -65,7 +65,7 @@
   --mastery-developing: #fbbf24;
   --mastery-proficient: #60a5fa;
   --mastery-strong: #34d399;
-  --mastery-mastered: #a78bfa;
+  --mastery-mastered: #f4f4f5;
 
   /* The backdrop grid. Barely there on purpose — you should notice the page
      has structure without being able to say why. */
@@ -85,7 +85,7 @@
   --popover: #ffffff;
   --popover-foreground: #121215;
 
-  --primary: #7c3aed;
+  --primary: #18181b;
   --primary-foreground: #ffffff;
 
   --secondary: #f2f2f5;
@@ -94,15 +94,15 @@
   --muted: #f4f4f6;
   --muted-foreground: #64646e;
 
-  --accent: #f0edfd;
-  --accent-foreground: #3b1f8f;
+  --accent: #f0f0f2;
+  --accent-foreground: #18181b;
 
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
 
   --border: rgba(10, 10, 14, 0.1);
   --input: rgba(10, 10, 14, 0.16);
-  --ring: #7c3aed;
+  --ring: #3f3f46;
 
   --difficulty-easy: #059669;
   --difficulty-medium: #b45309;
@@ -113,7 +113,7 @@
   --mastery-developing: #b45309;
   --mastery-proficient: #2563eb;
   --mastery-strong: #059669;
-  --mastery-mastered: #7c3aed;
+  --mastery-mastered: #18181b;
 
   --grid-line: rgba(10, 10, 14, 0.055);
 

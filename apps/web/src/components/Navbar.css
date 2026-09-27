@@ -112,20 +112,15 @@
   display: grid;
   gap: 2px;
 }
-.nav__sheet a {
+.nav__sheet li a {
   display: block;
   padding: 12px 10px;
   border-radius: 0;
   font-size: 16px;
   color: rgba(245, 245, 245, 0.86);
 }
-.nav__sheet a:hover {
+.nav__sheet li a:hover {
   background: rgba(255, 255, 255, 0.07);
-}
-.nav__sheet-cta {
-  width: 100%;
-  justify-content: center;
-  padding: 0.85em 1.4em;
 }
 
 @media (min-width: 940px) {

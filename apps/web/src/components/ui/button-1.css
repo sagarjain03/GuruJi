@@ -1,0 +1,45 @@
+/* Rotating silver ring for GradientButton (button-1.tsx). The ::after plate
+   covers the centre; on hover/focus it fades out and the silver shows through,
+   so the label flips dark to stay readable on it. */
+@property --r {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.rotatingGradient {
+  --color-background: var(--background, #0b0b0d);
+  --color-text: #f2f2f4;
+  background: conic-gradient(
+    from var(--r),
+    #5f5f66,
+    #e4e4e7,
+    #9f9fa6,
+    #fafafa,
+    #71717a,
+    #5f5f66
+  );
+  animation: rotating-gradient 3.5s linear infinite;
+}
+
+.rotatingGradient .label {
+  gap: 0.55em;
+  white-space: nowrap;
+  transition: color 0.3s linear;
+}
+
+.rotatingGradient:hover::after,
+.rotatingGradient:focus-visible::after {
+  opacity: 0;
+}
+
+.rotatingGradient:hover .label,
+.rotatingGradient:focus-visible .label {
+  color: #0b0b0d;
+}
+
+@keyframes rotating-gradient {
+  to {
+    --r: 360deg;
+  }
+}

@@ -65,9 +65,9 @@ function defineThemes(monaco: Monaco): void {
       'editor.foreground': '#f2f2f4',
       'editorLineNumber.foreground': '#4a4a52',
       'editorLineNumber.activeForeground': '#9a9aa4',
-      'editor.selectionBackground': '#8b5cf640',
+      'editor.selectionBackground': '#ffffff26',
       'editor.lineHighlightBackground': '#ffffff08',
-      'editorCursor.foreground': '#8b5cf6',
+      'editorCursor.foreground': '#f2f2f4',
       'editorIndentGuide.background1': '#ffffff10',
     },
   })
@@ -80,9 +80,9 @@ function defineThemes(monaco: Monaco): void {
       'editor.background': '#ffffff',
       'editor.foreground': '#18181b',
       'editorLineNumber.foreground': '#a1a1aa',
-      'editor.selectionBackground': '#7c3aed26',
+      'editor.selectionBackground': '#18181b1f',
       'editor.lineHighlightBackground': '#0000000a',
-      'editorCursor.foreground': '#7c3aed',
+      'editorCursor.foreground': '#18181b',
     },
   })
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Chevron, Close, Logo, Menu } from './icons'
+import GradientButton from './ui/button-1'
 import './Navbar.css'
 
 const links = [
@@ -43,9 +44,9 @@ export default function Navbar() {
       </nav>
 
       <div className="nav__actions">
-        <a className="btn btn--light nav__cta" href="#main">
+        <GradientButton className="nav__cta" href="#main" width="150px" height="44px">
           Start Training
-        </a>
+        </GradientButton>
         <button
           className="nav__burger"
           type="button"
@@ -68,9 +69,9 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          <a className="btn btn--accent nav__sheet-cta" href="#main" onClick={() => setOpen(false)}>
+          <GradientButton href="#main" width="100%" height="52px" onClick={() => setOpen(false)}>
             Start Training
-          </a>
+          </GradientButton>
         </div>
       )}
     </header>

@@ -81,7 +81,7 @@ body[data-dragging] {
    pattern strip, and almost nothing over the subject. Values are neutral
    near-black — a warm tint read brown against graphite. Lighter through the
    middle than the video version needed, because there is no longer a bright
-   orange horizon to suppress. The last layer is a faint violet bloom off the
+   orange horizon to suppress. The last layer is a faint white bloom off the
    right edge, the only place the accent touches the ground. */
 .hero__scrim {
   position: absolute;
@@ -96,7 +96,7 @@ body[data-dragging] {
     ),
     linear-gradient(0deg, rgba(4, 4, 5, 0.8) 0%, rgba(4, 4, 5, 0.12) 26%, rgba(0, 0, 0, 0) 44%),
     linear-gradient(180deg, rgba(4, 4, 5, 0.52) 0%, rgba(0, 0, 0, 0) 22%),
-    radial-gradient(70% 60% at 78% 44%, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0) 70%);
+    radial-gradient(70% 60% at 78% 44%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
 }
 
@@ -148,7 +148,7 @@ body[data-dragging] {
   border-top: 1px solid var(--hair-soft);
   width: fit-content;
   max-width: 300px;
-  font-size: calc(11.5px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
   line-height: 1.45;
   letter-spacing: 0.005em;
   color: var(--ink-faint);
@@ -195,18 +195,9 @@ body[data-dragging] {
 
 .hero__go {
   font-size: calc(15px * var(--ui-scale));
+  font-weight: 600;
 }
-
-.hero__go-dot {
-  display: grid;
-  place-items: center;
-  width: 2.55em;
-  height: 2.55em;
-  border-radius: 0;
-  background: #fff;
-  color: #0b0b0d;
-}
-.hero__go-dot svg {
+.hero__go svg {
   width: 1.15em;
   height: 1.15em;
 }
@@ -269,7 +260,7 @@ body[data-dragging] {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 .stat:nth-child(2) {
-  background: linear-gradient(150deg, rgba(124, 58, 237, 0.26), rgba(79, 70, 229, 0.14));
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.16), rgba(200, 200, 206, 0.06));
 }
 
 .stat__mark {
@@ -329,11 +320,11 @@ body[data-dragging] {
   background: rgba(255, 255, 255, 0.5);
 }
 .ghost__bars span:last-child {
-  background: rgba(167, 139, 250, 0.55);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .ghost__kpi {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.4;
 }
 .ghost__kpi strong {

@@ -85,9 +85,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <div className="w-full max-w-md">
       <svg viewBox="0 0 28 28" className="size-7" fill="none" aria-hidden="true">
-        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="#A78BFA" />
-        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="#7C3AED" />
-        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="#6366F1" />
+        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="currentColor" />
+        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="currentColor" fillOpacity={0.6} />
+        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="currentColor" fillOpacity={0.35} />
       </svg>
 
       <h1 className="font-display mt-6 text-4xl font-semibold tracking-tight">{copy.title}</h1>
