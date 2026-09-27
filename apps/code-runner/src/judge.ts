@@ -15,6 +15,14 @@ import { LANGUAGES } from './sandbox/languages'
 const COMPILE_TIMEOUT_MS = Number(process.env.COMPILE_TIMEOUT_MS ?? 20_000)
 
 /**
+ * And its own memory budget. The problem's `memoryLimitMb` bounds the
+ * *program*; handed to the compiler as well, it killed `cc1plus` on
+ * `#include <bits/stdc++.h>` and every such submission came back a compile
+ * error. A compile-time memory bomb is still bounded — by this, and the timeout.
+ */
+const COMPILE_MEMORY_MB = Number(process.env.COMPILE_MEMORY_MB ?? 512)
+
+/**
  * Worse verdicts win.
  *
  * A submission that times out on one case and merely answers wrong on another
@@ -66,7 +74,7 @@ export async function judge(job: RunnerJob): Promise<RunnerCallback> {
         args: plan.compile.args,
         stdin: '',
         timeoutMs: COMPILE_TIMEOUT_MS,
-        memoryLimitMb: job.memoryLimitMb,
+        memoryLimitMb: COMPILE_MEMORY_MB,
         outputCapBytes: OUTPUT_CAP_BYTES,
       })
 

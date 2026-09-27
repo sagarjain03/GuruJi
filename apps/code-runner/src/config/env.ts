@@ -32,6 +32,12 @@ const envSchema = z.object({
   CODE_RUNNER_MEMORY_MB: z.coerce.number().int().positive().default(256),
   /** A template-heavy C++ file is genuinely slow. Still bounded. */
   COMPILE_TIMEOUT_MS: z.coerce.number().int().positive().default(20_000),
+  /**
+   * The compiler's own memory budget, separate from the problem's limit, which
+   * is for the program. `cc1plus` needs 256–384 MB for `bits/stdc++.h` alone;
+   * 512 leaves room while four concurrent compiles still fit the 3.9 GB host.
+   */
+  COMPILE_MEMORY_MB: z.coerce.number().int().positive().default(512),
 
   SANDBOX_IMAGE_PREFIX: z.string().min(1).default('guruji-sandbox'),
   SANDBOX_IMAGE_TAG: z.string().min(1).default('1'),

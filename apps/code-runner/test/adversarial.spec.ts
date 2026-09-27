@@ -265,6 +265,22 @@ describe('adversarial suite', () => {
     await expectNoSurvivors()
   })
 
+  it('compiles an ordinary bits/stdc++.h solution under a 256 MB problem limit', async () => {
+    const solution = [
+      '#include <bits/stdc++.h>',
+      'using namespace std;',
+      'int main() { unordered_map<long long, int> seen; seen[1] = 2; cout << seen[1] << "\\n"; }',
+    ].join('\n')
+
+    const result = await judge(job('CPP', solution, '2'))
+
+    // The problem's memory limit is for the program, not the compiler. Given
+    // to the compiler too, `cc1plus` is killed on the most common first line
+    // in competitive C++, and every such submission became a compile error.
+    expect(result.compileOutput ?? '').toBe('')
+    expect(result.verdict).toBe('ACCEPTED')
+  })
+
   it('still grades an ordinary correct program', async () => {
     const result: RunnerCallback = await judge(
       job('PYTHON', 'print("hello")\n', 'hello'),
