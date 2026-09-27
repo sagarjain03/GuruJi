@@ -456,7 +456,7 @@ exit criteria waived.**
 - [x] Playback controls; step-back is exact (index − 1), not re-approximated
 - [x] Variable panel + live metrics
 - [x] Single rAF loop, not per-element timers
-- [ ] Accessibility — text descriptions, keyboard controls, not colour-only,
+- [x] Accessibility — text descriptions, keyboard controls, not colour-only,
       `prefers-reduced-motion`
 - [x] Input-size caps with a clear message
 - [x] Per-algorithm event-sequence tests

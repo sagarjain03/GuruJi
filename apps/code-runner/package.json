@@ -6,6 +6,7 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc -b",
     "start": "node dist/src/main.js",
+    "e2e:serve": "node dist/src/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",

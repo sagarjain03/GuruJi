@@ -115,6 +115,38 @@ test('visualizer - an over-cap input shows a clear message instead of freezing',
   await expect(canvas()).toHaveAttribute('aria-label', /^Array: /)
 })
 
+
+/**
+ * `prefers-reduced-motion`, both ways. The normal-motion half is what makes the
+ * reduced half mean something: without it, a canvas that never animated at all
+ * would pass too.
+ *
+ * On the shared page via `emulateMedia`, not a fresh context: the saved refresh
+ * token rotates on first use, so a second context would arrive signed out.
+ */
+for (const motion of ['reduce', 'no-preference'] as const) {
+  test(`visualizer - transitions follow prefers-reduced-motion: ${motion}`, async () => {
+    await page.emulateMedia({ reducedMotion: motion })
+    await page.goto('/visualizer')
+    const bar = page.locator('[role="img"][tabindex="0"] div[style*="height"]').first()
+    await expect(bar).toBeVisible()
+
+    // `motion-reduce:transition-none` removes the transitioned properties; the
+    // duration is left alone, so the property list is what to check.
+    const property = await bar.evaluate((element) => getComputedStyle(element).transitionProperty)
+    if (motion === 'reduce') {
+      expect(property).toBe('none')
+    } else {
+      expect(property).toContain('height')
+    }
+
+    // Stepping is not motion: it must keep working either way.
+    // The reload above starts playback at step 1.
+    await page.getByRole('button', { name: 'Next step' }).click()
+    await expect(counter()).toHaveText(/^Step 2 \//)
+  })
+}
+
 test('visualizer - no console errors along the way', () => {
   expect(errors).toEqual([])
 })

@@ -12,6 +12,7 @@
     "dev": "pnpm --parallel --filter \"./apps/**\" dev",
     "dev:web": "pnpm --filter @guruji/web dev",
     "dev:api": "pnpm --filter @guruji/api dev",
+    "e2e:stack": "pnpm --filter @guruji/api --filter @guruji/code-runner build && pnpm --parallel --filter \"./apps/**\" e2e:serve",
     "build": "pnpm --filter \"./packages/**\" build && pnpm --filter \"./apps/**\" build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",

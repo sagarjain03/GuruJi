@@ -27,4 +27,30 @@ setup('create an account', async ({ request }) => {
   // The request context owns the Set-Cookie response and never mounts the
   // dashboard SessionGate, so no second refresh can spend the rotated token.
   await request.storageState({ path: STORAGE_STATE })
+
+  // Compile every page once, before any spec asserts against it. `next dev`
+  // compiles a route on its first request, and a cold route on this host takes
+  // longer than a 15s expectation — so a spec's first navigation to a page
+  // nobody had opened yet failed on timing, not behaviour. A plain GET renders
+  // on the server only: the proxy checks that the cookie exists, and nothing
+  // here spends the refresh token.
+  setup.setTimeout(APP_ROUTES.length * WARM_TIMEOUT_MS)
+  for (const route of APP_ROUTES) {
+    const page = await request.get(route, { timeout: WARM_TIMEOUT_MS, maxRedirects: 0 })
+    expect(page.status(), `warming ${route}`).toBe(200)
+  }
 })
+
+/** Every signed-in page. A new page added under `src/app/(app)` belongs here. */
+const APP_ROUTES = [
+  '/dashboard',
+  '/roadmap',
+  '/problems',
+  '/revision',
+  '/mistakes',
+  '/visualizer',
+  '/analytics',
+  '/profile',
+]
+
+const WARM_TIMEOUT_MS = 180_000

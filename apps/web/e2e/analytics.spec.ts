@@ -16,6 +16,8 @@ let page: Page
 let errors: string[]
 
 test.beforeAll(async ({ browser }) => {
+  // A real judge run happens below: container start-up on this host alone can take tens of seconds.
+  test.setTimeout(180_000)
   const context = await browser.newContext({ storageState: STORAGE_STATE })
   page = await context.newPage()
 
@@ -43,11 +45,12 @@ test.beforeAll(async ({ browser }) => {
   }
 
   // One real graded submission, judged by the real runner, so the heatmap and
-  // the trend lines have a point to draw. `print(0)` is wrong for any problem
-  // worth having, which keeps "solved" at zero and the assertions exact.
+  // the trend lines have a point to draw. It fails on purpose, and fast: a
+  // wrong answer that loops or waits on stdin would sit out the time limit on
+  // every case, which made this hook slower than its own timeout.
   const submitted = await page.request.post(`${API_URL}/submissions`, {
     headers: { authorization: `Bearer ${accessToken}` },
-    data: { problemId, language: 'PYTHON', code: 'print(0)\n', isRun: false, timeSpentMs: 90_000 },
+    data: { problemId, language: 'PYTHON', code: 'raise SystemExit(1)\n', isRun: false, timeSpentMs: 90_000 },
   })
   expect(submitted.status()).toBe(202)
   const { id } = (await submitted.json()) as { id: string }
@@ -59,7 +62,7 @@ test.beforeAll(async ({ browser }) => {
         })
         return ((await detail.json()) as { status: string }).status
       },
-      { timeout: 90_000, intervals: [1_000] },
+      { timeout: 150_000, intervals: [1_000] },
     )
     .toBe('COMPLETED')
 })

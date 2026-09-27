@@ -28,6 +28,7 @@ AI endpoints return a clear "not configured" error rather than pretending.
 | Command | Does |
 |---|---|
 | `pnpm dev` | Both apps in watch mode |
+| `pnpm e2e:stack` | The stack Playwright runs against: API and runner from a fresh build (no watchers to restart mid-run), web on `next dev` from an empty dev cache |
 | `pnpm typecheck` | Type-check every package |
 | `pnpm lint` | Lint every package |
 | `pnpm test` | Unit tests |
