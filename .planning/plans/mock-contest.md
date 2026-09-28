@@ -101,7 +101,7 @@ first, see it fail, then the code.
 | # | Task | Files | Verify |
 |---|---|---|---|
 | 6 | Export `SubmissionsService` and `CandidatesService` from their modules | `execution.module.ts`, `recommendations.module.ts` | api typecheck; existing suites unchanged |
-| 7 | `ContestsService.start` / `view` / `active` + lazy TIME_UP on read; one-active via the unique index (map Prisma `P2002` → `CONTEST_ALREADY_ACTIVE` with the active id) | `contests.service.ts` | e2e in task 11 |
+| 7 | `ContestsService.start` / `view` / `latest` + lazy TIME_UP on read; one-active via the unique index (map Prisma `P2002` → `CONTEST_ALREADY_ACTIVE` with the active id) | `contests.service.ts` | e2e in task 11 |
 | 8 | `ContestsService.submit` (deadline + membership checks, then `SubmissionsService.submit`, then `ContestSubmission`), `finish` (idempotent, stores score), `report` | `contests.service.ts` | e2e in task 11 |
 | 9 | Controller (6 routes, Zod parsing, other user's id → 404), module, register in `AppModule` | `contests.controller.ts`, `contests.module.ts`, `app.module.ts` | api typecheck + lint |
 | 10 | Hint gate: `assertMentorAllowed(userId, problemId)` on the service; called from the 5 mentor routes; allowed for non-contest problems and with `hintsAllowed` | `contests.service.ts`, `ai.service.ts`, `ai.module.ts` | e2e in task 12 |
@@ -112,7 +112,7 @@ first, see it fail, then the code.
 
 | # | Task | Files | Verify |
 |---|---|---|---|
-| 13 | `contestApi` (start, active, get, submit, finish, report) | `lib/api.ts` | web typecheck |
+| 13 | `contestApi` (start, latest, get, submit, finish, report) | `lib/api.ts` | web typecheck |
 | 14 | `Countdown`: from `serverNow` + `deadlineAt`, one timer, text, announces at 10 and 1 min, reduced-motion safe; on zero asks the parent to refetch | `components/contest/countdown.tsx` | browser (task 18) |
 | 15 | `/contest`: start state (60/90, hints toggle, rules), active state (3 problems with state, Finish), report state; nav item ready | `app/(app)/contest/page.tsx`, `components/contest/contest-view.tsx`, `app-shell.tsx` | typecheck + lint |
 | 16 | Report component: score, weak area in words with its evidence, per-problem table, "seen before" marks | `components/contest/contest-report.tsx` | browser (task 18) |

@@ -71,7 +71,7 @@ deadline is ever accepted into the contest.
      `isRun: true`; runs are never contest submissions.
 6. **Resume** — `GET /contests/:id` returns the contest, its problems (in
    order), per-problem status (unsolved / attempted / solved), `deadlineAt`
-   and server `now`. `GET /contests/active` returns the active one or `null`.
+   and server `now`. `GET /contests/latest` returns the most recent contest, active or finished, or `null` — so a report is never lost to a closed tab (changed from `/contests/active` during build).
 7. **Finish** — `POST /contests/:id/finish` ends it early. A contest past its
    deadline is finished **lazily** on the next read or write (no cron):
    `finishReason` = `EARLY` | `TIME_UP`.
@@ -182,7 +182,7 @@ schemas live in `packages/types/src/contest.ts`.
 | Method | Route | Success |
 |---|---|---|
 | POST | `/contests` | 201 contest view |
-| GET | `/contests/active` | 200 contest view or `null` |
+| GET | `/contests/latest` | 200 most recent contest view (any status) or `null` |
 | GET | `/contests/:id` | 200 contest view |
 | POST | `/contests/:id/submissions` | 202 `{ id, status }` (as `/submissions`) |
 | POST | `/contests/:id/finish` | 200 contest view |
@@ -192,7 +192,7 @@ schemas live in `packages/types/src/contest.ts`.
 // POST /contests
 { "durationMinutes": 60, "hintsAllowed": false }
 
-// 201 — contest view (also GET /contests/:id, /contests/active)
+// 201 — contest view (also GET /contests/:id, /contests/latest)
 {
   "id": "01a0…",
   "status": "ACTIVE",
@@ -239,7 +239,7 @@ New error codes (added to `ERROR_CODES`): `CONTEST_UNAVAILABLE`,
 ## UI changes
 
 - `/contest` — start / active / report states in one route, driven by
-  `GET /contests/active` and the report endpoint.
+  `GET /contests/latest` and the report endpoint.
 - Editor (`/problems/[slug]`) in contest mode via `?contest=<id>`: countdown in
   the header, Submit posts to the contest endpoint, mentor panel hidden when
   hints are off, "Back to contest" link.

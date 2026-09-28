@@ -35,5 +35,8 @@ import { SubmissionsService } from './submissions.service'
     ProgressService,
     RevisionService,
   ],
+  // For contests: a contest submission is a real graded submission, judged and
+  // counted by exactly this path, not a copy of it.
+  exports: [SubmissionsService],
 })
 export class ExecutionModule {}

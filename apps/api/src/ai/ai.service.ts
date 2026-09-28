@@ -20,6 +20,7 @@ import {
 } from '@guruji/ai'
 import { prisma } from '@guruji/database'
 import type Redis from 'ioredis'
+import { ContestsService } from '../contests/contests.service'
 import { NotFoundError } from '../common/app-error'
 import { ProblemRepository } from '../content/problem.repository'
 import { HintDto } from './dto/hint.dto'
@@ -41,9 +42,12 @@ export class AIService {
     @Inject(AI_PROVIDER) private readonly provider: LLMProvider,
     @Inject(REDIS) private readonly redis: Redis,
     @Inject(AI_REFERENCE_EXECUTOR) private readonly referenceExecutor: ReferenceExecutor,
+    private readonly contests: ContestsService,
   ) {}
 
   async hint(userId: string, request: HintDto): Promise<{ hint: string; level: number; curated: boolean }> {
+    // Before the quota: a contest refusing the mentor must cost the learner nothing.
+    await this.contests.assertMentorAllowed(userId, request.problemSlug)
     await this.guardQuota(userId)
     const problem = await this.problems.findBySlug(request.problemSlug)
     if (problem === null) {
@@ -116,6 +120,8 @@ export class AIService {
   }
 
   async explain(userId: string, request: ExplainDto): Promise<ExplanationResponse> {
+    // Before the quota: a contest refusing the mentor must cost the learner nothing.
+    await this.contests.assertMentorAllowed(userId, request.problemSlug)
     await this.guardQuota(userId)
     const problem = await this.problem(request.problemSlug)
     return this.complete(userId, problem.id, 'EXPLAIN', explanationSchema, {
@@ -129,6 +135,8 @@ export class AIService {
   }
 
   async analyzeCode(userId: string, request: AnalyzeCodeDto): Promise<CodeAnalysisResponse> {
+    // Before the quota: a contest refusing the mentor must cost the learner nothing.
+    await this.contests.assertMentorAllowed(userId, request.problemSlug)
     await this.guardQuota(userId)
     const problem = await this.problem(request.problemSlug)
     return this.complete(userId, problem.id, 'ANALYZE_CODE', codeAnalysisSchema, {
@@ -142,6 +150,8 @@ export class AIService {
   }
 
   async explainWrongAnswer(userId: string, request: ExplainWrongAnswerDto): Promise<WrongAnswerResponse> {
+    // Before the quota: a contest refusing the mentor must cost the learner nothing.
+    await this.contests.assertMentorAllowed(userId, request.problemSlug)
     await this.guardQuota(userId)
     const problem = await this.problem(request.problemSlug)
     return this.complete(userId, problem.id, 'EXPLAIN_WRONG_ANSWER', wrongAnswerSchema, {
@@ -155,6 +165,8 @@ export class AIService {
   }
 
   async showSolution(userId: string, request: ExplainDto): Promise<SolutionResponse> {
+    // Before the quota: a contest refusing the mentor must cost the learner nothing.
+    await this.contests.assertMentorAllowed(userId, request.problemSlug)
     await this.guardQuota(userId)
     const problem = await this.problem(request.problemSlug)
     return this.complete(userId, problem.id, 'SHOW_SOLUTION', solutionSchema, {

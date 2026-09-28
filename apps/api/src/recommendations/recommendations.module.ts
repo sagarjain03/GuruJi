@@ -15,6 +15,7 @@ import { RecommendationsService } from './recommendations.service'
   imports: [AuthModule],
   controllers: [RecommendationsController],
   providers: [RecommendationsService, CandidatesService],
-  exports: [RecommendationsService],
+  // CandidatesService for contests: they pick weak topics by the same measure.
+  exports: [RecommendationsService, CandidatesService],
 })
 export class RecommendationsModule {}

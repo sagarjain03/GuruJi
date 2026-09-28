@@ -15,6 +15,7 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
 import { RevisionModule } from './revision/revision.module'
 import { RedisModule } from './redis/redis.module'
 import { AIModule } from './ai/ai.module'
+import { ContestsModule } from './contests/contests.module'
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { AIModule } from './ai/ai.module'
     ScheduleModule.forRoot(),
     RedisModule,
     AIModule,
+    ContestsModule,
     AuthModule,
     ContentModule,
     EditorModule,

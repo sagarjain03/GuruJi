@@ -4,11 +4,12 @@ import { GroqProvider, type LLMProvider } from '@guruji/ai'
 import type { Env } from '../config/env'
 import { AuthModule } from '../auth/auth.module'
 import { ContentModule } from '../content/content.module'
+import { ContestsModule } from '../contests/contests.module'
 import { AIController } from './ai.controller'
 import { AI_PROVIDER, AI_REFERENCE_EXECUTOR, AIService, type ReferenceExecutor } from './ai.service'
 
 @Module({
-  imports: [AuthModule, ContentModule],
+  imports: [AuthModule, ContentModule, ContestsModule],
   controllers: [AIController],
   providers: [
     AIService,
