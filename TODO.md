@@ -493,7 +493,7 @@ exit criteria waived.**
 - [ ] Loading, empty and error states everywhere
 - [ ] Performance budget — code splitting, lazy loading, query tuning
 - [ ] Security review against `docs/security.md`
-- [ ] Playwright: register → login → open problem → code → run → submit → result →
+- [x] Playwright: register → login → open problem → code → run → submit → result →
       recommendation → revision
 - [ ] Sentry wired up
 - [ ] Light gamification — streaks, badges, milestones. **Never feeding mastery**
