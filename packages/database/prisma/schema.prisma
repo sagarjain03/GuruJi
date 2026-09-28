@@ -74,6 +74,7 @@ model User {
   revisionItems   RevisionItem[]
   recommendations Recommendation[]
   aiConversations AIConversation[]
+  contests        Contest[]
 
   @@map("users")
 }
@@ -328,6 +329,8 @@ model Problem {
   revisionItems   RevisionItem[]
   recommendations Recommendation[]
   aiConversations AIConversation[]
+  contestProblems    ContestProblem[]
+  contestSubmissions ContestSubmission[]
 
   // The filtered problem list.
   @@index([difficulty, reviewStatus])
@@ -533,6 +536,8 @@ model Submission {
   problem  Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
   results  SubmissionResult[]
   mistakes Mistake[]
+  /// Set when the submission was made inside a mock contest.
+  contestSubmission ContestSubmission?
 
   // Submission history and the activity chart.
   @@index([userId, createdAt])
@@ -895,4 +900,96 @@ model Recommendation {
   @@index([userId, generatedAt])
   @@index([userId, problemId, generatedAt])
   @@map("recommendations")
+}
+
+// ---------------------------------------------------------------------------
+// Mock contest (Phase 11). See .planning/specs/mock-contest.md.
+// ---------------------------------------------------------------------------
+
+enum ContestStatus {
+  ACTIVE
+  FINISHED
+
+  @@map("contest_status")
+}
+
+enum ContestFinishReason {
+  /// The learner pressed Finish before the deadline.
+  EARLY
+  /// The deadline passed; finished lazily on the next read or write.
+  TIME_UP
+
+  @@map("contest_finish_reason")
+}
+
+/// A timed, single-user assessment of three problems. The clock is this row:
+/// `deadlineAt` is fixed at start and nothing on the client can move it.
+///
+/// At most one ACTIVE contest per user — enforced by a partial unique index
+/// written by hand in the migration, because Prisma cannot express one.
+model Contest {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  status          ContestStatus @default(ACTIVE)
+  durationMinutes Int           @map("duration_minutes")
+  hintsAllowed    Boolean       @default(false) @map("hints_allowed")
+
+  startedAt    DateTime             @map("started_at") @db.Timestamptz(3)
+  deadlineAt   DateTime             @map("deadline_at") @db.Timestamptz(3)
+  finishedAt   DateTime?            @map("finished_at") @db.Timestamptz(3)
+  finishReason ContestFinishReason? @map("finish_reason")
+
+  score    Int @default(0)
+  maxScore Int @map("max_score")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problems    ContestProblem[]
+  submissions ContestSubmission[]
+
+  @@index([userId, startedAt])
+  @@map("contests")
+}
+
+/// The three problems of a contest, in display order, with their points.
+model ContestProblem {
+  id        String @id @default(uuid(7)) @db.Uuid
+  contestId String @map("contest_id") @db.Uuid
+  problemId String @map("problem_id") @db.Uuid
+
+  position Int
+  points   Int
+  /// Picked from already-solved problems because too few unsolved ones were
+  /// left. The report says so rather than treating it as a cold attempt.
+  wasSolvedBefore Boolean @map("was_solved_before")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, problemId])
+  @@unique([contestId, position])
+  @@map("contest_problems")
+}
+
+/// Links a graded `Submission` to the contest it was made in. The code and the
+/// verdict stay on the submission; nothing is copied.
+model ContestSubmission {
+  id           String @id @default(uuid(7)) @db.Uuid
+  contestId    String @map("contest_id") @db.Uuid
+  problemId    String @map("problem_id") @db.Uuid
+  submissionId String @unique @map("submission_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  contest    Contest    @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem    Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([contestId, problemId])
+  @@map("contest_submissions")
 }

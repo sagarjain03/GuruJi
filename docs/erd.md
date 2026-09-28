@@ -157,6 +157,20 @@ NEW_PROBLEM NEW_PROBLEM
 MOCK_CHALLENGE MOCK_CHALLENGE
         }
     
+
+
+        contest_status {
+            ACTIVE ACTIVE
+FINISHED FINISHED
+        }
+    
+
+
+        contest_finish_reason {
+            EARLY EARLY
+TIME_UP TIME_UP
+        }
+    
   "users" {
     String id "🗝️"
     String email 
@@ -484,6 +498,43 @@ MOCK_CHALLENGE MOCK_CHALLENGE
     DateTime expires_at 
     }
   
+
+  "contests" {
+    String id "🗝️"
+    String user_id 
+    ContestStatus status 
+    Int duration_minutes 
+    Boolean hints_allowed 
+    DateTime started_at 
+    DateTime deadline_at 
+    DateTime finished_at "❓"
+    ContestFinishReason finish_reason "❓"
+    Int score 
+    Int max_score 
+    DateTime created_at 
+    DateTime updated_at 
+    }
+  
+
+  "contest_problems" {
+    String id "🗝️"
+    String contest_id 
+    String problem_id 
+    Int position 
+    Int points 
+    Boolean was_solved_before 
+    DateTime created_at 
+    }
+  
+
+  "contest_submissions" {
+    String id "🗝️"
+    String contest_id 
+    String problem_id 
+    String submission_id 
+    DateTime created_at 
+    }
+  
     "users" |o--|| "role" : "enum:role"
     "profiles" |o--|| "language" : "enum:preferred_language"
     "profiles" |o--|| "experience_level" : "enum:experience_level"
@@ -540,4 +591,12 @@ MOCK_CHALLENGE MOCK_CHALLENGE
     "recommendations" |o--|| "recommendation_kind" : "enum:kind"
     "recommendations" }o--|| "users" : "user"
     "recommendations" }o--|o "problems" : "problem"
+    "contests" |o--|| "contest_status" : "enum:status"
+    "contests" |o--|o "contest_finish_reason" : "enum:finish_reason"
+    "contests" }o--|| "users" : "user"
+    "contest_problems" }o--|| "contests" : "contest"
+    "contest_problems" }o--|| "problems" : "problem"
+    "contest_submissions" }o--|| "contests" : "contest"
+    "contest_submissions" }o--|| "problems" : "problem"
+    "contest_submissions" |o--|| "submissions" : "submission"
 ```
