@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { HardLink } from '@/components/hard-link'
 import { useEffect, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import GradientButton from '@/components/ui/button-1'
 import { Close, Logo, Menu } from './icons'
 import './Navbar.css'
 
@@ -99,9 +99,7 @@ export default function Navbar() {
         <HardLink className="nav__signin" href="/login">
           Sign in
         </HardLink>
-        <Button asChild className="nav__cta">
-          <HardLink href="/register">Start Training</HardLink>
-        </Button>
+        <GradientButton href="/register" width="150px" height="44px" className="nav__cta">Start Training</GradientButton>
         <button
           ref={burger}
           className="nav__burger"
@@ -139,11 +137,9 @@ export default function Navbar() {
               </HardLink>
             </li>
           </ul>
-          <Button asChild size="lg" className="w-full">
-            <HardLink href="/register" onClick={() => setOpen(false)}>
-              Start Training
-            </HardLink>
-          </Button>
+          <GradientButton href="/register" width="100%" height="52px" onClick={() => setOpen(false)}>
+            Start Training
+          </GradientButton>
         </div>
       )}
     </header>

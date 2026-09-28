@@ -16,7 +16,9 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { UnlockMoment } from '@/components/achievements/unlock-moment'
 import { AmbientBackground } from '@/components/ambient-background'
+import { Logo } from '@/components/icons'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { DockItem, FloatingDock } from '@/components/ui/floating-dock'
 import { UserMenu } from '@/components/user-menu'
@@ -134,11 +136,7 @@ function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/dashboard" className="flex items-center gap-2">
-      <svg viewBox="0 0 28 28" className="size-5" fill="none" aria-hidden="true">
-        <path d="M14 1.6 20.3 8 14 14.4 7.7 8 14 1.6Z" fill="currentColor" />
-        <path d="M6.4 9.3 12.7 15.7 6.4 22.1 0.1 15.7 6.4 9.3Z" fill="currentColor" fillOpacity={0.6} />
-        <path d="M21.6 9.3 27.9 15.7 21.6 22.1 15.3 15.7 21.6 9.3Z" fill="currentColor" fillOpacity={0.35} />
-      </svg>
+      <Logo className="size-7" />
       <span className={cn('font-display text-base font-semibold tracking-tight', compact && 'max-sm:sr-only')}>
         GuruJi
       </span>
@@ -233,6 +231,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main id="content" className="min-w-0 flex-1 overflow-y-auto px-4 pb-6 lg:px-6">
           {children}
         </main>
+        <UnlockMoment />
       </div>
     </div>
   )

@@ -14,7 +14,7 @@ export function AuthLayout({ form, panel }: { form: React.ReactNode; panel: Reac
           href="/"
           className="font-display absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold"
         >
-          <Logo className="size-5" />
+          <Logo className="size-7" />
           GuruJi
         </HardLink>
         <div className="w-full max-w-95">{form}</div>

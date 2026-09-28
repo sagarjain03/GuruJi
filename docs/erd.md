@@ -171,6 +171,15 @@ FINISHED FINISHED
 TIME_UP TIME_UP
         }
     
+
+
+        achievement_tier {
+            BRONZE BRONZE
+SILVER SILVER
+GOLD GOLD
+PLATINUM PLATINUM
+        }
+    
   "users" {
     String id "🗝️"
     String email 
@@ -535,6 +544,17 @@ TIME_UP TIME_UP
     DateTime created_at 
     }
   
+
+  "user_achievements" {
+    String id "🗝️"
+    String user_id 
+    String badge 
+    AchievementTier tier 
+    DateTime unlocked_at 
+    DateTime seen_at "❓"
+    DateTime created_at 
+    }
+  
     "users" |o--|| "role" : "enum:role"
     "profiles" |o--|| "language" : "enum:preferred_language"
     "profiles" |o--|| "experience_level" : "enum:experience_level"
@@ -599,4 +619,6 @@ TIME_UP TIME_UP
     "contest_submissions" }o--|| "contests" : "contest"
     "contest_submissions" }o--|| "problems" : "problem"
     "contest_submissions" |o--|| "submissions" : "submission"
+    "user_achievements" |o--|| "achievement_tier" : "enum:tier"
+    "user_achievements" }o--|| "users" : "user"
 ```

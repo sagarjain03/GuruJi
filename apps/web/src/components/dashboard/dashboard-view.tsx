@@ -2,8 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Clock3, Flame, Globe2, Layers, Sparkles, Target } from 'lucide-react'
-import type { AnalyticsOverview } from '@guruji/types'
+import type { ActivityDay, AnalyticsOverview } from '@guruji/types'
 import Link from 'next/link'
+import { NextUp } from '@/components/achievements/next-up'
 import { ErrorState, ListSkeleton } from '@/components/content/states'
 import { MasteryBar } from '@/components/dashboard/mastery-bar'
 import { OnboardingCard } from '@/components/dashboard/onboarding-card'
@@ -39,6 +40,13 @@ export function DashboardView() {
   const overview = useQuery({
     queryKey: ['analytics', 'overview'],
     queryFn: () => analyticsApi.overview(),
+    staleTime: 30_000,
+  })
+  // Same key and range as /analytics, so the week under the streak is free
+  // once either page has loaded it.
+  const activity = useQuery({
+    queryKey: ['analytics', 'activity'],
+    queryFn: () => analyticsApi.activity(),
     staleTime: 30_000,
   })
   const due = useQuery({
@@ -93,8 +101,11 @@ export function DashboardView() {
           // drifts without anyone noticing.
           current={data?.streak.current ?? 0}
           longest={data?.streak.longest ?? 0}
+          days={activity.data?.days ?? null}
         />
       </div>
+
+      <NextUp />
 
       <TopicsPanel overview={data} isLoading={overview.isPending} />
     </div>
@@ -466,7 +477,8 @@ function RevisionPanel() {
   )
 }
 
-function StreakPanel({ current, longest }: { current: number; longest: number }) {
+function StreakPanel({ current, longest, days }: { current: number; longest: number; days: ActivityDay[] | null }) {
+  const week = lastSevenDays(days)
   return (
     <Panel className="flex flex-col">
       <header className="mb-4">
@@ -475,14 +487,41 @@ function StreakPanel({ current, longest }: { current: number; longest: number })
       </header>
 
       <div className="flex flex-1 items-center gap-4">
-        <span className="border-border/70 grid size-16 shrink-0 place-items-center border">
-          <Flame className="text-primary size-7" />
+        <span
+          className={cn(
+            'grid size-16 shrink-0 place-items-center border',
+            current > 0 ? 'border-primary/60 bg-primary/10' : 'border-border/70',
+          )}
+        >
+          <Flame className={cn('size-7', current > 0 ? 'text-primary fill-primary/30' : 'text-muted-foreground')} />
         </span>
         <div className="grid grid-cols-2 gap-3">
           <Stat value={current} label="Current" />
           <Stat value={longest} label="Longest" />
         </div>
       </div>
+
+      {week !== null && (
+        <ol className="mt-4 grid grid-cols-7 gap-1.5" aria-label="The last seven days" data-testid="streak-week">
+          {week.map((day) => (
+            <li key={day.date} className="flex flex-col items-center gap-1">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-2 w-full',
+                  day.solved > 0 ? 'bg-primary' : day.attempted > 0 ? 'bg-primary/30' : 'bg-muted',
+                )}
+              />
+              <span className="text-muted-foreground text-[10px] tabular-nums">
+                {WEEKDAY.format(new Date(`${day.date}T00:00:00Z`))}
+                <span className="sr-only">
+                  {day.solved > 0 ? ', solved' : day.attempted > 0 ? ', attempted' : ', no practice'}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
 
       <p className="text-muted-foreground mt-4 text-xs">
         {/* The server buckets days in UTC, and says so rather than claiming
@@ -492,6 +531,20 @@ function StreakPanel({ current, longest }: { current: number; longest: number })
       </p>
     </Panel>
   )
+}
+
+/** Days are UTC dates, so the weekday is named in UTC too, or it drifts by one. */
+const WEEKDAY = new Intl.DateTimeFormat(undefined, { weekday: 'narrow', timeZone: 'UTC' })
+
+/** Today and the six UTC days before it, zero-filled: the server sends only active days. */
+function lastSevenDays(days: ActivityDay[] | null): ActivityDay[] | null {
+  if (days === null) return null
+  const byDate = new Map(days.map((day) => [day.date, day]))
+  const today = Date.now()
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today - (6 - index) * 86_400_000).toISOString().slice(0, 10)
+    return byDate.get(date) ?? { date, attempted: 0, solved: 0 }
+  })
 }
 
 function Stat({ value, label }: { value: number; label: string }) {

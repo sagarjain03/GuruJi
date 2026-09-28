@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
+import { TrophyCase } from '@/components/achievements/trophy-case'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { analyticsApi } from '@/lib/api'
@@ -78,6 +79,8 @@ export function ProfileView() {
           <Link href="/analytics">See full analytics</Link>
         </Button>
       </section>
+
+      <TrophyCase />
 
       <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-preferences">
         <h2 id="profile-preferences" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">

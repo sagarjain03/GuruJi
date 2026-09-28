@@ -2,8 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { HardLink } from '@/components/hard-link'
-import { Button } from '@/components/ui/button'
+import GradientButton from '@/components/ui/button-1'
 import { ArrowRight, Globe, patterns } from './icons'
 import './Hero.css'
 
@@ -118,12 +117,10 @@ export default function Hero() {
           </p>
 
           <div className="hero__cta">
-            <Button asChild size="lg">
-              <HardLink href="/register">
-                Start training
-                <ArrowRight />
-              </HardLink>
-            </Button>
+            <GradientButton href="/register" width="200px" height="52px" className="hero__go">
+              Start training
+              <ArrowRight aria-hidden="true" />
+            </GradientButton>
           </div>
         </div>
       </div>

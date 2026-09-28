@@ -207,6 +207,14 @@ body[data-dragging] {
   margin-top: calc(26px * var(--scale));
 }
 
+.hero__go {
+  font-size: calc(15px * var(--ui-scale));
+}
+.hero__go svg {
+  width: 1.15em;
+  height: 1.15em;
+}
+
 /* ---------- footer band ---------- */
 .hero__foot {
   position: relative;

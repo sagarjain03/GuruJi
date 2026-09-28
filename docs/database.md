@@ -47,9 +47,9 @@ RoadmapNode              StudySession              Recommendation
 Problem                  Mistake
 ProblemTopic
 ProblemPattern           LEARNING                  GAMIFICATION
-TestCase                 RevisionItem              Achievement
-Hint                     AIConversation            UserAchievement
-                         AIMessage                 DailyGoal
+TestCase                 RevisionItem              UserAchievement
+Hint                     AIConversation
+                         AIMessage
 IDENTITY                 Contest
 User                     ContestProblem
 Profile                  ContestSubmission
@@ -332,16 +332,28 @@ As built (Phase 11):
 
 ## Gamification
 
-`Achievement` (slug, name, description, criteria jsonb, icon),
-`UserAchievement` (userId, achievementId, unlockedAt),
-`DailyGoal` (userId, date, targetMinutes, achievedMinutes, completed).
+As built (Phase 12), one table:
 
-`DailyGoal.date` is a `DATE` in the user's local timezone, resolved from
-`Profile.timezone` at write time. This is the only place a local-day concept is
-persisted, and it is deliberate: a streak that resets at UTC midnight is wrong
-for most of the world.
+`UserAchievement` (userId, badge `varchar(64)`, tier `achievement_tier`,
+unlockedAt, seenAt nullable, createdAt), unique on `(userId, badge, tier)`,
+indexed on `(userId, seenAt)`.
 
-None of these tables feed mastery. That separation is the point.
+- **The catalogue is code, not rows.** The twelve badges, their metrics and
+  tier thresholds live in `apps/api/src/achievements/catalog.ts`. An
+  `Achievement` table would be a second copy of that list with nothing to add;
+  `badge` stores the slug. `DailyGoal` was not built — the streak is read from
+  submissions, as the dashboard already did.
+- **Unlocks are recorded on read.** `GET /achievements` computes every metric
+  from existing rows, and any tier crossed for the first time is inserted with
+  `createMany … skipDuplicates`; the unique index makes two tabs evaluating at
+  once write one row. A row is never deleted or downgraded: an unlock is a fact
+  about the past.
+- **`seenAt`** is set when the unlock moment is dismissed. Seeing a badge's
+  highest new tier marks the lower tiers crossed with it as seen too.
+
+None of this feeds mastery. The dependency runs one way — achievements read
+the engines' tables, no engine imports achievements — and
+`achievements/boundary.spec.ts` fails the build if that changes.
 
 ---
 

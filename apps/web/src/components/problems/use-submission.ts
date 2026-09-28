@@ -128,6 +128,8 @@ export function useSubmission(problemId: string, contestId: string | null = null
         announce(event.submission)
         // A verdict can move a contest problem from attempted to solved.
         void queryClient.invalidateQueries({ queryKey: ['contest'] })
+        // A graded verdict may cross a badge tier; a sample run never does.
+        if (!event.submission.isRun) void queryClient.invalidateQueries({ queryKey: ['achievements'] })
       }
     }
 
@@ -156,6 +158,7 @@ export function useSubmission(problemId: string, contestId: string | null = null
             setSubmission(fetched)
             announce(fetched)
             void queryClient.invalidateQueries({ queryKey: ['contest'] })
+            if (!fetched.isRun) void queryClient.invalidateQueries({ queryKey: ['achievements'] })
           }
         })
         .catch(() => {

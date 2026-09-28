@@ -75,6 +75,7 @@ model User {
   recommendations Recommendation[]
   aiConversations AIConversation[]
   contests        Contest[]
+  achievements    UserAchievement[]
 
   @@map("users")
 }
@@ -992,4 +993,43 @@ model ContestSubmission {
 
   @@index([contestId, problemId])
   @@map("contest_submissions")
+}
+
+// ---------------------------------------------------------------------------
+// Achievements (Phase 12). See .planning/specs/achievements.md.
+//
+// The badges and their thresholds are code (apps/api/src/achievements/catalog.ts);
+// only the unlocks are data. Nothing here is ever an input to mastery.
+// ---------------------------------------------------------------------------
+
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+
+  @@map("achievement_tier")
+}
+
+/// A badge tier someone has earned. Recorded the first time its threshold is
+/// observed and never removed: earning is permanent.
+model UserAchievement {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  /// Catalog slug, e.g. "sharp-first-try".
+  badge String          @db.VarChar(64)
+  tier  AchievementTier
+
+  unlockedAt DateTime  @map("unlocked_at") @db.Timestamptz(3)
+  /// Null until the unlock moment has been shown, so it is shown exactly once.
+  seenAt     DateTime? @map("seen_at") @db.Timestamptz(3)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badge, tier])
+  @@index([userId, seenAt])
+  @@map("user_achievements")
 }

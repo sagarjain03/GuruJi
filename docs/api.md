@@ -248,6 +248,27 @@ As built (Phase 11):
   solved → `weakArea: null` and `slowest`, labelled as pace, not weakness.
 - Another user's contest id, or a malformed one, is `404`.
 
+### `achievements`
+
+| Method | Route | Notes |
+|---|---|---|
+| GET | `/achievements` | Trophy case: all badges with `value`, held `tier`, `next` `{ tier, threshold }`, every tier's `unlockedAt`; plus `new` — unlocks not yet seen |
+| POST | `/achievements/seen` | `{ unlocks: [{ badge, tier }] }` (max 64) → **204** |
+
+As built (Phase 12):
+
+- **Evaluated on read.** The GET computes every metric from submissions,
+  revision reviews, mistakes and contests, and records any tier crossed for the
+  first time. Nothing is computed on the submission path.
+- **`new`** holds one entry per badge — its highest unseen tier — so crossing
+  Bronze and Silver at once is one moment, not two. It repeats on every read
+  until acknowledged.
+- **`seen`** marks that tier and every lower one of the same badge. An unknown
+  badge or an already-seen tier is a no-op, still 204; a malformed body is
+  `400 VALIDATION_FAILED`.
+- Graded submissions only: sample runs and judge failures never count toward a
+  badge, the same rule as accuracy.
+
 ### `health`
 
 `GET /health` (liveness), `GET /health/ready` (readiness — checks Postgres,

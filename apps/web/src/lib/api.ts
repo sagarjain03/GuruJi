@@ -1,5 +1,7 @@
 import type {
   ActivityResponse,
+  MarkSeenRequest,
+  TrophyCase,
   ContestReport,
   ContestSubmitRequest,
   ContestView,
@@ -341,6 +343,17 @@ export const recommendationApi = {
 
   dismiss: (id: string) =>
     send<void>(`/recommendations/${encodeURIComponent(id)}/dismiss`, { method: 'POST' }),
+}
+
+/**
+ * Badges. Reading the trophy case is also what records a newly crossed tier,
+ * so it is always a GET the server may write behind; `seen` only stops the
+ * unlock moment from showing again.
+ */
+export const achievementApi = {
+  trophyCase: () => send<TrophyCase>('/achievements'),
+
+  seen: (body: MarkSeenRequest) => send<void>('/achievements/seen', { method: 'POST', body }),
 }
 
 /**

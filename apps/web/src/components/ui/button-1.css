@@ -1,0 +1,61 @@
+/* Silver GradientButton (button-1.tsx).
+
+   A rotating silver ring around a softly graded silver plate (the ::after).
+   On hover or keyboard focus the plate fades and the ring shows through.
+   Every colour in both states is light-to-mid silver, and the label is always
+   near-black — so the text stays clearly readable before and after the fade. */
+@property --r {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.rotatingGradient {
+  --color-background: #d9d9de;
+  --color-text: #111113;
+  background: conic-gradient(
+    from var(--r),
+    #fafafa,
+    #b4b4bb,
+    #e4e4e7,
+    #a8a8b0,
+    #f4f4f5,
+    #bdbdc4,
+    #fafafa
+  );
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  animation: rotating-gradient 4s linear infinite;
+}
+
+/* The plate: a light silver wash, top lighter than bottom. */
+.rotatingGradient::after {
+  background-image: linear-gradient(180deg, #f1f1f3 0%, #d4d4d9 55%, #c2c2c8 100%);
+}
+
+.rotatingGradient .label {
+  gap: 0.55em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rotatingGradient:hover::after,
+.rotatingGradient:focus-visible::after {
+  opacity: 0;
+}
+
+.rotatingGradient:focus-visible {
+  outline: 2px solid #f2f2f4;
+  outline-offset: 3px;
+}
+
+@keyframes rotating-gradient {
+  to {
+    --r: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotatingGradient {
+    animation: none;
+  }
+}

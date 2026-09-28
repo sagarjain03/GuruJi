@@ -15,6 +15,7 @@ import { RealtimeModule } from './realtime/realtime.module'
 import { RecommendationsModule } from './recommendations/recommendations.module'
 import { RevisionModule } from './revision/revision.module'
 import { RedisModule } from './redis/redis.module'
+import { AchievementsModule } from './achievements/achievements.module'
 import { AIModule } from './ai/ai.module'
 import { RateLimitService } from './auth/rate-limit.service'
 import { GlobalRateLimitGuard } from './common/guards/global-rate-limit.guard'
@@ -54,6 +55,7 @@ import { ContestsModule } from './contests/contests.module'
     RedisModule,
     AIModule,
     ContestsModule,
+    AchievementsModule,
     AuthModule,
     ContentModule,
     EditorModule,

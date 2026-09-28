@@ -8,12 +8,11 @@ import type {
   DifficultyDistribution,
   PatternProgress,
   PerformanceRow,
-  Streak,
   TopicAnalytics,
   TopicProgress,
   TrendsResponse,
 } from '@guruji/types'
-import { bucketDays, bucketWeeks, firstTryAccuracy, hintsUsed, rangeBounds, resolveRange } from './analytics-math'
+import { bucketDays, bucketWeeks, firstTryAccuracy, hintsUsed, rangeBounds, resolveRange, streakFrom } from './analytics-math'
 import { computeMastery } from './mastery'
 
 /** A year of squares, which is what a heatmap is. */
@@ -248,48 +247,4 @@ function performance(
     accuracy: row.attempts === 0 ? null : firstAttemptSolved / row.attempts,
     masteryScore: row.mastery.score,
   }
-}
-
-/**
- * Consecutive days with a solve, counting back from today.
- *
- * A day with attempts but no solve does not extend a streak: the streak is
- * about finishing things, and a version that counted showing up would reward
- * opening the tab. It is shown to the user and deliberately kept out of the
- * mastery model for the same reason — consistency is a habit, not a skill.
- */
-function streakFrom(activity: ActivityDay[]): Streak {
-  const solvedDays = activity.filter((day) => day.solved > 0).map((day) => day.date)
-  if (solvedDays.length === 0) {
-    return { current: 0, longest: 0, lastActiveDate: null }
-  }
-
-  const days = new Set(solvedDays)
-  const lastActiveDate = solvedDays[solvedDays.length - 1] ?? null
-
-  let longest = 0
-  let run = 0
-  for (const date of solvedDays) {
-    run = days.has(previousDay(date)) ? run + 1 : 1
-    longest = Math.max(longest, run)
-  }
-
-  // Counting back from today, and from yesterday if today is not done yet —
-  // a streak that breaks the moment midnight passes would punish people for
-  // not having practised yet at 9am.
-  const today = new Date().toISOString().slice(0, 10)
-  let cursor = days.has(today) ? today : previousDay(today)
-  let current = 0
-  while (days.has(cursor)) {
-    current += 1
-    cursor = previousDay(cursor)
-  }
-
-  return { current, longest, lastActiveDate }
-}
-
-function previousDay(date: string): string {
-  const parsed = new Date(`${date}T00:00:00Z`)
-  parsed.setUTCDate(parsed.getUTCDate() - 1)
-  return parsed.toISOString().slice(0, 10)
 }

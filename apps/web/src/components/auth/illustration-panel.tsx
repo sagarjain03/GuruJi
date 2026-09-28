@@ -3,7 +3,7 @@ import { Logo, patterns } from '@/components/icons'
 
 /**
  * The showcase half of the auth screen: a full-bleed illustration with the
- * diamond mark, one line of product copy and the Core Patterns strip laid over
+ * panda mark, one line of product copy and the Core Patterns strip laid over
  * it. A gradient in the page's own background colour rises from the bottom so
  * the copy stays readable in either theme. Static on purpose. Desktop-only —
  * on a phone it would push the form below the fold, and because the panel is
@@ -19,7 +19,7 @@ export function IllustrationPanel() {
       <div className="from-background via-background/70 absolute inset-0 bg-gradient-to-t via-35% to-transparent to-65%" />
 
       <div className="relative flex h-full flex-col justify-between p-10">
-        <Logo className="size-10 text-white drop-shadow" />
+        <Logo className="size-12" />
 
         <div>
           <p className="font-display max-w-md text-2xl leading-snug font-semibold">

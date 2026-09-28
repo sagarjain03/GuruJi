@@ -16,7 +16,7 @@ export default function NotFound() {
   return (
     <div className="bg-background text-foreground grid min-h-svh place-items-center px-6">
       <div className="border-border flex w-full max-w-md flex-col items-center gap-3 border border-dashed px-6 py-14 text-center">
-        <Logo className="size-6" />
+        <Logo className="size-12" />
         <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.18em] uppercase">
           404
         </p>
