@@ -2,6 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import type {
   Language,
   SubmissionDetail,
@@ -11,6 +12,7 @@ import type {
 } from '@guruji/types'
 import { ApiError, contestApi, submissionApi } from '@/lib/api'
 import { getSocket } from '@/lib/socket'
+import { VERDICT_LABEL } from '@/components/problems/result-panel'
 
 /**
  * The socket is the fast path, not the only path.
@@ -22,6 +24,24 @@ import { getSocket } from '@/lib/socket'
 const FALLBACK_POLL_MS = 4000
 
 export type RunKind = 'run' | 'submit'
+
+/**
+ * One toast per verdict. The socket and the fallback poll can both deliver the
+ * same result, so the submission id doubles as the toast id — a second arrival
+ * replaces the first instead of stacking.
+ */
+function announce(submission: SubmissionDetail): void {
+  const verdict = submission.verdict ?? 'INTERNAL_ERROR'
+  const label = VERDICT_LABEL[verdict]
+  const title = submission.isRun ? `Run: ${label}` : label
+  if (verdict === 'ACCEPTED') {
+    toast.success(title, { id: submission.id })
+  } else if (verdict === 'INTERNAL_ERROR') {
+    toast.warning(title, { id: submission.id })
+  } else {
+    toast.error(title, { id: submission.id })
+  }
+}
 
 export interface UseSubmission {
   /** Null until something has been run in this session. */
@@ -83,9 +103,9 @@ export function useSubmission(problemId: string, contestId: string | null = null
         .catch((cause: unknown) => {
           // The rate limit is the one a user will actually hit, and "nothing
           // happened" is the worst possible response to it.
-          setError(
-            cause instanceof ApiError ? cause.message : 'Could not reach the server.',
-          )
+          const message = cause instanceof ApiError ? cause.message : 'Could not reach the server.'
+          setError(message)
+          toast.error(message)
           setStatus(null)
           setKind(null)
         })
@@ -105,6 +125,7 @@ export function useSubmission(problemId: string, contestId: string | null = null
       if (event.submissionId === currentId.current) {
         setSubmission(event.submission)
         setStatus(event.submission.status)
+        announce(event.submission)
         // A verdict can move a contest problem from attempted to solved.
         void queryClient.invalidateQueries({ queryKey: ['contest'] })
       }
@@ -133,6 +154,7 @@ export function useSubmission(problemId: string, contestId: string | null = null
           setStatus(fetched.status)
           if (fetched.status === 'COMPLETED' || fetched.status === 'FAILED') {
             setSubmission(fetched)
+            announce(fetched)
             void queryClient.invalidateQueries({ queryKey: ['contest'] })
           }
         })

@@ -51,7 +51,7 @@ export function MistakeForm({
       setOpen(false)
       setWhatWentWrong('')
       setCorrectIdea('')
-      toast('Mistake saved.')
+      toast.success('Mistake saved.')
     },
   })
 

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, X } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import {
   RECOMMENDATION_KIND_LABEL,
   type Recommendation,
@@ -82,10 +83,12 @@ export function TodaysTraining() {
   const dismiss = useMutation({
     mutationFn: (id: string) => recommendationApi.dismiss(id),
     onSuccess: () => {
+      toast.success('Suggestion dismissed.')
       // Both the list and the single pick are now stale — the dismissal feeds
       // the next batch's recency penalty.
       void queryClient.invalidateQueries({ queryKey: ['recommendations'] })
     },
+    onError: () => toast.error('Could not dismiss that suggestion.'),
   })
 
   const items = batch.data ?? []

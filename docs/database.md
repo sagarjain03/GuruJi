@@ -309,9 +309,24 @@ prompts per message; they are versioned in code.
 
 ### `Contest` / `ContestProblem` / `ContestSubmission`
 
-Contest: `userId`, `title`, `durationMinutes`, `startedAt`, `endedAt`,
-`score`, `status`. Join table orders problems and holds points. Contest
-submissions reference `Submission` rather than duplicating code storage.
+As built (Phase 11):
+
+- `Contest`: `userId`, `status` (ACTIVE | FINISHED), `durationMinutes`
+  (60 | 90), `hintsAllowed`, `startedAt`, `deadlineAt`, `finishedAt`,
+  `finishReason` (EARLY | TIME_UP), `score`, `maxScore`. No `title`: a contest
+  is identified by when it ran.
+- **At most one ACTIVE contest per user** — `contests_one_active_per_user`, a
+  partial unique index written by hand in the migration, because Prisma cannot
+  express one. Application checks alone would let two simultaneous starts both
+  succeed.
+- `ContestProblem`: `contestId`, `problemId`, `position` (1–3), `points`,
+  `wasSolvedBefore`. Unique on `(contestId, problemId)` and
+  `(contestId, position)`.
+- `ContestSubmission`: `contestId`, `problemId`, `submissionId` (unique). It
+  references `Submission` rather than duplicating code storage; the verdict and
+  the code stay on the submission.
+- No soft delete: contests are history owned by the user and cascade with the
+  account, like submissions.
 
 ---
 

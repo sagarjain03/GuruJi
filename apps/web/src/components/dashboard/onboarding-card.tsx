@@ -53,7 +53,7 @@ export function OnboardingCard() {
       }
       // Tolerance moved, so every suggestion computed before it is aimed wrong.
       void queryClient.invalidateQueries({ queryKey: ['recommendations'] })
-      toast('Setup saved. Suggestions now use your answers.')
+      toast.success('Setup saved. Suggestions now use your answers.')
     },
   })
 

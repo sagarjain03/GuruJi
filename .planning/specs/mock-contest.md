@@ -1,7 +1,7 @@
 # Spec: Mock contest (Phase 11)
 
 **Created**: 2026-09-28
-**Status**: draft
+**Status**: done
 **Author**: Sagar Jain
 **Epic**: none (roadmap Phase 11)
 

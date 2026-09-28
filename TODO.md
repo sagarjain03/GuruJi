@@ -478,11 +478,11 @@ exit criteria waived.**
 
 ## Phase 11 — Mock contest
 
-- [ ] `Contest`, `ContestProblem`, `ContestSubmission`
-- [ ] Start / submit / finish / report endpoints
-- [ ] Timer, hints disabled by default
-- [ ] Post-contest report naming the weak area
-- [ ] Assessment framing, not leaderboards
+- [x] `Contest`, `ContestProblem`, `ContestSubmission`
+- [x] Start / submit / finish / report endpoints
+- [x] Timer, hints disabled by default
+- [x] Post-contest report naming the weak area
+- [x] Assessment framing, not leaderboards
 
 ---
 

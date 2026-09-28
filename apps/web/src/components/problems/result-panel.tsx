@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
  * message to someone who cannot see it, and `TIME_LIMIT_EXCEEDED` in red is not
  * self-explanatory to someone meeting it for the first time.
  */
-const VERDICT_LABEL: Record<Verdict, string> = {
+export const VERDICT_LABEL: Record<Verdict, string> = {
   ACCEPTED: 'Accepted',
   WRONG_ANSWER: 'Wrong answer',
   TIME_LIMIT_EXCEEDED: 'Time limit exceeded',

@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { Lightbulb, Loader2, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { aiApi, type MentorAnalysis, type MentorExplanation, type MentorSolution } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 
@@ -29,16 +30,19 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
       window.localStorage.setItem(storageKey, String(Math.min(level + 1, MAX_HINT_LEVEL)))
       setLevel((current) => Math.min(current + 1, MAX_HINT_LEVEL))
     },
+    onError: () => toast.error('The mentor is unavailable right now.'),
   })
 
   const explain = useMutation({
     mutationFn: () => aiApi.explain({ problemSlug, ...(message ? { question: message } : {}) }),
     onSuccess: setExplanation,
+    onError: () => toast.error('Could not explain that right now.'),
   })
 
   const analyze = useMutation({
     mutationFn: () => aiApi.analyzeCode({ problemSlug, code }),
     onSuccess: setAnalysis,
+    onError: () => toast.error('Could not analyse your code right now.'),
   })
 
   const showSolution = useMutation({
@@ -47,6 +51,7 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
       setSolution(value)
       setConfirmSolution(false)
     },
+    onError: () => toast.error('Could not load the solution right now.'),
   })
 
   return (
@@ -102,7 +107,6 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
       )}
 
       {hint.data && <div className="border-border bg-background border p-3 text-sm leading-relaxed">{hint.data.hint}</div>}
-      {hint.isError && <p role="alert" className="text-destructive text-xs">The mentor is unavailable right now.</p>}
       {analysis && (
         <div className="border-border bg-background flex flex-col gap-3 border p-3 text-sm">
           <MentorSection title="Correctness" value={analysis.correctness} />

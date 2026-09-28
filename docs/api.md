@@ -208,8 +208,45 @@ are the obvious abuse target. Requests carry a `problemId`, never problem text.
 
 ### `contests`
 
-`POST /contests` (start), `GET /contests/:id`, `POST /contests/:id/finish`,
-`GET /contests/:id/report`.
+| Method | Route | Notes |
+|---|---|---|
+| POST | `/contests` | `{ durationMinutes: 60 \| 90, hintsAllowed? }` → 201 contest view |
+| GET | `/contests/latest` | Most recent contest, running or finished; **204** when there has never been one |
+| GET | `/contests/:id` | Contest view: problems in order, per-problem state and attempts, `deadlineAt`, `serverNow` |
+| POST | `/contests/:id/submissions` | `{ problemId, language, code }` → 202, through the normal judge path |
+| POST | `/contests/:id/finish` | Ends early; idempotent |
+| GET | `/contests/:id/report` | Finished contests only |
+
+As built (Phase 11):
+
+- **The clock is the server's.** `deadlineAt` is fixed at start; every view
+  carries `serverNow`, and the client counts down from the difference. A
+  contest past its deadline is finished by the next read or write that touches
+  it (`finishReason: TIME_UP`, `finishedAt` = the deadline) — there is no job.
+- **One running contest per user**, enforced by a partial unique index; a
+  second start is `409 CONTEST_ALREADY_ACTIVE` with `details.contestId`.
+- **Problems**: one per difficulty from the weakest topics (the recommendation
+  engine's measure), unsolved first; solved ones only when too few unsolved
+  exist, flagged `wasSolvedBefore`. Fewer than three published problems is
+  `409 CONTEST_UNAVAILABLE`.
+- **Submissions** are ordinary graded submissions (they count toward mastery
+  and revision) linked by `ContestSubmission`. After the deadline:
+  `409 CONTEST_ENDED`; a problem outside the set: `422 PROBLEM_NOT_IN_CONTEST`.
+  What counts is `Submission.createdAt ≤ deadlineAt` — judging may finish later.
+  A judge failure is not an attempt.
+- **Score**: EASY 100, MEDIUM 200, HARD 300 per problem solved in time; wrong
+  answers cost nothing. No ranks or comparison with other users anywhere.
+- **Hints**: while a contest started without `hintsAllowed` is running, every
+  mentor route (`hint`, `explain`, `analyze-code`, `explain-wrong-answer`,
+  `show-solution`) refuses that contest's problems with
+  `403 CONTEST_HINTS_DISABLED` — checked before the AI quota is touched.
+  Other problems are unaffected.
+- **Report** (`409 CONTEST_NOT_FINISHED` before the end): per-problem result,
+  attempts, time to solve, topics, patterns, hints, logged mistakes, and a
+  `weakArea` — the topic or pattern behind the most unsolved problems (ties:
+  lower mastery, then the harder problem) with its evidence in words. All
+  solved → `weakArea: null` and `slowest`, labelled as pace, not weakness.
+- Another user's contest id, or a malformed one, is `404`.
 
 ### `health`
 

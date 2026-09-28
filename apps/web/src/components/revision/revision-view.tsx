@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   REVISION_OUTCOME_LABEL,
   REVISION_STATE_LABEL,
@@ -34,7 +35,11 @@ export function RevisionView() {
   const respace = useMutation({
     mutationFn: () => revisionApi.respace(),
     onSuccess: () => {
+      toast.success('Backlog spread over the coming days.')
       void queryClient.invalidateQueries({ queryKey: ['revision'] })
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : 'Could not spread them out.')
     },
   })
 
@@ -137,6 +142,7 @@ function QueueRow({ item }: { item: QueueItem }) {
   const complete = useMutation({
     mutationFn: (outcome: RevisionOutcome) => revisionApi.complete(item.id, { outcome }),
     onSuccess: () => {
+      toast.success(`Review saved for ${item.title}.`)
       void queryClient.invalidateQueries({ queryKey: ['revision'] })
       // Retention feeds mastery, so the dashboard is now out of date too.
       void queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'none' })

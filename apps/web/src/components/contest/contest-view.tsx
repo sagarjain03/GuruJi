@@ -4,6 +4,7 @@ import type { ContestView as Contest, StartContestRequest } from '@guruji/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { DifficultyBadge } from '@/components/content/states'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -86,12 +87,18 @@ function StartContest({ onStarted }: { onStarted: (contest: Contest) => void }) 
 
   const start = useMutation({
     mutationFn: () => contestApi.start({ durationMinutes, hintsAllowed }),
-    onSuccess: onStarted,
+    onSuccess: (contest) => {
+      toast.success('Contest started. The clock is running.')
+      onStarted(contest)
+    },
     onError: (error) => {
       // Another tab started one first: show that one instead of an error.
       if (error instanceof ApiError && error.code === 'CONTEST_ALREADY_ACTIVE') {
+        toast.info('A contest is already running — showing that one.')
         void client.invalidateQueries({ queryKey: LATEST })
+        return
       }
+      toast.error(error instanceof ApiError ? error.message : 'Could not start the contest.')
     },
   })
 
@@ -163,7 +170,13 @@ function StartContest({ onStarted }: { onStarted: (contest: Contest) => void }) 
 function ActiveContest({ contest, onChange }: { contest: Contest; onChange: () => void }) {
   const finish = useMutation({
     mutationFn: () => contestApi.finish(contest.id),
-    onSuccess: onChange,
+    onSuccess: () => {
+      toast.success('Contest finished. Here is your report.')
+      onChange()
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : 'Could not finish the contest.')
+    },
   })
 
   return (
@@ -183,7 +196,13 @@ function ActiveContest({ contest, onChange }: { contest: Contest; onChange: () =
           variant="outline"
           disabled={finish.isPending}
           onClick={() => {
-            if (window.confirm('Finish now? You cannot submit again after this.')) finish.mutate()
+            toast.warning('Finish now?', {
+              id: 'finish-contest',
+              description: 'You cannot submit again after this.',
+              duration: 8000,
+              action: { label: 'Finish', onClick: () => finish.mutate() },
+              cancel: { label: 'Keep going', onClick: () => {} },
+            })
           }}
         >
           {finish.isPending ? 'Finishing…' : 'Finish contest'}

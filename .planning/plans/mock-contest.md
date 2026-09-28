@@ -3,7 +3,7 @@
 **Spec**: .planning/specs/mock-contest.md
 **Epic**: none (roadmap Phase 11)
 **Created**: 2026-09-28
-**Status**: draft
+**Status**: done
 
 Full-stack: database → API → types → web → browser tests. Backend first; the
 integration point is `contestApi` in `apps/web/src/lib/api.ts` (task 13).
