@@ -109,6 +109,11 @@ describe('contests (e2e)', () => {
       await as(token).post('/contests', { durationMinutes: 45 }).expect(400)
     })
 
+    it('refuses a field it does not know, rather than silently dropping it', async () => {
+      // Mass assignment fails loudly everywhere else in the API; here too.
+      await as(token).post('/contests', { durationMinutes: 60, score: 600 }).expect(400)
+    })
+
     it('resumes: latest returns the running contest with the same deadline', async () => {
       const latest = (await as(token).get('/contests/latest').expect(200)).body as ContestView
 

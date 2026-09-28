@@ -49,3 +49,5 @@ apps/code-runner/tmp/
 apps/web/e2e/.auth/
 apps/web/test-results/
 apps/web/playwright-report/
+
+docs/

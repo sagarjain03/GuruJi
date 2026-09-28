@@ -1,10 +1,13 @@
+import Image from 'next/image'
 import { Logo, patterns } from '@/components/icons'
 
 /**
- * The showcase half of the auth screen, built only from existing brand pieces:
- * the dot field, the diamond mark, one line of product copy and the Core
- * Patterns strip. Static on purpose. Desktop-only — on a phone it would push
- * the form below the fold.
+ * The showcase half of the auth screen: a full-bleed illustration with the
+ * diamond mark, one line of product copy and the Core Patterns strip laid over
+ * it. A gradient in the page's own background colour rises from the bottom so
+ * the copy stays readable in either theme. Static on purpose. Desktop-only —
+ * on a phone it would push the form below the fold, and because the panel is
+ * `display: none` there, the lazily loaded image is never fetched.
  */
 export function IllustrationPanel() {
   return (
@@ -12,10 +15,11 @@ export function IllustrationPanel() {
       aria-hidden="true"
       className="border-border bg-background relative hidden h-full overflow-hidden border-l md:block"
     >
-      <div className="auth-dots absolute inset-0" />
+      <Image src="/image.png" alt="" fill sizes="50vw" className="object-cover object-center" />
+      <div className="from-background via-background/70 absolute inset-0 bg-gradient-to-t via-35% to-transparent to-65%" />
 
       <div className="relative flex h-full flex-col justify-between p-10">
-        <Logo className="text-foreground size-10" />
+        <Logo className="size-10 text-white drop-shadow" />
 
         <div>
           <p className="font-display max-w-md text-2xl leading-snug font-semibold">

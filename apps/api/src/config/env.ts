@@ -39,12 +39,15 @@ const envSchema = z.object({
   CODE_RUNNER_SHARED_SECRET: z.string().min(32),
 
   GROQ_API_KEY: z.string().min(1).optional(),
-  GROQ_FAST_MODEL: z.string().min(1).default('llama-3.1-8b-instant'),
-  GROQ_QUALITY_MODEL: z.string().min(1).default('llama-3.3-70b-versatile'),
+  // Groq retired the Llama 3.x models; these are the current equivalents.
+  GROQ_FAST_MODEL: z.string().min(1).default('openai/gpt-oss-20b'),
+  GROQ_QUALITY_MODEL: z.string().min(1).default('openai/gpt-oss-120b'),
 
   // OWASP guidance, mirrored in docs/security.md.
   ARGON2_MEMORY_COST: z.coerce.number().int().positive().default(19456),
   ARGON2_TIME_COST: z.coerce.number().int().positive().default(2),
+  /** Requests per IP per minute, on every route: the baseline in docs/security.md. */
+  RATE_LIMIT_GLOBAL_PER_MINUTE: z.coerce.number().int().positive().default(100),
 })
 
 export type Env = z.infer<typeof envSchema>

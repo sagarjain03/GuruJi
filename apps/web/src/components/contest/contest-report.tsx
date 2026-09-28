@@ -1,6 +1,6 @@
 'use client'
 
-import { MISTAKE_CATEGORY_LABEL } from '@guruji/types'
+import { MISTAKE_CATEGORY_LABEL } from '@guruji/types/labels'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { DifficultyBadge } from '@/components/content/states'

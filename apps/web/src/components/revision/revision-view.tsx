@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  REVISION_OUTCOME_LABEL,
-  REVISION_STATE_LABEL,
   type QueueItem,
   type RevisionOutcome,
   type UpcomingDay,
 } from '@guruji/types'
+import { REVISION_OUTCOME_LABEL, REVISION_STATE_LABEL } from '@guruji/types/labels'
+import { ErrorState, ListSkeleton } from '@/components/content/states'
 import { Button } from '@/components/ui/button'
 import { ApiError, revisionApi } from '@/lib/api'
 import { cn } from '@/lib/utils'
@@ -56,9 +56,9 @@ export function RevisionView() {
       </header>
 
       {due.isPending ? (
-        <p className="text-muted-foreground text-sm">Loading your queue…</p>
+        <ListSkeleton rows={3} label="Loading your queue…" rowClassName="h-24" />
       ) : queue === undefined ? (
-        <p className="text-destructive text-sm">Could not load the queue.</p>
+        <ErrorState message="Could not load the queue." onRetry={() => void due.refetch()} />
       ) : (
         <>
           <QueueSummary queue={queue} onRespace={respace.mutate} respacing={respace.isPending} />

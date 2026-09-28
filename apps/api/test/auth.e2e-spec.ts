@@ -171,6 +171,18 @@ describe('auth (e2e)', () => {
       .expect(400)
   })
 
+  it('refuses a password from the common-password list, whatever its case', async () => {
+    // Long enough, and still among the first guesses of any credential-stuffing
+    // list. Length alone does not make a password strong.
+    for (const password of ['password1234', 'PASSWORD1234', '000000000000']) {
+      const refused = await request(app.getHttpServer())
+        .post('/api/auth/register')
+        .send({ email: `common-${password.length}-${Date.now()}@example.com`, password, displayName: 'X' })
+        .expect(400)
+      expect(refused.body.error.code).toBe('PASSWORD_TOO_COMMON')
+    }
+  })
+
   it('rejects a second registration of the same email', async () => {
     await request(app.getHttpServer())
       .post('/api/auth/register')

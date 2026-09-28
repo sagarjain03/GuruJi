@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+// Defined in ./labels (no runtime imports) and re-exported, so the web can take it without zod.
+export { RECOMMENDATION_KIND_LABEL } from './labels'
+
 /**
  * What TRAIN NOW decided to do — an activity, not merely a problem.
  *
@@ -15,13 +18,6 @@ export const recommendationKindSchema = z.enum([
 ])
 export type RecommendationKind = z.infer<typeof recommendationKindSchema>
 
-export const RECOMMENDATION_KIND_LABEL: Record<RecommendationKind, string> = {
-  REVISION: 'Revise',
-  WEAK_TOPIC: 'Shore up a weak area',
-  NEW_PATTERN: 'Learn a new technique',
-  NEW_PROBLEM: 'Keep moving',
-  MOCK_CHALLENGE: 'Test yourself under time',
-}
 
 export const recommendationSchema = z.object({
   id: z.uuid(),

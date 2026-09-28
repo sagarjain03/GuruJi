@@ -1,7 +1,9 @@
 import { Controller, Get, HttpCode, HttpStatus, Res } from '@nestjs/common'
+import { SkipGlobalRateLimit } from '../common/guards/global-rate-limit.guard'
 import type { Response } from 'express'
 import { HealthService, type ReadinessReport } from './health.service'
 
+@SkipGlobalRateLimit()
 @Controller('health')
 export class HealthController {
   constructor(private readonly health: HealthService) {}

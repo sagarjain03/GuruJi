@@ -127,7 +127,7 @@ export class AIService {
     return this.complete(userId, problem.id, 'EXPLAIN', explanationSchema, {
       tier: 'QUALITY',
       messages: assembleMentorPrompt({
-        developer: 'Explain intuition, a small worked example, implementation ideas, complexity, and common mistakes. Return JSON matching the schema. Do not dump a complete answer.',
+        developer: 'Explain intuition, a small worked example, implementation ideas, complexity, and common mistakes. Do not dump a complete answer. Return only JSON with exactly these fields: {"intuition": string, "example": string, "implementation": string, "complexity": string, "commonMistakes": string[]}.',
         context: `${problem.title}\n${problem.statement}\n${problem.constraints}`,
         user: request.question ?? 'Explain this concept so a beginner can reason about it.',
       }),
@@ -142,7 +142,7 @@ export class AIService {
     return this.complete(userId, problem.id, 'ANALYZE_CODE', codeAnalysisSchema, {
       tier: 'QUALITY',
       messages: assembleMentorPrompt({
-        developer: 'Analyze correctness and complexity. Give directional suggestions only; never provide replacement code. Return JSON matching the schema.',
+        developer: 'Analyze correctness and complexity. Give directional suggestions only; never provide replacement code. Return only JSON with exactly these fields: {"correctness": "correct" | "incorrect" | "partially-correct", "issues": [{"severity": "error" | "warning" | "info", "line"?: positive integer, "description": string}], "timeComplexity": string, "spaceComplexity": string, "suggestions": string[], "concepts": string[]}.',
         context: `${problem.title}\n${problem.statement}\n${problem.constraints}`,
         user: `Code to analyze:\n${request.code}`,
       }),
@@ -157,7 +157,7 @@ export class AIService {
     return this.complete(userId, problem.id, 'EXPLAIN_WRONG_ANSWER', wrongAnswerSchema, {
       tier: 'QUALITY',
       messages: assembleMentorPrompt({
-        developer: 'Explain what happened and where the logic diverged. Stop before giving the correction or replacement code. Return JSON matching the schema.',
+        developer: 'Explain what happened and where the logic diverged. Stop before giving the correction or replacement code. Return only JSON with exactly these fields: {"whatHappened": string, "why": string, "divergenceLine"?: positive integer, "missingConcept": string}.',
         context: `${problem.title}\n${problem.statement}\n${problem.constraints}`,
         user: `Code:\n${request.code}\nFailed input:\n${request.failedInput}\nExpected:\n${request.expectedOutput}\nActual:\n${request.actualOutput}`,
       }),
@@ -172,7 +172,7 @@ export class AIService {
     return this.complete(userId, problem.id, 'SHOW_SOLUTION', solutionSchema, {
       tier: 'QUALITY',
       messages: assembleMentorPrompt({
-        developer: 'The user explicitly requested the solution. Return the correct approach, complete code, and complexity as JSON matching the schema. This is a separate deliberate action, not a hint.',
+        developer: 'The user explicitly requested the solution. This is a separate deliberate action, not a hint. Return only JSON with exactly these fields: {"approach": string, "code": string, "complexity": string}.',
         context: `${problem.title}\n${problem.statement}\n${problem.constraints}`,
         user: request.question ?? 'Show the complete solution now.',
       }),

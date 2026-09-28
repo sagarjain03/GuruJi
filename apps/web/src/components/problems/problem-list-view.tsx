@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Route } from 'next'
 import type { Difficulty, ProblemListItem } from '@guruji/types'
-import { DifficultyBadge, EmptyState, ErrorState, LoadingState } from '@/components/content/states'
+import { DifficultyBadge, EmptyState, ErrorState, ListSkeleton, LoadingState } from '@/components/content/states'
 import { contentApi } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -107,7 +107,7 @@ export function ProblemListView() {
         onChange={setFilter}
       />
 
-      {list.isPending && <LoadingState label="Loading problems…" />}
+      {list.isPending && <ListSkeleton rows={8} label="Loading problems…" rowClassName="h-12" />}
 
       {list.isError && (
         <ErrorState

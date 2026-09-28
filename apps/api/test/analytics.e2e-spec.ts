@@ -102,6 +102,7 @@ describe('analytics ranges (e2e)', () => {
       ['a span over a year and a day', `from=2020-01-01&to=${day(new Date())}`],
       ['a backwards range', `from=${day(daysAgo(1))}&to=${day(daysAgo(5))}`],
       ['a malformed date', 'from=last-tuesday'],
+      ['an unknown parameter', 'userId=someone-else'],
     ])('refuses %s with INVALID_RANGE', async (_name, query) => {
       const body = (await get(`/analytics/activity?${query}`).expect(400)).body as ErrorEnvelope
       expect(body.error.code).toBe('INVALID_RANGE')

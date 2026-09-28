@@ -71,12 +71,15 @@ export type PublicProfile = z.infer<typeof publicProfileSchema>
  * The timezone is detected by the browser rather than asked for — people do
  * not know their IANA name, and a wrong one moves their revision day.
  */
-export const onboardingRequestSchema = z.object({
-  experienceLevel: experienceLevelSchema,
-  preferredLanguage: languageSchema,
-  dailyGoalMinutes: z.number().int().min(10).max(240),
-  timezone: z.string().min(1).max(64),
-})
+export const onboardingRequestSchema = z
+  .object({
+    experienceLevel: experienceLevelSchema,
+    preferredLanguage: languageSchema,
+    dailyGoalMinutes: z.number().int().min(10).max(240),
+    timezone: z.string().min(1).max(64),
+  })
+  // Refuses unknown fields: this body is written straight onto the profile.
+  .strict()
 export type OnboardingRequest = z.infer<typeof onboardingRequestSchema>
 
 /**

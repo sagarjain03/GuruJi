@@ -12,3 +12,11 @@ onlyBuiltDependencies:
   - "@nestjs/core"
   - "unrs-resolver"
   - "sharp"
+
+# Patched versions of transitive dependencies flagged by `pnpm audit`. Both stay
+# within their major version. `deepmerge-ts` (inside the Prisma CLI) is left at
+# the exact 7.1.5 Prisma pins: its advisory needs attacker-controlled input to
+# merge, and it only merges Prisma's own config. See docs/security.md.
+overrides:
+  dompurify: ^3.4.13
+  mysql2: ^3.23.1

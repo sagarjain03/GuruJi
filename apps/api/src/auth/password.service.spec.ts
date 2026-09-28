@@ -51,4 +51,17 @@ describe('PasswordService', () => {
     expect(hash).toContain('t=2')
     expect(hash).toContain('p=1')
   })
+
+  it('spends a real verification on an unknown account, at the configured cost', async () => {
+    // The login route verifies against this when the email does not exist, so
+    // "no such account" takes as long as "wrong password". A hash hard-coded at
+    // one cost would drift the moment ARGON2_* changed, and the timing would
+    // tell an attacker which emails are registered.
+    const cheap = serviceWith(1024, 1)
+
+    await expect(cheap.verifyAgainstUnknownAccount('any-password-at-all')).resolves.toBe(false)
+    // Parameter order in the encoded hash is the library's business; the costs are ours.
+    const params = (await cheap.unknownAccountHash()).split('$')[3]?.split(',') ?? []
+    expect(params).toEqual(expect.arrayContaining(['m=1024', 't=1']))
+  })
 })

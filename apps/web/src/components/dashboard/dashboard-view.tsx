@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Clock3, Flame, Globe2, Layers, Sparkles, Target } from 'lucide-react'
 import type { AnalyticsOverview } from '@guruji/types'
 import Link from 'next/link'
+import { ErrorState, ListSkeleton } from '@/components/content/states'
 import { MasteryBar } from '@/components/dashboard/mastery-bar'
 import { OnboardingCard } from '@/components/dashboard/onboarding-card'
 import { TodaysTraining, TrainNow } from '@/components/dashboard/train-now'
@@ -57,8 +58,15 @@ export function DashboardView() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-3">
+      {/* One request feeds the hero, mastery, streak and topics. When it fails,
+          say so once, here — otherwise those panels read as zeros, which is a
+          claim about the learner rather than about the network. */}
+      {overview.isError && (
+        <ErrorState message="Could not load your progress. The numbers below are not your real ones." onRetry={() => void overview.refetch()} />
+      )}
+
       <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
-        <HeroPanel name={profile.displayName} overview={data} dueToday={dueToday} />
+        <HeroPanel name={profile.displayName} overview={data} failed={overview.isError} dueToday={dueToday} />
         <SetupPanel
           language={LANGUAGE_LABEL[profile.preferredLanguage] ?? profile.preferredLanguage}
           level={LEVEL_LABEL[profile.experienceLevel] ?? profile.experienceLevel}
@@ -111,14 +119,18 @@ function Panel({ className, children }: { className?: string; children: React.Re
 function HeroPanel({
   name,
   overview,
+  failed,
   dueToday,
 }: {
   name: string
   overview: AnalyticsOverview | null
+  /** The overview request failed: show "—", not a "…" that promises it is still coming. */
+  failed: boolean
   dueToday: number | null
 }) {
   const solved = overview?.totalSolved ?? null
   const accuracy = overview?.firstTryAccuracy
+  const pending = failed ? '—' : '…'
 
   return (
     <Panel className="flex flex-col gap-4">
@@ -145,13 +157,13 @@ function HeroPanel({
       {/* Every chip is read from the server; "…" while it loads, "—" when there
           is nothing to measure yet — never a made-up zero. */}
       <div className="relative flex flex-wrap gap-2">
-        <Chip label="Solved" value={solved === null ? '…' : String(solved)} />
+        <Chip label="Solved" value={solved === null ? pending : String(solved)} />
         <Chip
           label="First-try accuracy"
-          value={accuracy === undefined ? '…' : accuracy === null ? '—' : `${Math.round(accuracy * 100)}%`}
+          value={accuracy === undefined ? pending : accuracy === null ? '—' : `${Math.round(accuracy * 100)}%`}
         />
         <Chip label="Due today" value={dueToday === null ? '…' : String(dueToday)} />
-        <Chip label="Hints used" value={overview === null ? '…' : String(overview.hintsUsed)} />
+        <Chip label="Hints used" value={overview === null ? pending : String(overview.hintsUsed)} />
       </div>
     </Panel>
   )
@@ -330,13 +342,24 @@ function TopicsPanel({
   if (isLoading) {
     return (
       <Panel>
-        <p className="text-muted-foreground text-xs">Loading your progress…</p>
+        <ListSkeleton rows={4} label="Loading your progress…" rowClassName="h-10" />
       </Panel>
     )
   }
 
-  const topics = overview?.topics ?? []
-  const patterns = overview?.patterns ?? []
+  if (overview === null) {
+    // The request failed (the banner above says so). "Nothing submitted yet"
+    // here would be a claim about the learner, and it would be false.
+    return (
+      <Panel>
+        <h2 className="font-display text-base font-semibold">Where you stand</h2>
+        <p className="text-muted-foreground mt-1 text-xs">Not available right now.</p>
+      </Panel>
+    )
+  }
+
+  const topics = overview.topics
+  const patterns = overview.patterns
 
   if (topics.length === 0) {
     return (

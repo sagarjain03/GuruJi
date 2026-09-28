@@ -490,9 +490,9 @@ exit criteria waived.**
 
 - [ ] Accessibility pass — keyboard, screen reader, contrast, focus
 - [ ] Responsive pass — desktop / tablet / mobile (editor is desktop-first)
-- [ ] Loading, empty and error states everywhere
+- [x] Loading, empty and error states everywhere (skeletons; failures forced in `e2e/states.spec.ts`)
 - [ ] Performance budget — code splitting, lazy loading, query tuning
-- [ ] Security review against `docs/security.md`
+- [x] Security review against `docs/security.md` (deploy-time items listed in its last section)
 - [x] Playwright: register → login → open problem → code → run → submit → result →
       recommendation → revision
 - [ ] Sentry wired up

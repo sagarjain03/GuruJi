@@ -4,10 +4,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  MISTAKE_CATEGORY_LABEL,
-  MISTAKE_TEXT_MAX,
   type MistakeCategory,
 } from '@guruji/types'
+import { MISTAKE_CATEGORY_LABEL, MISTAKE_TEXT_MAX } from '@guruji/types/labels'
 import { Button } from '@/components/ui/button'
 import { ApiError, mistakeApi } from '@/lib/api'
 import { cn } from '@/lib/utils'

@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import type { RoadmapNode, RoadmapSection } from '@guruji/types'
-import { EmptyState, ErrorState, LoadingState } from '@/components/content/states'
+import { EmptyState, ErrorState, ListSkeleton } from '@/components/content/states'
 import { contentApi } from '@/lib/api'
 
 const SECTION_LABEL: Record<RoadmapSection, string> = {
@@ -31,7 +31,7 @@ export function RoadmapView() {
         </p>
       </header>
 
-      {isPending && <LoadingState label="Loading the curriculum…" />}
+      {isPending && <ListSkeleton rows={6} label="Loading the curriculum…" rowClassName="h-16" />}
 
       {isError && (
         <ErrorState

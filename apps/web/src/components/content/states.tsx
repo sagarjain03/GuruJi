@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 /**
@@ -18,6 +19,55 @@ export function LoadingState({ label = 'Loading…' }: { label?: string }) {
     >
       <Loader2 className="size-4 animate-spin" />
       {label}
+    </div>
+  )
+}
+
+/**
+ * A placeholder in the shape of what is coming. A spinner says "wait"; a
+ * skeleton says what to wait for, and the page does not jump when it arrives.
+ * The label is for screen readers, which cannot see the shape.
+ */
+export function ListSkeleton({
+  rows = 5,
+  label = 'Loading…',
+  rowClassName = 'h-14',
+}: {
+  rows?: number
+  label?: string
+  rowClassName?: string
+}) {
+  return (
+    <div role="status" aria-busy="true" className="flex flex-col gap-2">
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: rows }, (_, index) => (
+        <Skeleton key={index} className={cn('w-full', rowClassName)} />
+      ))}
+    </div>
+  )
+}
+
+/** The problem page's shape: statement on the left, editor and tests on the right. */
+export function WorkspaceSkeleton({ label = 'Loading the problem…' }: { label?: string }) {
+  return (
+    <div
+      role="status"
+      aria-busy="true"
+      className="flex h-[calc(100svh-6.5rem)] min-h-[560px] flex-col gap-3 lg:flex-row"
+    >
+      <span className="sr-only">{label}</span>
+      <div className="border-border flex flex-col gap-3 border p-5 lg:basis-[42%]">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="mt-4 h-40 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <div className="border-border flex min-w-0 flex-1 flex-col gap-3 border p-3">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="w-full flex-1" />
+        <Skeleton className="h-40 w-full" />
+      </div>
     </div>
   )
 }

@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
 import {
-  MISTAKE_CATEGORY_LABEL,
   type Mistake,
   type MistakeCategory,
   type MistakePattern,
 } from '@guruji/types'
+import { MISTAKE_CATEGORY_LABEL } from '@guruji/types/labels'
+import { ErrorState, ListSkeleton } from '@/components/content/states'
 import { mistakeApi } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -40,6 +41,10 @@ export function MistakesView() {
           Written down at the moment it happened. The value is in what repeats.
         </p>
       </header>
+
+      {patterns.isError && (
+        <ErrorState message="Could not load what keeps happening." onRetry={() => void patterns.refetch()} />
+      )}
 
       {found.length > 0 && (
         <section className="border-border border p-4">
@@ -82,7 +87,11 @@ export function MistakesView() {
         </div>
 
         {list.isPending ? (
-          <p className="text-muted-foreground text-sm">Loading…</p>
+          <ListSkeleton rows={4} label="Loading the journal…" rowClassName="h-20" />
+        ) : list.isError ? (
+          // A failed load is not an empty journal: saying "nothing logged" here
+          // would tell someone their notes are gone.
+          <ErrorState message="Could not load the journal." onRetry={() => void list.refetch()} />
         ) : entries.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             Nothing logged yet. After a wrong answer the result panel offers to write down what

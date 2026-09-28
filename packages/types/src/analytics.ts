@@ -7,10 +7,13 @@ import { activityDaySchema } from './progress'
  * bounds the span, because an unbounded `from`/`to` is a cheap way to ask the
  * database for everything.
  */
-export const analyticsRangeQuerySchema = z.object({
-  from: z.iso.date().optional(),
-  to: z.iso.date().optional(),
-})
+export const analyticsRangeQuerySchema = z
+  .object({
+    from: z.iso.date().optional(),
+    to: z.iso.date().optional(),
+  })
+  // An unknown parameter is refused, not ignored — nothing else is accepted.
+  .strict()
 export type AnalyticsRangeQuery = z.infer<typeof analyticsRangeQuerySchema>
 
 /** The range the server actually used, echoed back so the client can label it. */

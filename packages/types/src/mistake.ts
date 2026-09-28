@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import { MISTAKE_TEXT_MAX } from './labels'
+
+// Defined in ./labels (no runtime imports) and re-exported, so the web can take them without zod.
+export { MISTAKE_CATEGORY_LABEL, MISTAKE_TEXT_MAX } from './labels'
 import { cursorQuerySchema } from './pagination'
 
 /**
@@ -23,19 +27,7 @@ export const mistakeCategorySchema = z.enum([
 export type MistakeCategory = z.infer<typeof mistakeCategorySchema>
 
 /** What each category means, in the words the interface shows. */
-export const MISTAKE_CATEGORY_LABEL: Record<MistakeCategory, string> = {
-  LOGIC: 'Logic',
-  SYNTAX: 'Syntax',
-  EDGE_CASE: 'Edge case',
-  COMPLEXITY: 'Too slow',
-  IMPLEMENTATION: 'Implementation',
-  MISREAD_PROBLEM: 'Misread the problem',
-  WRONG_PATTERN: 'Wrong approach',
-  OFF_BY_ONE: 'Off by one',
-  OVERFLOW: 'Overflow',
-}
 
-export const MISTAKE_TEXT_MAX = 4000
 
 export const createMistakeRequestSchema = z.object({
   problemId: z.uuid(),

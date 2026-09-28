@@ -262,18 +262,6 @@
   caret-color: var(--foreground);
 }
 
-/* The same dot field as the app backdrop, static, fading towards the bottom. */
-.auth-dots {
-  background-image: radial-gradient(
-    circle,
-    color-mix(in oklab, var(--foreground) 13%, transparent) 1px,
-    transparent 1.5px
-  );
-  background-size: 22px 22px;
-  background-position: 11px 11px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
-}
-
 /* ---------- touch hit area ----------
    On touch screens, grows a control's hit area to at least 44×44 with an
    invisible ::after, so small controls keep their visual size. Not for

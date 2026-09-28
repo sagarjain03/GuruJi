@@ -1,4 +1,5 @@
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator'
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
+import { AI_MESSAGE_MAX } from './mentor.dto'
 
 export class HintDto {
   @IsString()
@@ -11,5 +12,6 @@ export class HintDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(AI_MESSAGE_MAX)
   message?: string
 }

@@ -70,6 +70,8 @@ export function MentorPanel({ problemSlug, code }: { problemSlug: string; code: 
         value={message}
         onChange={(event) => setMessage(event.target.value)}
         placeholder="What part feels stuck?"
+        // The API refuses more (docs/security.md): stop typing here, not at a 400.
+        maxLength={4000}
         rows={2}
         className="border-border bg-background focus:ring-primary/40 w-full resize-y border p-2 text-sm outline-none focus:ring-2"
       />

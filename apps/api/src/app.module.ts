@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
 import { LoggerModule } from 'nestjs-pino'
 import { randomUUID } from 'node:crypto'
@@ -15,6 +16,8 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
 import { RevisionModule } from './revision/revision.module'
 import { RedisModule } from './redis/redis.module'
 import { AIModule } from './ai/ai.module'
+import { RateLimitService } from './auth/rate-limit.service'
+import { GlobalRateLimitGuard } from './common/guards/global-rate-limit.guard'
 import { ContestsModule } from './contests/contests.module'
 
 @Module({
@@ -60,6 +63,11 @@ import { ContestsModule } from './contests/contests.module'
     RecommendationsModule,
     RealtimeModule,
     HealthModule,
+  ],
+  providers: [
+    // The per-IP baseline, ahead of every route's own guards.
+    RateLimitService,
+    { provide: APP_GUARD, useClass: GlobalRateLimitGuard },
   ],
 })
 export class AppModule {}

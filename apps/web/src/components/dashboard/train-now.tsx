@@ -5,10 +5,11 @@ import { ArrowRight, X } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
-  RECOMMENDATION_KIND_LABEL,
   type Recommendation,
   type TrainNow as TrainNowPayload,
 } from '@guruji/types'
+import { RECOMMENDATION_KIND_LABEL } from '@guruji/types/labels'
+import { ErrorState, ListSkeleton } from '@/components/content/states'
 import { Button } from '@/components/ui/button'
 import { recommendationApi } from '@/lib/api'
 
@@ -36,15 +37,27 @@ export function TrainNow() {
           Train now
         </p>
         <h2 className="font-display mt-1 text-lg font-semibold tracking-tight">
-          {payload === undefined
-            ? 'Working out what you need…'
-            : RECOMMENDATION_KIND_LABEL[payload.kind]}
+          {next.isError
+            ? 'Could not decide right now'
+            : payload === undefined
+              ? 'Working out what you need…'
+              : RECOMMENDATION_KIND_LABEL[payload.kind]}
         </h2>
       </header>
 
-      <p className="text-muted-foreground text-sm">
-        {payload?.reason ?? 'One button. It decides what actually moves you forward.'}
-      </p>
+      {next.isError ? (
+        // Not "working it out" forever: the request failed, and it can be retried.
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-sm">
+          <p className="text-muted-foreground">The suggestion did not load.</p>
+          <Button variant="outline" size="sm" onClick={() => void next.refetch()}>
+            Try again
+          </Button>
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          {payload?.reason ?? 'One button. It decides what actually moves you forward.'}
+        </p>
+      )}
 
       {target?.slug != null && (
         <Button className="group mt-3" asChild>
@@ -103,7 +116,10 @@ export function TodaysTraining() {
       </header>
 
       {batch.isPending ? (
-        <p className="text-muted-foreground text-sm">Working it out…</p>
+        <ListSkeleton rows={3} label="Working it out…" rowClassName="h-16" />
+      ) : batch.isError ? (
+        // A failed load is not "nothing to suggest".
+        <ErrorState message="Could not load today's suggestions." onRetry={() => void batch.refetch()} />
       ) : items.length === 0 ? (
         <p className="text-muted-foreground text-sm">
           Nothing to suggest yet. Solve a problem and this starts reasoning from real data.

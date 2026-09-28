@@ -91,8 +91,9 @@ test('contest - the contest page shows the attempt, and finishing opens the repo
   const first = page.getByRole('list', { name: 'Contest problems' }).getByRole('listitem').first()
   await expect(first).toContainText(/Attempted|Solved/)
 
-  page.once('dialog', (dialog) => void dialog.accept())
+  // Finishing asks for confirmation in a toast, not a native dialog.
   await page.getByRole('button', { name: 'Finish contest' }).click()
+  await page.getByRole('button', { name: 'Finish', exact: true }).click()
 
   await expect(page.getByRole('heading', { name: 'Your last contest' })).toBeVisible()
   await expect(page.getByRole('heading', { name: /^Weak area/ })).toBeVisible()

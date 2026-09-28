@@ -7,6 +7,10 @@ process.loadEnvFile(path.resolve(__dirname, '../../../.env'))
 process.env.NODE_ENV = 'test'
 // Request logs would bury the assertion output.
 process.env.LOG_LEVEL = 'fatal'
+// Every suite talks to the API from one address, far faster than a person.
+// The per-IP baseline is exercised by rate-limit.e2e-spec.ts, which sets its
+// own small limit; everywhere else it must not be what a test runs into.
+process.env.RATE_LIMIT_GLOBAL_PER_MINUTE ??= '100000'
 
 /**
  * Clears the auth rate-limit counters before each spec file.

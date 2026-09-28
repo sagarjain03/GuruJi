@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { COMMON_PASSWORDS } from './common-passwords'
 import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
@@ -35,6 +36,15 @@ export class AuthService {
     input: { email: string; password: string; displayName: string },
     context: TokenContext,
   ): Promise<SessionResult> {
+    // Checked before hashing: refusing costs nothing, and a common password is
+    // refused however it is capitalised.
+    if (COMMON_PASSWORDS.has(input.password.toLowerCase())) {
+      throw new AppError(
+        'PASSWORD_TOO_COMMON',
+        'That password is on lists attackers try first. Choose a less common one.',
+      )
+    }
+
     const passwordHash = await this.passwords.hash(input.password)
 
     const existing = await prisma.user.findUnique({
@@ -84,10 +94,7 @@ export class AuthService {
     if (!user || user.deletedAt !== null || !user.profile) {
       // Still spend the time a real verification costs, so the response time
       // does not reveal whether the account exists.
-      await this.passwords.verify(
-        '$argon2id$v=19$m=19456,t=2,p=1$aaaaaaaaaaaaaaaa$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        input.password,
-      )
+      await this.passwords.verifyAgainstUnknownAccount(input.password)
       throw invalid
     }
 

@@ -1,13 +1,34 @@
 'use client'
 
-import { MISTAKE_CATEGORY_LABEL } from '@guruji/types'
+import { MISTAKE_CATEGORY_LABEL } from '@guruji/types/labels'
 import { useQuery } from '@tanstack/react-query'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { analyticsApi, mistakeApi } from '@/lib/api'
 import { ActivityHeatmap } from './activity-heatmap'
 import { ChartPanel } from './chart-panel'
-import { ColumnBars, HorizontalBars, TrendLines } from './charts'
 import { addDays, formatDay, formatMinutes, formatPercent, formatShortDay, toDay } from './format'
+
+/*
+ * Recharts is the heaviest thing on this page and needed nowhere else. Loaded
+ * on demand, in one chunk shared by all three wrappers, it stays out of every
+ * other route's bundle; the panels show a skeleton of the chart's height until
+ * it arrives. The heatmap is plain SVG and needs no such treatment.
+ */
+const chartLoading = () => <Skeleton className="h-56 w-full" />
+const HorizontalBars = dynamic(() => import('./charts').then((module) => module.HorizontalBars), {
+  ssr: false,
+  loading: chartLoading,
+})
+const ColumnBars = dynamic(() => import('./charts').then((module) => module.ColumnBars), {
+  ssr: false,
+  loading: chartLoading,
+})
+const TrendLines = dynamic(() => import('./charts').then((module) => module.TrendLines), {
+  ssr: false,
+  loading: chartLoading,
+})
 
 const TREND_WEEKS = [4, 12, 26, 52] as const
 

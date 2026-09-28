@@ -1,6 +1,6 @@
 # GuruJi — Security
 
-> Last updated: 2026-09-18
+> Last updated: 2026-09-28 (Phase 12 review)
 
 Sandbox specifics live in [code-execution.md](./code-execution.md); prompt
 security lives in [ai.md](./ai.md). This document covers everything else and
@@ -31,8 +31,11 @@ the host. It gets its own document and its own CI gate.
 
 **Passwords.** Argon2id — memory cost 19456 KiB, time cost 2, parallelism 1,
 per OWASP's current guidance. Minimum 12 characters, checked against a
-common-password list. Length over composition rules: forced symbol requirements
-produce `Password1!` and nothing else.
+common-password list: the NCSC 100k list, keeping the ~1,250 entries of 12+
+characters, compared case-insensitively, on the server only
+(`apps/api/src/auth/common-passwords.ts`, error `PASSWORD_TOO_COMMON`). Length
+over composition rules: forced symbol requirements produce `Password1!` and
+nothing else.
 
 **Sessions.** Short-lived access JWT (15 min) plus a long-lived refresh token
 (30 days) in an httpOnly, `Secure`, `SameSite=Strict` cookie.
@@ -51,7 +54,16 @@ sessions.
 
 **Login responses are uniform.** Unknown email and wrong password return the
 same message, the same status and, as far as practical, the same timing.
-Distinguishing them turns the endpoint into an account-enumeration oracle.
+Distinguishing them turns the endpoint into an account-enumeration oracle. The
+timing holds because an unknown email is verified against a hash made at start-up
+at the *configured* Argon2 cost — a hash hard-coded at one cost would drift the
+moment `ARGON2_*` changed.
+
+**Accepted risk — registration reveals a taken email.** `POST /auth/register`
+answers `409 EMAIL_ALREADY_REGISTERED`. Closing this needs email verification
+(answer "check your inbox" either way), which does not exist yet. Until then it
+is bounded by the 5-per-15-minutes limit on the route, per IP and per email. It
+is on the list below of things to settle before any public deployment.
 
 ---
 
@@ -89,17 +101,21 @@ Every endpoint validates at the edge, before any business logic:
 - `class-validator` DTOs with explicit types and bounds
 - `whitelist: true` and `forbidNonWhitelisted: true` — unknown properties are
   rejected, not silently dropped, so a mass-assignment attempt fails loudly
-- Zod at the `packages/types` boundary, shared with the client
+- Zod at the `packages/types` boundary, shared with the client. Request schemas
+  parsed with Zod instead of a DTO are `.strict()`, so they refuse unknown
+  fields the same way
 
 Specific caps that matter:
 
 | Input | Cap | Why |
 |---|---|---|
 | Submitted code | 64 KB | Storage and compile-bomb bound |
-| AI message | 4 KB | Context-flooding defence |
-| Analytics date range | 1 year | An unbounded range asks for the whole table |
-| Page size | 100 | Prevents "give me everything" |
-| Mistake journal note | 8 KB | Ordinary abuse bound |
+| AI message (every free-text field sent to the mentor) | 4,000 characters | Context-flooding and cost defence |
+| Code sent to the mentor | 64 KB, the submission cap | Code is code, not a message |
+| Analytics date range | 366 days | An unbounded range asks for the whole table |
+| Page size | 50 | Prevents "give me everything" |
+| Mistake journal note | 4,000 characters | Ordinary abuse bound |
+| Any JSON body | 100 KB (8 MB for the runner's own callback) | Bounds every handler before validation |
 
 ---
 
@@ -117,8 +133,12 @@ journal notes) is rendered as plain text.
 
 **CSRF.** The API is token-authenticated with `SameSite=Strict` cookies for
 refresh only, and CORS is an explicit origin allow-list — no wildcard, no
-origin reflection. The refresh endpoint additionally requires the request to
-carry the access token, so a cross-site request cannot silently rotate a session.
+origin reflection. `SameSite=Strict` is what stops a cross-site request from
+rotating a session: the browser does not send the cookie on one.
+
+(An earlier version of this document said the refresh endpoint also requires the
+access token. It does not, and it should not: refresh exists for the moment the
+access token has expired, and demanding it would break exactly that.)
 
 ---
 
@@ -142,15 +162,19 @@ Backed by Redis so limits hold across API instances.
 
 | Scope | Limit | Protects |
 |---|---|---|
-| Global per IP | 100 / min | Baseline |
+| Global per IP | 100 / min, every route (`RATE_LIMIT_GLOBAL_PER_MINUTE`) | Baseline. Health check and the runner callback are exempt |
 | Login / register | 5 / 15 min, per IP **and** per email | Credential stuffing |
 | `POST /submissions` | 10 / min per user | Execution capacity |
 | `/ai/*` | 20 / min per user + daily token budget | Cost |
-| Password reset | 3 / hour per email | Enumeration and spam |
+| Password reset | 3 / hour per email, when it exists | Enumeration and spam — there is no reset flow yet |
 
 AI and submission limits are **per user**, not per IP. Per-IP limits are
 trivially defeated and would punish shared networks while missing the actual
 abuse case, which is one authenticated account in a loop.
+
+Behind a reverse proxy, `request.ip` is the proxy unless Express is configured
+with `trust proxy`; without it every user shares one per-IP bucket. Set it at
+deploy time.
 
 ---
 
@@ -184,7 +208,13 @@ provider message in an HTTP response is free reconnaissance.
 
 ## Dependencies
 
-`pnpm audit` in CI. Lockfile committed and installs are `--frozen-lockfile`.
+`pnpm audit` in CI — **there is no CI yet**; until there is, run it by hand
+before a release. Lockfile committed and installs are `--frozen-lockfile`.
+
+Transitive advisories are patched with `overrides` in `pnpm-workspace.yaml`,
+staying within each package's major version. One is accepted: `deepmerge-ts`
+inside the Prisma CLI, pinned exactly by Prisma, whose advisory needs
+attacker-controlled input to merge — it only ever merges Prisma's own config.
 pnpm v10 blocks post-install scripts by default; the allow-list in
 `pnpm-workspace.yaml` is short, and adding to it requires a reason — an
 arbitrary post-install script is code execution on every developer's machine and
@@ -197,9 +227,13 @@ in CI.
 Not required for local development; required before exposure, and listed so
 they are decisions rather than omissions:
 
+- A CI pipeline: build, tests, `pnpm audit`, `--frozen-lockfile`
+- HSTS on the web app (the API sets it through Helmet; Next does not)
+- `trust proxy` set for the real deployment topology
 - Stronger sandbox isolation (gVisor / Firecracker) and dedicated execution hosts
 - Secret manager wired up; no secrets in host environment variables
-- Email verification enforced before submission privileges
+- Email verification enforced before submission privileges — which also closes
+  the registration enumeration above
 - Automated dependency scanning on a schedule, not just on push
 - A written incident response path — who is paged, how a user is notified
 - An external review of the sandbox specifically, because it is the one

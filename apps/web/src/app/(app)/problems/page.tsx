@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { LoadingState } from '@/components/content/states'
+import { ListSkeleton } from '@/components/content/states'
 import { ProblemListView } from '@/components/problems/problem-list-view'
 
 export const metadata = {
@@ -14,7 +14,7 @@ export const metadata = {
  */
 export default function ProblemsPage() {
   return (
-    <Suspense fallback={<LoadingState label="Loading problems…" />}>
+    <Suspense fallback={<ListSkeleton rows={8} label="Loading problems…" rowClassName="h-12" />}>
       <ProblemListView />
     </Suspense>
   )

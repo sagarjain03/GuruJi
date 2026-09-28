@@ -19,18 +19,22 @@ export type ContestStatus = z.infer<typeof contestStatusSchema>
 export const contestFinishReasonSchema = z.enum(['EARLY', 'TIME_UP'])
 export type ContestFinishReason = z.infer<typeof contestFinishReasonSchema>
 
-export const startContestRequestSchema = z.object({
-  durationMinutes: z.union([z.literal(60), z.literal(90)]),
-  /** Off by default: an assessment measures what you can do unaided. */
-  hintsAllowed: z.boolean().default(false),
-})
+// `.strict()`: an unknown field is refused, as the class-validator DTOs refuse
+// it everywhere else — a mass-assignment attempt fails loudly, not silently.
+export const startContestRequestSchema = z
+  .object({
+    durationMinutes: z.union([z.literal(60), z.literal(90)]),
+    /** Off by default: an assessment measures what you can do unaided. */
+    hintsAllowed: z.boolean().default(false),
+  })
+  .strict()
 export type StartContestRequest = z.infer<typeof startContestRequestSchema>
 
 /**
  * A graded submission inside a contest. Never a "Run": sample runs keep going
  * through `/submissions` with `isRun: true` and are not part of the contest.
  */
-export const contestSubmitRequestSchema = submitRequestSchema.omit({ isRun: true, hintsUsedAtSubmit: true })
+export const contestSubmitRequestSchema = submitRequestSchema.omit({ isRun: true, hintsUsedAtSubmit: true }).strict()
 export type ContestSubmitRequest = z.infer<typeof contestSubmitRequestSchema>
 
 export const contestProblemStateSchema = z.enum(['UNSOLVED', 'ATTEMPTED', 'SOLVED'])

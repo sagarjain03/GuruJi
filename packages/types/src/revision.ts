@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+// Defined in ./labels (no runtime imports) and re-exported, so the web can take them without zod.
+export { REVISION_OUTCOME_LABEL, REVISION_STATE_LABEL } from './labels'
+
 /**
  * How a revision went.
  *
@@ -16,22 +19,10 @@ export const revisionOutcomeSchema = z.enum([
 ])
 export type RevisionOutcome = z.infer<typeof revisionOutcomeSchema>
 
-export const REVISION_OUTCOME_LABEL: Record<RevisionOutcome, string> = {
-  SOLVED_EASILY: 'Came back easily',
-  SOLVED_WITH_EFFORT: 'Got there with effort',
-  STRUGGLED: 'Struggled through it',
-  FAILED: 'Could not do it',
-}
 
 export const revisionStateSchema = z.enum(['LEARNING', 'REVIEWING', 'MASTERED', 'LAPSED'])
 export type RevisionState = z.infer<typeof revisionStateSchema>
 
-export const REVISION_STATE_LABEL: Record<RevisionState, string> = {
-  LEARNING: 'Learning',
-  REVIEWING: 'Reviewing',
-  MASTERED: 'Mastered',
-  LAPSED: 'Lapsed',
-}
 
 export const queueItemSchema = z.object({
   id: z.uuid(),

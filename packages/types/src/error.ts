@@ -24,6 +24,7 @@ export const ERROR_CODES = [
   'CONTEST_NOT_FINISHED',
   'PROBLEM_NOT_IN_CONTEST',
   'CONTEST_HINTS_DISABLED',
+  'PASSWORD_TOO_COMMON',
 ] as const
 
 export const errorCodeSchema = z.enum(ERROR_CODES)

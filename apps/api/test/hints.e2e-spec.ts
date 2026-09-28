@@ -89,6 +89,35 @@ describe('hints used at submit (e2e)', () => {
     expect(await submitAndReadHints()).toBe(2)
   })
 
+  describe('input caps on the mentor', () => {
+    // Everything here is sent to a paid model. docs/security.md caps a message
+    // at 4 KB: past that it is context flooding, and every character is a cost.
+    const TOO_LONG = 'x'.repeat(4001)
+    const post = (path: string, body: object) =>
+      request(app.getHttpServer()).post(`/api/ai/${path}`).set('authorization', `Bearer ${token}`).send(body)
+
+    it('accepts a message at exactly the cap', async () => {
+      // Level 1 is curated, so this reaches no model and succeeds.
+      await post('hint', { problemSlug: SLUG, level: 1, message: 'x'.repeat(4000) }).expect(201)
+    })
+
+    it.each([
+      ['hint', { problemSlug: SLUG, level: 1, message: TOO_LONG }],
+      ['explain', { problemSlug: SLUG, question: TOO_LONG }],
+      ['show-solution', { problemSlug: SLUG, question: TOO_LONG }],
+      ['explain-wrong-answer', { problemSlug: SLUG, code: 'x', failedInput: TOO_LONG, expectedOutput: '', actualOutput: '' }],
+      ['explain-wrong-answer', { problemSlug: SLUG, code: 'x', failedInput: '', expectedOutput: TOO_LONG, actualOutput: '' }],
+      ['explain-wrong-answer', { problemSlug: SLUG, code: 'x', failedInput: '', expectedOutput: '', actualOutput: TOO_LONG }],
+    ])('refuses a %s field over 4 KB before it reaches the model', async (path, body) => {
+      await post(path, body).expect(400)
+    })
+
+    it('still takes code up to the submission cap, and refuses more', async () => {
+      // Code is code, not a message: its cap is the 64 KB a submission may be.
+      await post('analyze-code', { problemSlug: SLUG, code: 'x'.repeat(64 * 1024 + 1) }).expect(400)
+    })
+  })
+
   it('does not count a hint the mentor failed to give', async () => {
     await hint(4).expect(503)
 

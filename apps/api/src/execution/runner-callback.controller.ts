@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common'
+import { SkipGlobalRateLimit } from '../common/guards/global-rate-limit.guard'
 import { runnerCallbackSchema } from '@guruji/types'
 import { AppError } from '../common/app-error'
 import { EventsGateway } from '../realtime/events.gateway'
@@ -13,6 +14,7 @@ import { SubmissionsService } from './submissions.service'
  * else. The shared-secret guard is the check that holds when that is
  * misconfigured.
  */
+@SkipGlobalRateLimit()
 @Controller('internal/submissions')
 @UseGuards(RunnerSecretGuard)
 export class RunnerCallbackController {

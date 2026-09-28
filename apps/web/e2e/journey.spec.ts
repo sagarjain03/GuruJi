@@ -38,6 +38,8 @@ const SOLUTION = [
 
 let page: Page
 let errors: string[]
+/** Every 4xx/5xx the page saw, by URL — a console "Failed to load resource" does not say which. */
+let failedRequests: string[]
 
 test.beforeAll(async ({ browser }) => {
   const context = await browser.newContext({ storageState: { cookies: [], origins: [] } })
@@ -48,6 +50,10 @@ test.beforeAll(async ({ browser }) => {
     if (message.type() === 'error') errors.push(message.text())
   })
   page.on('pageerror', (error) => errors.push(error.message))
+  failedRequests = []
+  page.on('response', (response) => {
+    if (response.status() >= 400) failedRequests.push(`${response.status()} ${response.request().method()} ${response.url()}`)
+  })
 })
 
 test.afterAll(async () => {
@@ -177,5 +183,8 @@ test('journey - the solved problem is scheduled for revision', async () => {
 const KNOWN_THEME_SCRIPT_WARNING = 'Encountered a script tag while rendering React component.'
 
 test('journey - no console errors along the whole road', () => {
-  expect(errors.filter((message) => !message.startsWith(KNOWN_THEME_SCRIPT_WARNING))).toEqual([])
+  expect(
+    errors.filter((message) => !message.startsWith(KNOWN_THEME_SCRIPT_WARNING)),
+    `failed requests along the way:\n${failedRequests.join('\n')}`,
+  ).toEqual([])
 })

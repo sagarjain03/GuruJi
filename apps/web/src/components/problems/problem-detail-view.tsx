@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ProblemDetail } from '@guruji/types'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
-import { DifficultyBadge, ErrorState, LoadingState } from '@/components/content/states'
+import { DifficultyBadge, ErrorState, WorkspaceSkeleton } from '@/components/content/states'
 import { Markdown } from '@/components/markdown'
 import { Workspace } from '@/components/problems/workspace'
 import { ApiError, contentApi } from '@/lib/api'
@@ -19,7 +19,7 @@ export function ProblemDetailView({ slug, contestId = null }: { slug: string; co
   })
 
   if (isPending) {
-    return <LoadingState label="Loading the problem…" />
+    return <WorkspaceSkeleton />
   }
 
   if (isError) {
