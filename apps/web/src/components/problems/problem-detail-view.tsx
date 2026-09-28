@@ -9,7 +9,7 @@ import { Markdown } from '@/components/markdown'
 import { Workspace } from '@/components/problems/workspace'
 import { ApiError, contentApi } from '@/lib/api'
 
-export function ProblemDetailView({ slug }: { slug: string }) {
+export function ProblemDetailView({ slug, contestId = null }: { slug: string; contestId?: string | null }) {
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ['problem', slug],
     queryFn: () => contentApi.problem(slug),
@@ -43,7 +43,7 @@ export function ProblemDetailView({ slug }: { slug: string }) {
   // The statement is passed into the workspace rather than rendered beside it:
   // which pane it belongs in, and how wide that pane is, is the workspace's
   // business, and this component should not have to know the layout to fill it.
-  return <Workspace problem={data} statement={<Statement problem={data} />} />
+  return <Workspace problem={data} statement={<Statement problem={data} />} contestId={contestId} />
 }
 
 function Statement({ problem: data }: { problem: ProblemDetail }) {

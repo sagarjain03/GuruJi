@@ -35,7 +35,7 @@ const NAV = [
   { href: '/visualizer', label: 'Visualizer', Icon: Dumbbell, ready: true },
   { href: '/mentor', label: 'AI Mentor', Icon: Bot, ready: false },
   { href: '/analytics', label: 'Analytics', Icon: BarChart3, ready: true },
-  { href: '/contest', label: 'Contest', Icon: Swords, ready: false },
+  { href: '/contest', label: 'Contest', Icon: Swords, ready: true },
 ] as const
 
 /** The floating icon rail. Desktop only — a 64px column is unusable on a phone. */

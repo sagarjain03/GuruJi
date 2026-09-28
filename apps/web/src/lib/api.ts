@@ -1,5 +1,9 @@
 import type {
   ActivityResponse,
+  ContestReport,
+  ContestSubmitRequest,
+  ContestView,
+  StartContestRequest,
   AnalyticsOverview,
   AnalyticsRangeQuery,
   TopicAnalytics,
@@ -257,6 +261,30 @@ export const analyticsApi = {
 
   trends: (range: AnalyticsRangeQuery = {}) =>
     send<TrendsResponse>(`/analytics/trends${toQueryString(range)}`),
+}
+
+/**
+ * Mock contests. The server holds the clock: every view carries `deadlineAt`
+ * and `serverNow`, and nothing here decides whether time is up.
+ */
+export const contestApi = {
+  start: (body: StartContestRequest) => send<ContestView>('/contests', { method: 'POST', body }),
+
+  /**
+   * The most recent contest, running or finished; null when there has never
+   * been one. The server answers that with 204, which `send` returns as
+   * undefined — and TanStack Query treats undefined data as an error.
+   */
+  latest: async (): Promise<ContestView | null> => (await send<ContestView | undefined>('/contests/latest')) ?? null,
+
+  get: (id: string) => send<ContestView>(`/contests/${encodeURIComponent(id)}`),
+
+  submit: (id: string, body: ContestSubmitRequest) =>
+    send<SubmissionAccepted>(`/contests/${encodeURIComponent(id)}/submissions`, { method: 'POST', body }),
+
+  finish: (id: string) => send<ContestView>(`/contests/${encodeURIComponent(id)}/finish`, { method: 'POST' }),
+
+  report: (id: string) => send<ContestReport>(`/contests/${encodeURIComponent(id)}/report`),
 }
 
 /** The mistake journal. Every call needs a session; nothing here is public. */

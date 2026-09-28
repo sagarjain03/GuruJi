@@ -1,14 +1,18 @@
 'use client'
 
-import { Minus, Play, Plus, RotateCcw, Send } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { ChevronLeft, Minus, Play, Plus, RotateCcw, Send } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
-import type { Language, ProblemDetail } from '@guruji/types'
+import type { ContestView, Language, ProblemDetail } from '@guruji/types'
+import { Countdown } from '@/components/contest/countdown'
 import { CodeEditor } from '@/components/editor/code-editor'
 import { useDrafts, type SaveStatus } from '@/components/editor/use-drafts'
 import { ResultPanel } from '@/components/problems/result-panel'
 import { MentorPanel } from '@/components/problems/mentor-panel'
 import { useSubmission, type RunKind } from '@/components/problems/use-submission'
 import { Button } from '@/components/ui/button'
+import { contestApi } from '@/lib/api'
 import { EDITOR_LANGUAGES, LANGUAGE_LABEL, useEditorStore } from '@/stores/editor-store'
 import { useSessionStore } from '@/stores/session-store'
 import { cn } from '@/lib/utils'
@@ -33,10 +37,25 @@ function clamp(value: number, min: number, max: number): number {
 export function Workspace({
   problem,
   statement,
+  contestId = null,
 }: {
   problem: ProblemDetail
   statement: React.ReactNode
+  /** Set when the problem was opened from a running mock contest. */
+  contestId?: string | null
 }) {
+  const contest = useQuery({
+    queryKey: ['contest', contestId],
+    queryFn: () => contestApi.get(contestId ?? ''),
+    enabled: contestId !== null,
+  })
+  // Contest mode only while it is running and this problem is part of it.
+  const running =
+    contest.data?.status === 'ACTIVE' &&
+    contest.data.problems.some((entry) => entry.problemId === problem.id)
+      ? contest.data
+      : null
+
   const profile = useSessionStore((state) => state.profile)
   const [language, setLanguage] = useState<Language>(profile?.preferredLanguage ?? 'CPP')
   const [leftPercent, setLeftPercent] = useState(STATEMENT.initial)
@@ -78,103 +97,140 @@ export function Workspace({
   }, [])
 
   return (
-    <div
-      ref={containerRef}
-      className="flex h-[calc(100svh-6.5rem)] min-h-[560px] flex-col lg:flex-row"
-    >
-      <PaneTabs value={pane} onChange={setPane} />
+    <div className="flex h-[calc(100svh-6.5rem)] min-h-[560px] flex-col">
+      {running !== null && <ContestBar contest={running} />}
+      <div ref={containerRef} className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <PaneTabs value={pane} onChange={setPane} />
 
-      <div
-        id="pane-statement"
-        role="tabpanel"
-        aria-labelledby="tab-statement"
-        className={cn(
-          'border-border min-w-0 overflow-y-auto border lg:border-r-0',
-          // The inline flex-basis is the desktop split; on phones the pane fills.
-          'max-lg:min-h-0 max-lg:flex-1 max-lg:basis-auto!',
-          pane !== 'statement' && 'max-lg:hidden',
-        )}
-        style={{ flexBasis: `${String(leftPercent)}%` }}
-      >
-        <div className="p-5">{statement}</div>
-      </div>
-
-      <ResizeHandle
-        axis="x"
-        label="Resize the statement panel"
-        value={leftPercent}
-        min={STATEMENT.min}
-        max={STATEMENT.max}
-        onMove={dragStatement}
-        onNudge={(step) => {
-          setLeftPercent((p) => clamp(p + step * 2, STATEMENT.min, STATEMENT.max))
-        }}
-      />
-
-      {/* `min-w-0` is load-bearing: without it the column refuses to shrink below
-          Monaco's min-content width, and the statement split can be dragged
-          narrower but never wider. */}
-      <div
-        ref={columnRef}
-        className={cn(
-          'border-border flex min-h-0 min-w-0 flex-1 flex-col border',
-          pane === 'statement' && 'max-lg:hidden',
-        )}
-      >
-        {/* Hidden, never unmounted: switching tabs keeps Monaco's state. */}
         <div
-          id="pane-code"
+          id="pane-statement"
           role="tabpanel"
-          aria-labelledby="tab-code"
-          className={cn('flex min-h-0 flex-1 flex-col', pane !== 'code' && 'max-lg:hidden')}
+          aria-labelledby="tab-statement"
+          className={cn(
+            'border-border min-w-0 overflow-y-auto border lg:border-r-0',
+            // The inline flex-basis is the desktop split; on phones the pane fills.
+            'max-lg:min-h-0 max-lg:flex-1 max-lg:basis-auto!',
+            pane !== 'statement' && 'max-lg:hidden',
+          )}
+          style={{ flexBasis: `${String(leftPercent)}%` }}
         >
-          <Toolbar
-            language={language}
-            onLanguage={setLanguage}
-            status={drafts.status}
-            onReset={() => {
-              drafts.reset()
-              setContentVersion((version) => version + 1)
-            }}
-          />
+          <div className="p-5">{statement}</div>
+        </div>
 
-          <div className="min-h-0 flex-1">
-            {drafts.isLoading ? null : (
-              <CodeEditor
-                language={language}
-                editorKey={`${language}:${String(contentVersion)}`}
-                initialValue={drafts.code}
-                onChange={drafts.setCode}
-              />
+        <ResizeHandle
+          axis="x"
+          label="Resize the statement panel"
+          value={leftPercent}
+          min={STATEMENT.min}
+          max={STATEMENT.max}
+          onMove={dragStatement}
+          onNudge={(step) => {
+            setLeftPercent((p) => clamp(p + step * 2, STATEMENT.min, STATEMENT.max))
+          }}
+        />
+
+        {/* `min-w-0` is load-bearing: without it the column refuses to shrink below
+            Monaco's min-content width, and the statement split can be dragged
+            narrower but never wider. */}
+        <div
+          ref={columnRef}
+          className={cn(
+            'border-border flex min-h-0 min-w-0 flex-1 flex-col border',
+            pane === 'statement' && 'max-lg:hidden',
+          )}
+        >
+          {/* Hidden, never unmounted: switching tabs keeps Monaco's state. */}
+          <div
+            id="pane-code"
+            role="tabpanel"
+            aria-labelledby="tab-code"
+            className={cn('flex min-h-0 flex-1 flex-col', pane !== 'code' && 'max-lg:hidden')}
+          >
+            <Toolbar
+              language={language}
+              onLanguage={setLanguage}
+              status={drafts.status}
+              onReset={() => {
+                drafts.reset()
+                setContentVersion((version) => version + 1)
+              }}
+            />
+
+            <div className="min-h-0 flex-1">
+              {drafts.isLoading ? null : (
+                <CodeEditor
+                  language={language}
+                  editorKey={`${language}:${String(contentVersion)}`}
+                  initialValue={drafts.code}
+                  onChange={drafts.setCode}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="shrink-0 max-lg:hidden">
+            <ResizeHandle
+              axis="y"
+              label="Resize the test panel"
+              value={testHeight}
+              min={TEST_MIN}
+              max={2000}
+              onMove={dragTests}
+              onNudge={nudgeTests}
+            />
+          </div>
+
+          <div
+            id="pane-tests"
+            role="tabpanel"
+            aria-labelledby="tab-tests"
+            className={cn(
+              'flex flex-col lg:shrink-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto',
+              pane !== 'tests' && 'max-lg:hidden',
+            )}
+          >
+            <TestPanel
+              problem={problem}
+              language={language}
+              code={drafts.code}
+              height={testHeight}
+              contestId={running?.id ?? null}
+            />
+            {/* Hints off during a contest: the mentor is gone, not greyed out. */}
+            {(running === null || running.hintsAllowed) && (
+              <MentorPanel problemSlug={problem.slug} code={drafts.code} />
             )}
           </div>
         </div>
-
-        <div className="shrink-0 max-lg:hidden">
-          <ResizeHandle
-            axis="y"
-            label="Resize the test panel"
-            value={testHeight}
-            min={TEST_MIN}
-            max={2000}
-            onMove={dragTests}
-            onNudge={nudgeTests}
-          />
-        </div>
-
-        <div
-          id="pane-tests"
-          role="tabpanel"
-          aria-labelledby="tab-tests"
-          className={cn(
-            'flex flex-col lg:shrink-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto',
-            pane !== 'tests' && 'max-lg:hidden',
-          )}
-        >
-          <TestPanel problem={problem} language={language} code={drafts.code} height={testHeight} />
-          <MentorPanel problemSlug={problem.slug} code={drafts.code} />
-        </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * The contest strip above the workspace: time left, and the way back. At zero
+ * the contest is re-read; the server has finished it and contest mode ends.
+ */
+function ContestBar({ contest }: { contest: ContestView }) {
+  const client = useQueryClient()
+  return (
+    <div className="border-border bg-card/70 mb-2 flex shrink-0 flex-wrap items-center justify-between gap-3 border px-3 py-2">
+      <Link
+        href="/contest"
+        className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
+      >
+        <ChevronLeft className="size-4" aria-hidden="true" />
+        Back to contest
+      </Link>
+      <span className="text-muted-foreground text-xs">
+        Mock contest · {contest.hintsAllowed ? 'hints allowed' : 'hints off'}
+      </span>
+      <Countdown
+        key={contest.id}
+        deadlineAt={contest.deadlineAt}
+        serverNow={contest.serverNow}
+        onExpire={() => void client.invalidateQueries({ queryKey: ['contest'] })}
+      />
     </div>
   )
 }
@@ -468,14 +524,16 @@ function TestPanel({
   language,
   code,
   height,
+  contestId,
 }: {
   problem: ProblemDetail
   language: Language
   code: string
   height: number
+  contestId: string | null
 }) {
   const [tab, setTab] = useState<'samples' | 'result'>('samples')
-  const run = useSubmission(problem.id)
+  const run = useSubmission(problem.id, contestId)
 
   /**
    * Pressing Run or Submit moves you to the Result tab.

@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   Language,
@@ -8,7 +9,7 @@ import type {
   SubmissionStatus,
   SubmissionStatusEvent,
 } from '@guruji/types'
-import { ApiError, submissionApi } from '@/lib/api'
+import { ApiError, contestApi, submissionApi } from '@/lib/api'
 import { getSocket } from '@/lib/socket'
 
 /**
@@ -32,7 +33,13 @@ export interface UseSubmission {
   start: (kind: RunKind, language: Language, code: string) => void
 }
 
-export function useSubmission(problemId: string): UseSubmission {
+/**
+ * @param contestId set while a mock contest is running: Submit then goes through
+ * the contest, which records it against the clock. Run is never part of a
+ * contest and keeps going to `/submissions`.
+ */
+export function useSubmission(problemId: string, contestId: string | null = null): UseSubmission {
+  const queryClient = useQueryClient()
   const [submissionId, setSubmissionId] = useState<string | null>(null)
   const [submission, setSubmission] = useState<SubmissionDetail | null>(null)
   const [status, setStatus] = useState<SubmissionStatus | null>(null)
@@ -53,17 +60,25 @@ export function useSubmission(problemId: string): UseSubmission {
       setSubmission(null)
       setStatus('QUEUED')
 
-      void submissionApi
-        .submit({
-          problemId,
-          language,
-          code,
-          isRun: nextKind === 'run',
-          timeSpentMs: 0,
-          hintsUsedAtSubmit: 0,
-        })
+      const request =
+        nextKind === 'submit' && contestId !== null
+          ? contestApi.submit(contestId, { problemId, language, code, timeSpentMs: 0 })
+          : submissionApi.submit({
+              problemId,
+              language,
+              code,
+              isRun: nextKind === 'run',
+              timeSpentMs: 0,
+              hintsUsedAtSubmit: 0,
+            })
+
+      void request
         .then((accepted) => {
           setSubmissionId(accepted.id)
+          // The contest's problem states just changed; the cached view is stale.
+          if (nextKind === 'submit' && contestId !== null) {
+            void queryClient.invalidateQueries({ queryKey: ['contest'] })
+          }
         })
         .catch((cause: unknown) => {
           // The rate limit is the one a user will actually hit, and "nothing
@@ -75,7 +90,7 @@ export function useSubmission(problemId: string): UseSubmission {
           setKind(null)
         })
     },
-    [problemId],
+    [problemId, contestId, queryClient],
   )
 
   useEffect(() => {
@@ -90,6 +105,8 @@ export function useSubmission(problemId: string): UseSubmission {
       if (event.submissionId === currentId.current) {
         setSubmission(event.submission)
         setStatus(event.submission.status)
+        // A verdict can move a contest problem from attempted to solved.
+        void queryClient.invalidateQueries({ queryKey: ['contest'] })
       }
     }
 
@@ -100,7 +117,7 @@ export function useSubmission(problemId: string): UseSubmission {
       socket.off('submission:status', onStatus)
       socket.off('submission:result', onResult)
     }
-  }, [])
+  }, [queryClient])
 
   // The fallback. It only runs while a submission is outstanding, and it stops
   // as soon as one arrives by either route.
@@ -116,6 +133,7 @@ export function useSubmission(problemId: string): UseSubmission {
           setStatus(fetched.status)
           if (fetched.status === 'COMPLETED' || fetched.status === 'FAILED') {
             setSubmission(fetched)
+            void queryClient.invalidateQueries({ queryKey: ['contest'] })
           }
         })
         .catch(() => {
@@ -126,7 +144,7 @@ export function useSubmission(problemId: string): UseSubmission {
     return () => {
       clearInterval(timer)
     }
-  }, [submissionId, submission])
+  }, [submissionId, submission, queryClient])
 
   return {
     submission,

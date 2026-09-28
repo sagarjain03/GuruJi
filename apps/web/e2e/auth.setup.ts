@@ -51,6 +51,9 @@ const APP_ROUTES = [
   '/visualizer',
   '/analytics',
   '/profile',
+  '/contest',
+  // One problem page: the editor (Monaco) is the heaviest route to compile cold.
+  '/problems/pair-sums-to-target',
 ]
 
 const WARM_TIMEOUT_MS = 180_000

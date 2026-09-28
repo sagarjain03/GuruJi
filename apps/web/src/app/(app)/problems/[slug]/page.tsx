@@ -4,7 +4,10 @@ import { ProblemDetailView } from '@/components/problems/problem-detail-view'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api'
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ contest?: string | string[] }>
+}
 
 /**
  * The problem's own title, and the first sentence of its statement as the
@@ -38,7 +41,9 @@ function firstSentence(markdown: string): string {
   return sentence.length > 160 ? `${sentence.slice(0, 157).trimEnd()}…` : sentence
 }
 
-export default async function ProblemPage({ params }: Props) {
+export default async function ProblemPage({ params, searchParams }: Props) {
   const { slug } = await params
-  return <ProblemDetailView slug={slug} />
+  // `?contest=<id>` opens the problem inside a running mock contest.
+  const { contest } = await searchParams
+  return <ProblemDetailView slug={slug} contestId={typeof contest === 'string' ? contest : null} />
 }
