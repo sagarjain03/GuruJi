@@ -152,7 +152,7 @@ function ProblemRow({ problem }: { problem: ProblemListItem }) {
   return (
     <Link
       href={`/problems/${problem.slug}`}
-      className="border-border bg-card/70 hover:border-foreground/25 flex flex-col gap-2 border p-4 transition-colors"
+      className="surface border-border bg-card/70 hover:border-foreground/25 flex flex-col gap-2 border p-4 transition-colors"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-display text-base font-semibold tracking-tight">{problem.title}</span>
@@ -219,7 +219,7 @@ function FilterBar({
   const hasFilters = Object.values(filters).some((value) => value !== undefined)
 
   return (
-    <div className="border-border bg-card/70 flex flex-col gap-3 border p-3">
+    <div className="surface border-border bg-card/70 flex flex-col gap-3 border p-3">
       <input
         type="search"
         value={search}

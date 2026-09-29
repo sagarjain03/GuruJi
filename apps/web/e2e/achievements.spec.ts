@@ -14,7 +14,7 @@ import { STORAGE_STATE } from './paths'
  */
 test.describe.configure({ mode: 'serial' })
 
-const TIERS: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']
+const TIERS: AchievementTier[] = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND']
 
 function badge(slug: string, name: string, icon: string, thresholds: number[], value: number): Badge {
   const tiers = thresholds.map((threshold, index) => ({

@@ -1007,6 +1007,7 @@ enum AchievementTier {
   SILVER
   GOLD
   PLATINUM
+  DIAMOND
 
   @@map("achievement_tier")
 }

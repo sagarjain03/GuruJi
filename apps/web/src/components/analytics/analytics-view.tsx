@@ -134,7 +134,7 @@ export function AnalyticsView() {
         </ChartPanel>
       </div>
 
-      <section className="border-border bg-card/70 flex flex-col gap-3 border p-5">
+      <section className="surface border-border bg-card/70 flex flex-col gap-3 border p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-base font-semibold tracking-tight">Trends</h2>

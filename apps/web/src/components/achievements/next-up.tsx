@@ -21,7 +21,7 @@ export function NextUp() {
   if (closest.length === 0) return null
 
   return (
-    <section className="border-border bg-card/70 border p-5" aria-labelledby="next-up" data-testid="next-up">
+    <section className="surface border-border bg-card/70 border p-5" aria-labelledby="next-up" data-testid="next-up">
       <header className="mb-4 flex items-baseline justify-between gap-3">
         <div>
           <h2 id="next-up" className="font-display text-base font-semibold">

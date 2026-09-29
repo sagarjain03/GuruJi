@@ -5,7 +5,8 @@ import { z } from 'zod'
  * here is an input to mastery, recommendations or revision.
  */
 
-export const achievementTierSchema = z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'])
+// DIAMOND exists for the long-haul streak badge; most badges stop at PLATINUM.
+export const achievementTierSchema = z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'])
 export type AchievementTier = z.infer<typeof achievementTierSchema>
 
 export const badgeTierSchema = z.object({

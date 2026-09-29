@@ -19,6 +19,7 @@ import {
   type WrongAnswerResponse,
 } from '@guruji/ai'
 import { prisma } from '@guruji/database'
+import type { MentorHistoryMode, MentorHistoryResponse } from '@guruji/types'
 import type Redis from 'ioredis'
 import { ContestsService } from '../contests/contests.service'
 import { NotFoundError } from '../common/app-error'
@@ -27,6 +28,10 @@ import { HintDto } from './dto/hint.dto'
 import { AnalyzeCodeDto, ExplainDto, ExplainWrongAnswerDto } from './dto/mentor.dto'
 import { GenerateProblemDto } from './dto/generate-problem.dto'
 import { REDIS } from '../redis/redis.module'
+import { toHistoryEntry } from './history'
+
+/** How much history one read returns. Enough for a page; there is no paging yet. */
+const HISTORY_LIMIT = 50
 
 export const AI_PROVIDER = Symbol('AI_PROVIDER')
 export const AI_REFERENCE_EXECUTOR = Symbol('AI_REFERENCE_EXECUTOR')
@@ -44,6 +49,36 @@ export class AIService {
     @Inject(AI_REFERENCE_EXECUTOR) private readonly referenceExecutor: ReferenceExecutor,
     private readonly contests: ContestsService,
   ) {}
+
+  /**
+   * The mentor's answers to this person, newest first. Only what was actually
+   * shown: a failed hint is stored without a level, and a failed structured
+   * answer stores no message at all, so neither appears.
+   */
+  async history(userId: string): Promise<MentorHistoryResponse> {
+    const rows = await prisma.aIMessage.findMany({
+      where: {
+        role: 'ASSISTANT',
+        conversation: { userId },
+        mode: { in: ['HINT', 'EXPLAIN', 'ANALYZE_CODE', 'EXPLAIN_WRONG_ANSWER', 'SHOW_SOLUTION'] },
+        NOT: { mode: 'HINT', hintLevel: null },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: HISTORY_LIMIT,
+      select: {
+        id: true,
+        mode: true,
+        content: true,
+        hintLevel: true,
+        createdAt: true,
+        conversation: { select: { problem: { select: { slug: true, title: true } } } },
+      },
+    })
+    return {
+      // The `in` filter above has already excluded GENERATE_PROBLEM.
+      entries: rows.map((row) => toHistoryEntry({ ...row, mode: row.mode as MentorHistoryMode })),
+    }
+  }
 
   async hint(userId: string, request: HintDto): Promise<{ hint: string; level: number; curated: boolean }> {
     // Before the quota: a contest refusing the mentor must cost the learner nothing.

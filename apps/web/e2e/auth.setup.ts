@@ -52,6 +52,7 @@ const APP_ROUTES = [
   '/analytics',
   '/profile',
   '/contest',
+  '/mentor',
   // One problem page: the editor (Monaco) is the heaviest route to compile cold.
   '/problems/pair-sums-to-target',
 ]

@@ -66,7 +66,7 @@ describe('achievements (e2e)', () => {
     const { token } = await signUp()
     const trophyCase = (await get(token).expect(200)).body as TrophyCase
 
-    expect(trophyCase.badges).toHaveLength(12)
+    expect(trophyCase.badges).toHaveLength(13)
     expect(trophyCase.badges.every((entry) => entry.tier === null && entry.value === 0)).toBe(true)
     expect(badge(trophyCase, 'sharp-first-try').next).toEqual({ tier: 'BRONZE', threshold: 1 })
     expect(trophyCase.new).toEqual([])

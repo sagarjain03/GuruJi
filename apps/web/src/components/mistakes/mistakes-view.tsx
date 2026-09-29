@@ -47,7 +47,7 @@ export function MistakesView() {
       )}
 
       {found.length > 0 && (
-        <section className="border-border border p-4">
+        <section className="surface border-border border p-4">
           <h2 className="font-display text-base font-semibold">What keeps happening</h2>
           <p className="text-muted-foreground mt-1 text-xs">
             Most frequent first. Tap one to see only those.
@@ -148,7 +148,7 @@ function PatternRow({
 
 function MistakeRow({ mistake }: { mistake: Mistake }) {
   return (
-    <li className="border-border border p-3">
+    <li className="surface border-border border p-3">
       <div className="flex flex-wrap items-baseline gap-2">
         <Link
           href={`/problems/${mistake.problemSlug}`}

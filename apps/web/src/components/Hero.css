@@ -59,6 +59,25 @@ body[data-dragging] {
    popping. The canvas renders on a transparent clear colour, so the section's own
    gradient below remains the actual ground. The stage spans the full section so
    the figure sits on the page's centre line, between the copy and the ghost panel. */
+/* Glossy black: one soft diagonal band of silver high on the right, as a light
+   would catch lacquer, and a flattened pool of light on the floor under the
+   figure. Both are faint — the ground must still read as black. */
+.hero__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* Strong on purpose: the scrim above it dims the bottom band by ~60%. */
+    radial-gradient(22% 6% at 54% 94%, rgba(220, 225, 236, 0.55) 0%, rgba(220, 225, 236, 0) 100%),
+    radial-gradient(48% 16% at 54% 95%, rgba(190, 196, 208, 0.16) 0%, rgba(190, 196, 208, 0) 100%),
+    linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0) 38%,
+      rgba(220, 225, 235, 0.045) 52%,
+      rgba(255, 255, 255, 0) 66%
+    );
+}
+
 .hero__stage {
   position: absolute;
   inset: 0;

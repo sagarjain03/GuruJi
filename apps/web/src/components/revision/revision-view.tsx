@@ -92,7 +92,7 @@ function QueueSummary({
   respacing: boolean
 }) {
   return (
-    <section className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border p-3">
+    <section className="surface border-border flex flex-wrap items-center gap-x-6 gap-y-2 border p-3">
       <Stat label="Due today" value={Math.min(queue.totalDue, queue.cap)} />
       <Stat label="Daily cap" value={queue.cap} />
       {queue.carriedForward > 0 && <Stat label="Carried forward" value={queue.carriedForward} />}
@@ -150,7 +150,7 @@ function QueueRow({ item }: { item: QueueItem }) {
   })
 
   return (
-    <li className="border-border border p-3">
+    <li className="surface border-border border p-3">
       <div className="flex flex-wrap items-baseline gap-2">
         <Link href={`/problems/${item.slug}`} className="text-sm font-medium hover:underline">
           {item.title}
@@ -248,7 +248,7 @@ function UpcomingWeek({ days, isLoading }: { days: UpcomingDay[]; isLoading: boo
   const busiest = Math.max(...days.map((day) => day.capped), 1)
 
   return (
-    <section className="border-border border p-3">
+    <section className="surface border-border border p-3">
       <h2 className="font-display text-base font-semibold">The week ahead</h2>
       <p className="text-muted-foreground mt-1 text-xs">
         What you will actually be asked for, after the daily cap.

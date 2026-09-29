@@ -6,7 +6,7 @@ import { BADGES } from './catalog'
 import { computeMetrics, type ProblemFacts } from './metrics'
 import { momentsToShow, resolveTier } from './tiers'
 
-const RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4 }
+const RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4, DIAMOND: 5 }
 
 /**
  * Badges, evaluated on read.

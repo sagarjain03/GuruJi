@@ -33,6 +33,14 @@
 
   --card: #101013;
   --card-foreground: #f2f2f4;
+  /* Polished black for cards (.surface, .card-spot): a faint silver catch
+     of light from the top-left over a near-black fall-off, and a silver hairline
+     along the top edge where a glossy surface would catch it. */
+  --card-sheen:
+    linear-gradient(150deg, rgba(222, 227, 238, 0.055) 0%, rgba(222, 227, 238, 0) 40%),
+    linear-gradient(180deg, #0c0c0f 0%, #050506 100%);
+  --card-edge: rgba(226, 230, 240, 0.12);
+  --card-edge-hover: rgba(226, 230, 240, 0.24);
   --popover: #141418;
   --popover-foreground: #f2f2f4;
 
@@ -83,6 +91,10 @@
 
   --card: #ffffff;
   --card-foreground: #121215;
+  /* Light cards stay plain white. */
+  --card-sheen: none;
+  --card-edge: transparent;
+  --card-edge-hover: transparent;
   --popover: #ffffff;
   --popover-foreground: #121215;
 
@@ -192,13 +204,13 @@
 
 /* ---------- ambient backdrop (components/ambient-background.tsx) ----------
    A dot field instead of a grid: structure without lines. The pointer carries
-   a wide soft spotlight and lights the dots right under it. --cursor-* are set
+   a small silver spotlight and lights the dots right under it. --cursor-* are set
    on <html> by the component; --cursor-on fades both out when the pointer
    leaves the window. */
 @layer components {
   .ambient {
     --dot: color-mix(in oklab, var(--foreground) 13%, transparent);
-    --dot-lit: color-mix(in oklab, var(--foreground) 55%, transparent);
+    --dot-lit: color-mix(in oklab, color-mix(in oklab, var(--foreground) 75%, #b8c2d6) 60%, transparent);
     position: fixed;
     inset: 0;
     z-index: -10;
@@ -224,7 +236,7 @@
   .ambient__lit {
     background-image: radial-gradient(circle, var(--dot-lit) 1px, transparent 1.5px);
     mask-image: radial-gradient(
-      180px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+      110px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
       black,
       transparent 75%
     );
@@ -232,12 +244,21 @@
     transition: opacity 0.4s ease;
   }
 
+  /* A tight silver core inside a smaller, cooler halo: reads as polished light
+     on metal rather than a wide grey wash. */
   .ambient__glow {
-    background: radial-gradient(
-      520px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
-      color-mix(in oklab, var(--foreground) 5%, transparent),
-      transparent 65%
-    );
+    --silver: color-mix(in oklab, var(--foreground) 70%, #b8c2d6);
+    background:
+      radial-gradient(
+        70px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+        color-mix(in oklab, var(--silver) 9%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        280px circle at var(--cursor-x, -999px) var(--cursor-y, -999px),
+        color-mix(in oklab, var(--silver) 6%, transparent),
+        transparent 65%
+      );
     opacity: var(--cursor-on, 0);
     transition: opacity 0.4s ease;
   }
@@ -281,18 +302,30 @@
   }
 }
 
-/* ---------- card hover ----------
-   A brighter hairline and a 2px lift. Unlayered on purpose: the hover border
-   has to beat the cards' `border-border` utility. */
+/* ---------- card surface + hover ----------
+   Polished black in the dark theme (tokens above), a brighter silver hairline
+   and a 2px lift on hover. Unlayered on purpose: the hover border has to beat
+   the cards' `border-border` utility. The gradient is a background-image, so it
+   sits over `bg-card` rather than fighting it. */
+.surface,
+.card-spot {
+  background-image: var(--card-sheen);
+  box-shadow: inset 0 1px 0 var(--card-edge);
+}
+
+/* `.surface` is the same finish for cards that do not lift on hover — every
+   page-level card and the sidebar, so the whole app reads as one material. */
 .card-spot {
   position: relative;
   transition:
     border-color 0.25s ease,
+    box-shadow 0.25s ease,
     transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-spot:hover {
   border-color: color-mix(in oklab, var(--foreground) 22%, transparent);
+  box-shadow: inset 0 1px 0 var(--card-edge-hover);
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -37,6 +37,16 @@ describe('resolveTier', () => {
     const three = FOUR.slice(0, 3)
     expect(resolveTier(15, three)).toEqual({ tier: 'GOLD', earned: ['BRONZE', 'SILVER', 'GOLD'], next: null })
   })
+
+  it('supports a fifth, diamond tier', () => {
+    const five = [...FOUR, { tier: 'DIAMOND', threshold: 100 }] as const
+    expect(resolveTier(60, five)).toEqual({
+      tier: 'PLATINUM',
+      earned: ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'],
+      next: { tier: 'DIAMOND', threshold: 100 },
+    })
+    expect(resolveTier(100, five).tier).toBe('DIAMOND')
+  })
 })
 
 describe('momentsToShow', () => {
@@ -62,13 +72,25 @@ describe('momentsToShow', () => {
 })
 
 describe('the catalog', () => {
-  it('has twelve badges with unique slugs', () => {
-    expect(BADGES).toHaveLength(12)
-    expect(new Set(BADGES.map((badge) => badge.slug)).size).toBe(12)
+  it('has thirteen badges with unique slugs', () => {
+    expect(BADGES).toHaveLength(13)
+    expect(new Set(BADGES.map((badge) => badge.slug)).size).toBe(13)
+  })
+
+  it('has a long-haul streak badge at 50 / 100 / 200 / 365 / 500 days', () => {
+    const unbroken = BADGES.find((badge) => badge.slug === 'unbroken')
+    expect(unbroken?.metric).toBe('longestStreak')
+    expect(unbroken?.tiers).toEqual([
+      { tier: 'BRONZE', threshold: 50 },
+      { tier: 'SILVER', threshold: 100 },
+      { tier: 'GOLD', threshold: 200 },
+      { tier: 'PLATINUM', threshold: 365 },
+      { tier: 'DIAMOND', threshold: 500 },
+    ])
   })
 
   it('orders every badge’s tiers bronze upward with strictly rising thresholds', () => {
-    const ORDER = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']
+    const ORDER = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND']
     for (const badge of BADGES) {
       expect(badge.tiers.length).toBeGreaterThanOrEqual(3)
       badge.tiers.forEach((tier, index) => {

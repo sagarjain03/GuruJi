@@ -37,7 +37,7 @@ export function ChartPanel({
   children: ReactNode
 }) {
   return (
-    <section className={cn('border-border bg-card/70 flex min-w-0 flex-col gap-3 border p-5', className)}>
+    <section className={cn('surface border-border bg-card/70 flex min-w-0 flex-col gap-3 border p-5', className)}>
       <header>
         <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>
         <p className="text-muted-foreground mt-1 text-xs">{description}</p>

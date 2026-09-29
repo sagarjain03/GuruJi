@@ -2,8 +2,9 @@
    Structure and every measured value below is the original composition; only the
    colour treatment and the branding have moved. */
 :root {
-  --ground: #0b0b0d;
-  --ground-deep: #050506;
+  /* Deep, almost pure black; the sheen that makes it read glossy is in Hero.css. */
+  --ground: #070708;
+  --ground-deep: #020203;
   --ink: #f5f5f5;
   --ink-soft: rgba(245, 245, 245, 0.72);
   --ink-faint: rgba(245, 245, 245, 0.5); /* 0.46 measured 4.3:1 on the footer; AA needs 4.5 */

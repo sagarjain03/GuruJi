@@ -34,7 +34,7 @@ export function ProfileView() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-5 lg:p-8">
-      <header className="border-border bg-card/70 flex flex-wrap items-center gap-5 border p-5">
+      <header className="surface border-border bg-card/70 flex flex-wrap items-center gap-5 border p-5">
         <span
           aria-hidden="true"
           className="bg-primary text-primary-foreground flex size-16 items-center justify-center font-mono text-xl font-semibold"
@@ -55,7 +55,7 @@ export function ProfileView() {
         </div>
       </header>
 
-      <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-stats">
+      <section className="surface border-border bg-card/70 border p-5" aria-labelledby="profile-stats">
         <h2 id="profile-stats" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Progress
         </h2>
@@ -82,7 +82,7 @@ export function ProfileView() {
 
       <TrophyCase />
 
-      <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-preferences">
+      <section className="surface border-border bg-card/70 border p-5" aria-labelledby="profile-preferences">
         <h2 id="profile-preferences" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Preferences
         </h2>

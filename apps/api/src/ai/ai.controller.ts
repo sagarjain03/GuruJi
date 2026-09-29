@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, ForbiddenException, Get, Post, UseGuards } from '@nestjs/common'
 import { CurrentUser } from '../common/decorators/current-user'
 import { AccessTokenGuard, type AuthenticatedUser } from '../auth/guards/access-token.guard'
 import { AIService } from './ai.service'
@@ -10,6 +10,12 @@ import { GenerateProblemDto } from './dto/generate-problem.dto'
 @UseGuards(AccessTokenGuard)
 export class AIController {
   constructor(private readonly ai: AIService) {}
+
+  /** What the mentor has already told this person, newest first. */
+  @Get('history')
+  history(@CurrentUser() user: AuthenticatedUser) {
+    return this.ai.history(user.id)
+  }
 
   @Post('hint')
   hint(@CurrentUser() user: AuthenticatedUser, @Body() dto: HintDto) {

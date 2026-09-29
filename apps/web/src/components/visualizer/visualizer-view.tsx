@@ -145,7 +145,7 @@ export function VisualizerView() {
       <InputForm key={`${definition.id}:${input}`} definition={definition} applied={input} error={result?.error ?? null} onApply={applyInput} />
 
       {steps !== null && step !== undefined && (
-        <section className="border-border bg-card flex flex-col gap-5 border p-5" aria-label="Algorithm visualizer">
+        <section className="surface border-border bg-card flex flex-col gap-5 border p-5" aria-label="Algorithm visualizer">
           <div
             role="img"
             tabIndex={0}

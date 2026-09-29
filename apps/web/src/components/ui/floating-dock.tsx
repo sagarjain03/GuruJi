@@ -49,7 +49,7 @@ export function FloatingDock({ children, className, ...props }: React.ComponentP
         onPointerMove={(e) => pointerY.set(e.clientY)}
         onPointerLeave={() => pointerY.set(Number.POSITIVE_INFINITY)}
         className={cn(
-          'border-border bg-card relative flex w-14 flex-col items-center gap-1 border p-2',
+          'surface border-border bg-card relative flex w-14 flex-col items-center gap-1 border p-2',
           className,
         )}
       >

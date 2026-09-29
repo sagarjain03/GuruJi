@@ -90,7 +90,7 @@ function TopicCard({ node }: { node: RoadmapNode }) {
   return (
     <Link
       href={{ pathname: '/problems', query: { topic: topic.slug } }}
-      className="border-border bg-card/70 hover:border-foreground/25 block border p-4 transition-colors"
+      className="surface border-border bg-card/70 hover:border-foreground/25 block border p-4 transition-colors"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-base font-semibold tracking-tight">{topic.name}</h3>

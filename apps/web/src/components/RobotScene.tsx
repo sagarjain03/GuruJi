@@ -1,12 +1,13 @@
 'use client'
 
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, useGLTF } from '@react-three/drei'
-import { Suspense, useEffect, useRef } from 'react'
-import type { Group } from 'three'
+import { ContactShadows, Environment, useGLTF } from '@react-three/drei'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Box3, type Group } from 'three'
 
 const MODEL_URL = '/robot.glb'
 
+const SCALE = 2
 const REST_YAW = -0.2
 const MAX_PITCH = 0.26
 const IDLE_AFTER_MS = 2600
@@ -142,12 +143,22 @@ function Robot({ reducedMotion }: { reducedMotion: boolean }) {
     g.position.y += (targetY - g.position.y) * a
   })
 
+  // Where the feet are, in world units, so the contact shadow sits under them
+  // rather than at a guessed height.
+  const feetY = useMemo(() => new Box3().setFromObject(scene).min.y * SCALE - 0.02, [scene])
+
   // The model is 1 unit tall on its own origin. At camera z=3.4 / fov 38° the
   // frustum is ~2.34 units high, so anything past ~2.0 crops the head.
   return (
-    <group ref={group} position={[0, -0.02, 0]} rotation={[0, REST_YAW, 0]} scale={2}>
-      <primitive object={scene} />
-    </group>
+    <>
+      <group ref={group} position={[0, -0.02, 0]} rotation={[0, REST_YAW, 0]} scale={SCALE}>
+        <primitive object={scene} />
+      </group>
+      {/* Soft contact shadow on the floor. It darkens the silver pool of light
+          the hero draws under the figure (Hero.css), which is what makes it
+          visible at all on a near-black ground. */}
+      <ContactShadows position={[0, feetY, 0]} scale={2.4} blur={2.6} far={1.2} opacity={0.85} resolution={512} />
+    </>
   )
 }
 
@@ -165,13 +176,15 @@ export default function RobotScene({ onReady }: { onReady: () => void }) {
       onCreated={onReady}
       style={{ background: 'transparent' }}
     >
-      {/* Key light from the upper left, matching where the copy sits. */}
-      <directionalLight position={[-3, 2.5, 2]} intensity={2.1} color="#ffffff" />
-      {/* White rim from behind-right to separate the silhouette from the ground. */}
-      <directionalLight position={[3.5, 1, -2]} intensity={3.4} color="#ffffff" />
-      {/* Neutral fill so the shadow side reads graphite rather than black. */}
-      <directionalLight position={[2, -1.5, 1.5]} intensity={0.5} color="#d4d4d8" />
-      <ambientLight intensity={0.35} />
+      {/* Key light from the upper left, matching where the copy sits. A cool
+          silver rather than pure white, so the highlights read as polished metal. */}
+      <directionalLight position={[-3, 2.5, 2]} intensity={2.3} color="#e4e8f0" />
+      {/* Silver rim from behind-right to separate the silhouette from the ground. */}
+      <directionalLight position={[3.5, 1, -2]} intensity={3.6} color="#dde2ec" />
+      {/* Low fill and ambient: the shadow side stays deep black, so the body
+          reads as glossy black with silver edges rather than flat grey. */}
+      <directionalLight position={[2, -1.5, 1.5]} intensity={0.25} color="#c8ccd6" />
+      <ambientLight intensity={0.12} />
 
       <Suspense fallback={null}>
         <Robot reducedMotion={reducedMotion} />

@@ -1,7 +1,7 @@
 import type { AchievementTier, Unlock } from '@guruji/types'
 import type { TierDefinition } from './catalog'
 
-const RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4 }
+const RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4, DIAMOND: 5 }
 
 export interface ResolvedTier {
   /** Highest tier earned, or null. */

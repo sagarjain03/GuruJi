@@ -36,7 +36,7 @@ export function ContestReport({ contestId }: { contestId: string }) {
   const data = report.data
   return (
     <div className="flex flex-col gap-3">
-      <section className="border-border bg-card/70 flex flex-wrap items-end justify-between gap-4 border p-5" aria-labelledby="report-score">
+      <section className="surface border-border bg-card/70 flex flex-wrap items-end justify-between gap-4 border p-5" aria-labelledby="report-score">
         <div>
           <h2 id="report-score" className="text-muted-foreground font-mono text-[11px] tracking-[0.14em] uppercase sm:text-[10px]">
             Score
@@ -51,7 +51,7 @@ export function ContestReport({ contestId }: { contestId: string }) {
       </section>
 
       {data.weakArea !== null ? (
-        <section className="border-destructive/40 bg-card/70 border p-5" aria-labelledby="report-weak-area">
+        <section className="surface border-destructive/40 bg-card/70 border p-5" aria-labelledby="report-weak-area">
           <h2 id="report-weak-area" className="text-muted-foreground font-mono text-[11px] tracking-[0.14em] uppercase sm:text-[10px]">
             Weak area · {data.weakArea.kind === 'TOPIC' ? 'topic' : 'pattern'}
           </h2>
@@ -59,7 +59,7 @@ export function ContestReport({ contestId }: { contestId: string }) {
           <p className="text-muted-foreground mt-2 text-sm">{data.weakArea.reason}</p>
         </section>
       ) : (
-        <section className="border-border bg-card/70 border p-5" aria-labelledby="report-weak-area">
+        <section className="surface border-border bg-card/70 border p-5" aria-labelledby="report-weak-area">
           <h2 id="report-weak-area" className="text-muted-foreground font-mono text-[11px] tracking-[0.14em] uppercase sm:text-[10px]">
             Weak area
           </h2>
@@ -68,7 +68,7 @@ export function ContestReport({ contestId }: { contestId: string }) {
         </section>
       )}
 
-      <section className="border-border bg-card/70 overflow-x-auto border p-5" aria-labelledby="report-problems">
+      <section className="surface border-border bg-card/70 overflow-x-auto border p-5" aria-labelledby="report-problems">
         <h2 id="report-problems" className="text-muted-foreground mb-3 font-mono text-[11px] tracking-[0.14em] uppercase sm:text-[10px]">
           Problems
         </h2>

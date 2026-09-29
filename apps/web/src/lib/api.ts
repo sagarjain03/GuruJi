@@ -29,6 +29,7 @@ import type {
   TrainNow,
   Language,
   Me,
+  MentorHistoryResponse,
   Paginated,
   PatternSummary,
   ProblemDetail,
@@ -210,6 +211,9 @@ export const aiApi = {
 
   showSolution: (body: { problemSlug: string }) =>
     send<MentorSolution>('/ai/show-solution', { method: 'POST', body }),
+
+  /** Everything the mentor has already said to this person, newest first. */
+  history: () => send<MentorHistoryResponse>('/ai/history'),
 }
 
 /**

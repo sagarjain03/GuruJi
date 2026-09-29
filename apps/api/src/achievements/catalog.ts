@@ -39,11 +39,18 @@ export interface BadgeDefinition {
   tiers: readonly TierDefinition[]
 }
 
-const tiers = (bronze: number, silver: number, gold: number, platinum?: number): TierDefinition[] => [
+const tiers = (
+  bronze: number,
+  silver: number,
+  gold: number,
+  platinum?: number,
+  diamond?: number,
+): TierDefinition[] => [
   { tier: 'BRONZE', threshold: bronze },
   { tier: 'SILVER', threshold: silver },
   { tier: 'GOLD', threshold: gold },
   ...(platinum === undefined ? [] : [{ tier: 'PLATINUM' as const, threshold: platinum }]),
+  ...(diamond === undefined ? [] : [{ tier: 'DIAMOND' as const, threshold: diamond }]),
 ]
 
 export const BADGES: readonly BadgeDefinition[] = [
@@ -86,6 +93,16 @@ export const BADGES: readonly BadgeDefinition[] = [
     icon: 'flame',
     metric: 'longestStreak',
     tiers: tiers(3, 7, 14, 30),
+  },
+  {
+    // On Fire covers the first month; this is the long haul after it. Same
+    // metric — a streak is persistence, not volume.
+    slug: 'unbroken',
+    name: 'Unbroken',
+    description: 'Your longest run of days with a solve, kept for months.',
+    icon: 'infinity',
+    metric: 'longestStreak',
+    tiers: tiers(50, 100, 200, 365, 500),
   },
   {
     slug: 'hard-mode',

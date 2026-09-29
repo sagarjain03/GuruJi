@@ -74,6 +74,9 @@ export default function Hero() {
   return (
     <section className="hero">
       <div className="hero__media">
+        {/* Behind the canvas: a silver sheen across the ground and a pool of
+            light on the floor, which the robot's contact shadow darkens. */}
+        <div className="hero__sheen" aria-hidden="true" />
         <div
           className={`hero__stage ${ready || stage === 'poster' ? 'is-ready' : ''}`}
           aria-hidden="true"

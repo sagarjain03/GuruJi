@@ -4,6 +4,7 @@ import type { Badge } from '@guruji/types'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { achievementApi } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { Medallion, TIER_LABEL } from './medallion'
 
 /** One key for every reader of badges: profile, dashboard and the unlock moment. */
@@ -29,7 +30,40 @@ export function standing(badge: Badge): string {
 }
 
 /**
- * All twelve badges, in catalogue order so each keeps its place as it is
+ * The whole ladder, not just the next rung: every tier and what it takes, so
+ * someone can see where a badge ends before they start on it. Earned tiers are
+ * lit; the one being worked toward is outlined; the rest are faint.
+ */
+function TierLadder({ badge }: { badge: Badge }) {
+  return (
+    <ol className="mt-auto flex flex-wrap justify-center gap-1 pt-1" aria-label={`${badge.name} tiers`}>
+      {badge.tiers.map((tier) => {
+        const earned = tier.unlockedAt !== null
+        const next = badge.next?.tier === tier.tier
+        return (
+          <li
+            key={tier.tier}
+            className={cn(
+              'border px-1.5 py-0.5 font-mono text-[10px] tabular-nums',
+              earned
+                ? 'border-foreground/30 text-foreground'
+                : next
+                  ? 'border-border text-muted-foreground'
+                  : 'text-muted-foreground/50 border-transparent',
+            )}
+            {...(earned ? { title: `Earned ${new Date(tier.unlockedAt ?? '').toLocaleDateString()}` } : {})}
+          >
+            {TIER_LABEL[tier.tier]} {tier.threshold}
+            <span className="sr-only">{earned ? ', earned' : ', locked'}</span>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+/**
+ * Every badge, in catalogue order so each keeps its place as it is
  * earned. Locked ones are shown too: seeing what exists is half the reason
  * to go and get it.
  */
@@ -39,7 +73,7 @@ export function TrophyCase() {
   const earned = badges.filter((badge) => badge.tier !== null).length
 
   return (
-    <section className="border-border bg-card/70 border p-5" aria-labelledby="profile-badges">
+    <section className="surface border-border bg-card/70 border p-5" aria-labelledby="profile-badges">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="profile-badges" className="text-muted-foreground font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase">
           Badges
@@ -76,6 +110,7 @@ export function TrophyCase() {
               </p>
               <p className="text-muted-foreground text-xs tabular-nums">{standing(badge)}</p>
               <p className="text-muted-foreground/80 text-xs leading-snug">{badge.description}</p>
+              <TierLadder badge={badge} />
             </li>
           ))}
         </ul>

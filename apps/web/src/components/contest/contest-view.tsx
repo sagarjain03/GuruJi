@@ -103,7 +103,7 @@ function StartContest({ onStarted }: { onStarted: (contest: Contest) => void }) 
   })
 
   return (
-    <section className="border-border bg-card/70 flex flex-col gap-5 border p-5" aria-labelledby="start-title">
+    <section className="surface border-border bg-card/70 flex flex-col gap-5 border p-5" aria-labelledby="start-title">
       <h2 id="start-title" className="font-display text-lg font-semibold">
         Start a contest
       </h2>
@@ -181,7 +181,7 @@ function ActiveContest({ contest, onChange }: { contest: Contest; onChange: () =
 
   return (
     <div className="flex flex-col gap-3">
-      <section className="border-border bg-card/70 flex flex-wrap items-center justify-between gap-4 border p-5">
+      <section className="surface border-border bg-card/70 flex flex-wrap items-center justify-between gap-4 border p-5">
         <Countdown
           key={contest.id}
           deadlineAt={contest.deadlineAt}
@@ -211,7 +211,7 @@ function ActiveContest({ contest, onChange }: { contest: Contest; onChange: () =
 
       <ol className="flex flex-col gap-2" aria-label="Contest problems">
         {contest.problems.map((problem) => (
-          <li key={problem.problemId} className="border-border bg-card/70 flex flex-wrap items-center justify-between gap-3 border p-4">
+          <li key={problem.problemId} className="surface border-border bg-card/70 flex flex-wrap items-center justify-between gap-3 border p-4">
             <div className="min-w-0">
               <p className="text-muted-foreground font-mono text-[11px] sm:text-[10px]">Problem {problem.position}</p>
               <Link

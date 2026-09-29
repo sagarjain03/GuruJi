@@ -5,6 +5,7 @@ import {
   Brain,
   Compass,
   Flame,
+  Infinity as InfinityIcon,
   Languages,
   NotebookPen,
   Puzzle,
@@ -33,6 +34,7 @@ const ICONS: Record<string, LucideIcon> = {
   puzzle: Puzzle,
   compass: Compass,
   flame: Flame,
+  infinity: InfinityIcon,
   skull: Skull,
   shield: ShieldCheck,
   rotate: RotateCcw,
@@ -47,9 +49,10 @@ export const TIER_LABEL: Record<AchievementTier, string> = {
   SILVER: 'Silver',
   GOLD: 'Gold',
   PLATINUM: 'Platinum',
+  DIAMOND: 'Diamond',
 }
 
-const TIER_RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4 }
+const TIER_RANK: Record<AchievementTier, number> = { BRONZE: 1, SILVER: 2, GOLD: 3, PLATINUM: 4, DIAMOND: 5 }
 
 interface Metal {
   /** Face gradient, dark to light. */
@@ -68,6 +71,8 @@ const METALS: Record<AchievementTier | 'LOCKED', Metal> = {
   GOLD: { face: ['#7a520c', '#d9a431', '#ffe79a'], lit: '#fff0b8', shade: '#654307', cut: '#5e3e05', catch: '#fff6cf' },
   // Cool, faintly violet: the one metal that borrows the product's own colour.
   PLATINUM: { face: ['#5b6478', '#b9c3d9', '#f1f0ff'], lit: '#ffffff', shade: '#4a5266', cut: '#3d4459', catch: '#ece6ff' },
+  // Icy and brighter than platinum: near-white with a cold blue depth.
+  DIAMOND: { face: ['#2f4a63', '#9fd4f2', '#f7fdff'], lit: '#ffffff', shade: '#27405a', cut: '#1d3248', catch: '#e6f8ff' },
   LOCKED: { face: ['#15151a', '#1f1f26', '#2a2a33'], lit: '#34343f', shade: '#0c0c10', cut: '#0d0d11', catch: '#3a3a46' },
 }
 
@@ -172,7 +177,7 @@ export function Medallion({
       <Glyph x="31" y="27.5" width="38" height="38" stroke={metal.catch} strokeWidth={2.2} opacity={tier === null ? 0.35 : 0.9} />
       <Glyph x="31" y="26.5" width="38" height="38" stroke={metal.cut} strokeWidth={2.2} opacity={tier === null ? 0.9 : 1} />
 
-      {/* Tier notches: one to four, so the tier is readable without colour. */}
+      {/* Tier notches: one to five, so the tier is readable without colour. */}
       {rank > 0 && (
         <g>
           {Array.from({ length: rank }, (_, index) => {
