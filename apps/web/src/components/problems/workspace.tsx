@@ -1,10 +1,11 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Minus, Play, Plus, RotateCcw, Send } from 'lucide-react'
+import { ChevronLeft, Minus, PencilRuler, Play, Plus, RotateCcw, Send } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
 import type { ContestView, Language, ProblemDetail } from '@guruji/types'
+import { Board } from '@/components/board/board'
 import { Countdown } from '@/components/contest/countdown'
 import { CodeEditor } from '@/components/editor/code-editor'
 import { useDrafts, type SaveStatus } from '@/components/editor/use-drafts'
@@ -68,6 +69,10 @@ export function Workspace({
 
   // Below `lg` only one pane shows at a time. Desktop ignores this entirely.
   const [pane, setPane] = useState<Pane>('statement')
+  const [boardOpen, setBoardOpen] = useState(false)
+  const closeBoard = useCallback(() => {
+    setBoardOpen(false)
+  }, [])
 
   const drafts = useDrafts(problem.slug, language, problem.starterCode)
 
@@ -154,6 +159,9 @@ export function Workspace({
                 drafts.reset()
                 setContentVersion((version) => version + 1)
               }}
+              onOpenBoard={() => {
+                setBoardOpen(true)
+              }}
             />
 
             <div className="min-h-0 flex-1">
@@ -203,6 +211,7 @@ export function Workspace({
           </div>
         </div>
       </div>
+      {boardOpen && <Board problem={problem} onClose={closeBoard} />}
     </div>
   )
 }
@@ -380,11 +389,13 @@ function Toolbar({
   onLanguage,
   status,
   onReset,
+  onOpenBoard,
 }: {
   language: Language
   onLanguage: (language: Language) => void
   status: SaveStatus
   onReset: () => void
+  onOpenBoard: () => void
 }) {
   const { fontSize, setFontSize, wordWrap, toggleWordWrap, minimap, toggleMinimap } =
     useEditorStore()
@@ -414,6 +425,16 @@ function Toolbar({
       <SaveIndicator status={status} />
 
       <div className="ml-auto flex items-center gap-1">
+        {/* A dry-run whiteboard with the sample case on top; see components/board. */}
+        <button
+          type="button"
+          onClick={onOpenBoard}
+          title="Work the case by hand on a whiteboard"
+          className="border-border text-muted-foreground hover:text-foreground mr-1 inline-flex items-center gap-1.5 border px-2 py-1 font-mono text-[11px] tracking-[0.14em] uppercase sm:text-[10px]"
+        >
+          <PencilRuler className="size-3" aria-hidden="true" />
+          Board
+        </button>
         <IconButton
           label="Smaller font"
           onClick={() => {
