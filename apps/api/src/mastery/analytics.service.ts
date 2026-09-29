@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { prisma } from '@guruji/database'
 import type {
-  ActivityDay,
   ActivityResponse,
   AnalyticsOverview,
   AnalyticsRangeQuery,
@@ -25,6 +24,11 @@ const MAX_RANGE_DAYS = 366
 const TREND_DAYS = 12 * 7
 
 /** What counts as a graded attempt everywhere in analytics. */
+/** The start of the dashboard's year of activity. */
+function activitySince(): Date {
+  return new Date(Date.now() - ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
+}
+
 const GRADED = { isRun: false, status: 'COMPLETED', verdict: { not: 'INTERNAL_ERROR' } } as const
 
 /**
@@ -37,11 +41,10 @@ const GRADED = { isRun: false, status: 'COMPLETED', verdict: { not: 'INTERNAL_ER
 @Injectable()
 export class AnalyticsService {
   async overview(userId: string): Promise<AnalyticsOverview> {
-    const [topics, patterns, solvedProblems, activity, graded] = await Promise.all([
+    const [topics, patterns, solvedProblems, graded] = await Promise.all([
       this.topics(userId),
       this.patterns(userId),
       this.solvedByDifficulty(userId),
-      this.activity(userId),
       // All time, like the solved counts beside it. One narrow row per graded
       // submission; the history a person builds by hand stays small.
       prisma.submission.findMany({
@@ -49,6 +52,13 @@ export class AnalyticsService {
         select: { problemId: true, verdict: true, createdAt: true, hintsUsedAtSubmit: true },
       }),
     ])
+    // A year of days, bucketed in UTC here rather than in the client: the
+    // streak is derived from it, and two devices in two time zones must not
+    // disagree about whether yesterday counted. It is a slice of the same rows,
+    // not a second read of them — with a heavy history that query was a quarter
+    // of this request.
+    const since = activitySince()
+    const activity = bucketDays(graded.filter((submission) => submission.createdAt >= since))
 
     return {
       totalAttempted: topics.reduce((total, topic) => total + topic.attempts, 0),
@@ -156,18 +166,6 @@ export class AnalyticsService {
       medium: rows.filter((row) => row.problem.difficulty === 'MEDIUM').length,
       hard: rows.filter((row) => row.problem.difficulty === 'HARD').length,
     }
-  }
-
-  /**
-   * A year of days, bucketed in UTC.
-   *
-   * Bucketing here rather than in the client because the streak is derived
-   * from it and has to agree with itself — two devices in two time zones must
-   * not disagree about whether yesterday counted.
-   */
-  private async activity(userId: string): Promise<ActivityDay[]> {
-    const since = new Date(Date.now() - ACTIVITY_DAYS * 24 * 60 * 60 * 1000)
-    return bucketDays(await this.graded(userId, { gte: since }))
   }
 
   async activityRange(userId: string, query: AnalyticsRangeQuery): Promise<ActivityResponse> {

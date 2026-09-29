@@ -13,12 +13,13 @@ export function useTrophyCase() {
   return useQuery({ queryKey: TROPHY_CASE_KEY, queryFn: () => achievementApi.trophyCase() })
 }
 
-/** How far along to the next tier, 0..1, measured from the tier already held. */
+/**
+ * How far along to the next tier, 0..1: the same `value / threshold` the text
+ * beside it shows, so "3 / 4" is never drawn as half a bar.
+ */
 export function progressToNext(badge: Badge): number | null {
   if (badge.next === null) return null
-  const held = badge.tiers.filter((tier) => tier.unlockedAt !== null).at(-1)?.threshold ?? 0
-  const span = badge.next.threshold - held
-  return span <= 0 ? 1 : Math.max(0, Math.min(1, (badge.value - held) / span))
+  return Math.max(0, Math.min(1, badge.value / badge.next.threshold))
 }
 
 export function standing(badge: Badge): string {

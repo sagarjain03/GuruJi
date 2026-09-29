@@ -354,3 +354,167 @@
     transform: translateX(170px);
   }
 }
+
+/*
+ * Panda loader: the panda nods to a beat of 0.8s. The head bobs on every beat
+ * and tilts left, then right, across a bar of two; rings leave the ear cups on
+ * each beat, the outer one a little behind; the shadow tightens as the head
+ * lifts; notes drift up on alternate bars. All of it hangs off one duration so
+ * it stays in time. Under reduced motion the panda sits still, rings faint.
+ */
+.panda-loader {
+  --beat: 0.8s;
+}
+
+.panda-loader__head {
+  transform-box: view-box;
+  /* The chin: a nod pivots there, not at the middle of the face. */
+  transform-origin: 128px 222px;
+}
+
+.panda-loader__shadow {
+  transform-box: view-box;
+  transform-origin: 128px 252px;
+}
+
+.panda-loader__waves {
+  transform-box: view-box;
+}
+
+.panda-loader__waves--left {
+  transform-origin: 20px 137px;
+}
+
+.panda-loader__waves--right {
+  transform-origin: 237px 137px;
+}
+
+.panda-loader__wave {
+  opacity: 0.35;
+}
+
+.panda-loader__note {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panda-loader__head {
+    animation: panda-groove calc(var(--beat) * 2) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  .panda-loader__shadow {
+    animation: panda-shadow var(--beat) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  .panda-loader__wave {
+    animation: panda-ring var(--beat) ease-out infinite;
+  }
+
+  .panda-loader__wave--outer {
+    animation-delay: calc(var(--beat) * 0.18);
+  }
+
+  .panda-loader__waves--left {
+    animation: panda-cup-left var(--beat) ease-out infinite;
+  }
+
+  .panda-loader__waves--right {
+    animation: panda-cup-right var(--beat) ease-out infinite;
+  }
+
+  .panda-loader__note--left {
+    animation: panda-note-left calc(var(--beat) * 4) ease-out infinite;
+  }
+
+  .panda-loader__note--right {
+    animation: panda-note-right calc(var(--beat) * 4) ease-out calc(var(--beat) * 2) infinite;
+  }
+}
+
+/* Down on the beat, up between, tilting left on the first and right on the second. */
+@keyframes panda-groove {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  25%,
+  75% {
+    transform: translateY(-14px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(0) rotate(6deg);
+  }
+}
+
+@keyframes panda-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scaleX(0.82);
+    opacity: 0.1;
+  }
+}
+
+/* A ring is born at the cup and fades as it spreads. */
+@keyframes panda-ring {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes panda-cup-left {
+  from {
+    transform: translateX(6px) scale(0.85);
+  }
+  to {
+    transform: translateX(-10px) scale(1.15);
+  }
+}
+
+@keyframes panda-cup-right {
+  from {
+    transform: translateX(-6px) scale(0.85);
+  }
+  to {
+    transform: translateX(10px) scale(1.15);
+  }
+}
+
+@keyframes panda-note-left {
+  0% {
+    opacity: 0;
+    transform: translate(0, 20px) rotate(0deg) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: translate(-34px, -70px) rotate(-18deg) scale(1);
+  }
+}
+
+@keyframes panda-note-right {
+  0% {
+    opacity: 0;
+    transform: translate(0, 20px) rotate(0deg) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: translate(34px, -76px) rotate(16deg) scale(1);
+  }
+}

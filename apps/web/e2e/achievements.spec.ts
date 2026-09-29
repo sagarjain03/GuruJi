@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type Route } from '@playwright/test'
 import type { AchievementTier, Badge, TrophyCase, Unlock } from '@guruji/types'
 import { STORAGE_STATE } from './paths'
@@ -84,6 +85,10 @@ test('achievements - the unlock moment shows each new tier once, and acknowledge
   await expect(moment.getByRole('heading', { name: 'Sharp first try' })).toBeVisible({ timeout: 30_000 })
   await expect(moment.getByText('Gold earned')).toBeVisible()
   await page.screenshot({ path: 'test-results/achievements/unlock.png' })
+  // The dialog is only in the page while it is open, so the page-level audit never sees it.
+  const audit = await new AxeBuilder({ page }).include('[data-testid="unlock-moment"]').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(audit.violations.map((violation) => violation.id)).toEqual([])
+  await expect(moment.getByRole('button', { name: 'Next badge (1 more)' })).toBeFocused()
 
   await moment.getByRole('button', { name: 'Next badge (1 more)' }).click()
   await expect(moment.getByRole('heading', { name: 'Hard mode' })).toBeVisible()
@@ -114,15 +119,18 @@ test('achievements - the dashboard shows the badges closest to their next tier',
 
   const nextUp = page.getByTestId('next-up')
   await expect(nextUp).toBeVisible({ timeout: 30_000 })
-  // On fire is two thirds of the way; Explorer halfway past Bronze; Sharp
-  // first try a fifth of the way to Platinum. Polyglot is at its top tier.
+  // Explorer 3 of 4, On fire 2 of 3, Sharp first try 20 of 40. Polyglot is
+  // at its top tier, so it has nothing next.
   const names = nextUp.getByRole('listitem')
   await expect(names).toHaveCount(3)
-  await expect(names.nth(0)).toContainText('On fire')
-  await expect(names.nth(0)).toContainText('2 / 3 to Bronze')
+  await expect(names.nth(0)).toContainText('Explorer')
+  await expect(names.nth(0)).toContainText('3 / 4 to Silver')
+  await expect(names.nth(1)).toContainText('On fire')
   await expect(nextUp).not.toContainText('Polyglot')
   await expect(page.getByTestId('streak-week').getByRole('listitem')).toHaveCount(7)
-  await page.screenshot({ path: 'test-results/achievements/dashboard.png', fullPage: true })
+  // The shell scrolls inside <main>, so a full-page shot would miss these.
+  await nextUp.screenshot({ path: 'test-results/achievements/next-up.png' })
+  await page.getByTestId('streak-week').locator('..').screenshot({ path: 'test-results/achievements/streak.png' })
 })
 
 test('achievements - the profile shows every badge with its standing', async () => {

@@ -335,6 +335,16 @@ cache key. The cache key includes `userId` where the response varies by user —
 the alternative is one user seeing another's progress, which is the worst
 possible caching bug.
 
+### Query budget
+
+`test/query-budget.e2e-spec.ts` seeds a learner with a heavy year — about a
+thousand graded submissions, revision items, mistakes, contests, progress on
+every topic and pattern — and counts the database operations each read route
+makes. Every route has a ceiling, set to what it does today (the most is 9,
+for `/recommendations/next`). A query per topic, problem or item pushes a route
+over its number and fails the suite. Counts, not milliseconds: timings on a
+shared dev host swing by 5x between runs; a count does not.
+
 ---
 
 ## Documentation

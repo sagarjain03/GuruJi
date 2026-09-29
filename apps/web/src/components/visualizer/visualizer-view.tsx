@@ -127,7 +127,7 @@ export function VisualizerView() {
               const next = findAlgorithm(event.target.value)
               if (next !== undefined) selectAlgorithm(next.id, next.defaultInput)
             }}
-            className="border-border bg-background text-foreground border px-2 py-2 text-sm tracking-normal normal-case outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+            className="border-border bg-background text-foreground border px-2 py-2 text-sm tracking-normal normal-case outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
           >
             {GROUPS.map((group) => (
               <optgroup key={group.category} label={CATEGORY_LABEL[group.category]}>
@@ -150,7 +150,7 @@ export function VisualizerView() {
             role="img"
             tabIndex={0}
             aria-label={describeSnapshot(step.state)}
-            className="border-border bg-background border p-4 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+            className="border-border bg-background border p-4 outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
           >
             <StructureCanvas step={step} />
           </div>
@@ -177,7 +177,7 @@ export function VisualizerView() {
                 <select
                   value={speed}
                   onChange={(event) => setSpeed(Number(event.target.value))}
-                  className="border-border bg-background text-foreground border px-2 py-1 outline-none focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
+                  className="border-border bg-background text-foreground border px-2 py-1 outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-[var(--ring)]"
                 >
                   {SPEEDS.map((option) => (
                     <option key={option} value={option}>

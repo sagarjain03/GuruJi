@@ -488,15 +488,25 @@ exit criteria waived.**
 
 ## Phase 12 — Polish
 
-- [ ] Accessibility pass — keyboard, screen reader, contrast, focus
-- [ ] Responsive pass — desktop / tablet / mobile (editor is desktop-first)
+- [x] Accessibility pass — keyboard, screen reader, contrast, focus
+      (`e2e/a11y.spec.ts`: axe WCAG 2.1 A/AA on all 13 pages, skip link, a visible
+      focus indicator on every Tab stop. Found: no focus ring on any `<Button>` or
+      `<Input>` — Tailwind 4 `outline-none` zeroes the style `outline-2` relies on —
+      and 4.3:1 footer text)
+- [x] Responsive pass — desktop / tablet / mobile (editor is desktop-first)
+      (`e2e/responsive.spec.ts`: 375 and 768 px, no sideways scroll on any page,
+      screenshots reviewed by eye)
 - [x] Loading, empty and error states everywhere (skeletons; failures forced in `e2e/states.spec.ts`)
-- [ ] Performance budget — code splitting, lazy loading, query tuning
+- [x] Performance budget — code splitting, lazy loading, query tuning
+      (`test/query-budget.e2e-spec.ts`: an operation ceiling per read route against
+      ~1000 submissions; no N+1 anywhere. Overview read the same submissions twice —
+      now once, 6 → 5 queries)
 - [x] Security review against `docs/security.md` (deploy-time items listed in its last section)
 - [x] Playwright: register → login → open problem → code → run → submit → result →
       recommendation → revision
 - [ ] Sentry wired up
-- [ ] Light gamification — streaks, badges, milestones. **Never feeding mastery**
+- [x] Light gamification — streaks, badges, milestones. **Never feeding mastery**
+      (12 tiered badges, evaluated on read; `achievements/boundary.spec.ts` fails if an engine imports them)
 
 ---
 

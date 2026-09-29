@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
+import { PandaLoader } from '@/components/ui/panda-loader'
 import { refreshSession, setAccessToken } from '@/lib/api'
 import { useSessionStore } from '@/stores/session-store'
 
@@ -42,9 +43,7 @@ export function SessionGate({ children }: { children: React.ReactNode }) {
   if (status !== 'authenticated') {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-muted-foreground text-sm" role="status">
-          Checking your session…
-        </p>
+        <PandaLoader label="Checking your session…" />
       </div>
     )
   }

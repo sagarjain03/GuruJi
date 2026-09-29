@@ -71,7 +71,7 @@ export function UnlockMoment() {
           </h2>
           <p id="unlock-detail" className="text-muted-foreground text-sm leading-relaxed">
             {badge.description}
-            {threshold !== undefined && <span className="text-foreground/80 block mt-1 tabular-nums">Reached {threshold}.</span>}
+            {threshold !== undefined && <span className="text-foreground/80 block mt-1 tabular-nums">Unlocked at {threshold}.</span>}
           </p>
           <Button autoFocus className="mt-3 w-full" onClick={dismiss}>
             {queue.length > 1 ? `Next badge (${queue.length - 1} more)` : 'Keep going'}

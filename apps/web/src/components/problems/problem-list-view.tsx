@@ -302,7 +302,7 @@ function Select({
       onChange={(event) => {
         onChange(event.target.value.length > 0 ? event.target.value : undefined)
       }}
-      className="border-border bg-background/40 text-muted-foreground pointer-coarse:min-h-11 border px-2 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase outline-none"
+      className="border-border bg-background/40 text-muted-foreground pointer-coarse:min-h-11 border px-2 py-1 font-mono text-[11px] sm:text-[10px] tracking-[0.14em] uppercase outline-none focus-visible:border-[var(--ring)]"
     >
       <option value="">{label}: any</option>
       {options.map((option) => (
