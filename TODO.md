@@ -504,7 +504,6 @@ exit criteria waived.**
 - [x] Security review against `docs/security.md` (deploy-time items listed in its last section)
 - [x] Playwright: register → login → open problem → code → run → submit → result →
       recommendation → revision
-- [ ] Sentry wired up
 - [x] Light gamification — streaks, badges, milestones. **Never feeding mastery**
       (12 tiered badges, evaluated on read; `achievements/boundary.spec.ts` fails if an engine imports them)
 
