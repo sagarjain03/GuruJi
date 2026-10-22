@@ -121,8 +121,8 @@ function Statement({ problem: data }: { problem: ProblemDetail }) {
       {/* Sample cases live in the editor's test panel now, next to where you
           would act on them, rather than at the bottom of the statement. */}
       <p className="border-border text-muted-foreground border border-dashed p-4 text-xs">
-        The sample cases are in the panel under the editor. Submissions are graded against more
-        than those. Run and Submit arrive in Phase 4, with the sandbox behind them.
+        The sample cases are in the panel under the editor. Run checks your code against those;
+        Submit grades it against hidden cases too.
       </p>
     </article>
   )
