@@ -88,8 +88,8 @@ mock. Every suggestion says why it was picked.
 
 ### Editor, real verdicts, and a mentor that holds back
 
-Monaco editor with C, C++, Python and JavaScript. Code runs in locked-down,
-throwaway Docker containers, and the verdict arrives live over a WebSocket.
+Monaco editor with C, C++, Python and JavaScript. Code runs in a locked-down
+Docker container per submission, and the verdict arrives live over a WebSocket.
 
 <img src="screenshots/12-submit-accepted-full.png" alt="Problem page with statement, Monaco editor, Accepted verdict and mentor panel" width="900">
 
